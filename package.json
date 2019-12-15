@@ -1,0 +1,15 @@
+{
+    "name": "copypaste.me",
+    "version": "1.0.0",
+    "description": "Easy password sharing from device to device",
+    "repository": "https://github.com/SebastianKersten/CopyPaste.me",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.17.1",
+        "generate-unique-id": "^2.0.0",
+        "http": "0.0.0",
+        "qrcode-generator": "^1.4.4",
+        "socket.io": "^2.3.0",
+        "socket.io-client": "^2.3.0"
+    }
+}

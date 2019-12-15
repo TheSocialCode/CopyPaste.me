@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+
+    Options -MultiViews
+
+    RewriteEngine On
+
+    RewriteRule ^static/ - [L,NC]
+    RewriteRule ^dynamic/ - [L,NC]
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [QSA,L]
+
+    php_value memory_limit 1000M
+    php_value upload_max_filesize 250M
+    php_value post_max_size 250M
+    php_value max_execution_time 200
+    php_value max_input_time 200
+
+</IfModule>
