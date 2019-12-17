@@ -7,7 +7,7 @@
 'use strict';
 
 
-const CopyPasteClient = require('./modules/CopyPasteClient');
+const Client = require('./modules/Client');
 
 
 // connect
@@ -21,8 +21,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // startup
     if (console) console.log('Starting up');
 
+    let sURL = window.location.href;
+    console.log(sURL.substr(sURL.lastIndexOf('/') + 1));
+
+
     // init
-    this.client = new CopyPasteClient("http://copypaste.local:3000");
+    this.client = new Client("http://copypaste.local:3000");
 
 
 }, true);

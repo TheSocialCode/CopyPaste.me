@@ -24,6 +24,7 @@ module.exports = {
 
     // init
     _aTokens: [],
+    _aSockets: [],
 
 
     // ----------------------------------------------------------------------------
@@ -36,9 +37,7 @@ module.exports = {
      */
     __construct: function (sGateway)
     {
-        console.log('asdkfhaskjdfhksdhfhjaskdfhksd');
-
-
+        // init
         this._app = Module_Express();
         this._http = Module_HTTP.createServer(this.app);
         this._io = Module_SocketIO(this._http);
@@ -56,16 +55,30 @@ module.exports = {
         this._io.on('connection', function(socket)
         {
 
-            console.log('a user connected');
+            console.log('a user connected', socket.id);
 
 
-            console.log('aTokens', classRoot._aTokens);
+            if (!classRoot._aSockets[''+socket.id])
+            {
+                console.log('New user connected');
+            }
+            else
+            {
+                console.log('Existing user reconnected');
+            }
+
+            // this._aSockets[socket.id] = {
+            //     socket,
+            //     aTokens: []
+            // }
+
 
 
 
             socket.on('disconnect', function(){
                 console.log('user disconnected');
             });
+
 
             socket.on('chat message', function(msg){
                 console.log('message: ' + msg);
@@ -115,7 +128,6 @@ module.exports = {
                 classRoot._aTokens['' + data.sToken].receiver.emit('data-password', data.sPassword)
 
             });
-
 
 
         });

@@ -1,13 +1,21 @@
 <!doctype html>
 <html>
 <head>
-    <title>CopyPaste.me - Transfer data from device to device</title>
+    <title>CopyPaste.me - Easy device-to-device data transfer</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             margin: 0;
             padding: 20px 0 0 0;
             background-color: #6FA8DC;
+            text-align: center;
+        }
+
+
+        div.interface-intro {
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 600px;
             text-align: center;
         }
 
@@ -19,22 +27,12 @@
             display: none;
         }
 
-        div.interface {
-            display: flex;
-            margin-left:auto;
-            margin-right:auto;
-            width: 600px;
-        }
-        div.intro {
-            flex: 400px;
-            text-align: left;
-            margin-right: 25px;
-        }
+
         div.info-title {
             font-size: x-large;
             font-weight: bold;
             color: #ffffff;
-            padding: 20px 0 20px 0;
+            padding: 20px 0 0 0;
         }
         div.info-title a {
             text-decoration: none;
@@ -43,12 +41,19 @@
         div.info-title a:hover {
             color: #1F588C;
         }
-        div.info {
-            color: #000000;
+        div.info-subtitle {
+            color: #1F588C;
             font-size: medium;
+            padding: 10px 20px 30px 20px;
+            width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+
         }
+
+
         div.QR-holder {
-            flex: 210px;
+            display: inline-block;
         }
         div.QRCodePlaceHolder {
             position: center;
@@ -74,7 +79,8 @@
             background-color: #ffffff;
             border-radius: 5px;
             display:flex;
-            width: 600px;
+            width: 100%;
+            max-width: 600px;
             margin-top: 25px;
             margin-left: auto;
             margin-right: auto;
@@ -90,10 +96,16 @@
         }
         div.received_data_label_data {
             background-color: #ffffff;
-            padding: 12px 20px 12px 15px;
             border-radius: 3px;
             border: #e5e5e5 1px solid;
             flex: auto;
+        }
+        input.data_input_password {
+            padding: 12px 20px 12px 15px;
+            border: 0;
+            width: 100%;
+            font-size: larger;
+            outline: none;
         }
 
         div.received_data_menu {
@@ -149,27 +161,33 @@
             display: none;
         }
 
+
+        div.sender_input_password {
+            min-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+
     </style>
 </head>
 <body>
 
+    <div class="interface-intro">
+        <div class="info-title"><a href="/">CopyPaste.me</a></div>
+        <div class="info-subtitle">
+            Easily and securely transfer passwords <!--, texts, images and other docs -->from your phone to this device
+        </div>
+    </div>
+
     <div id="interface-receiver" class="interface-receiver">
-        <div id="receiver-setup" class="interface">
-            <div class="intro">
-                <div class="info-title"><a href="/">CopyPaste.me</a></div>
-                <div class="info">
-                    Easily and quickly share passwords from device to device. Case study: in meeting -> need to login -> mail pw to self
-                </div>
-                <br>
-                <br>
-                <div id="copy_token" class="received_data_button"></div>
-            </div>
-            <div class="QR-holder">
-                <div class="QRCodePlaceHolder">
-                    <div class="QRCodePlaceHolder-label">Scan me</div>
-                    <div class="QRCodePlaceHolder-sublabel">to connect your phone</div>
-                    <div id="QRCodePlaceHolder"></div>
-                </div>
+        <div id="QR-holder" class="QR-holder">
+            <div class="QRCodePlaceHolder">
+                <div class="QRCodePlaceHolder-label">Scan me</div>
+                <div class="QRCodePlaceHolder-sublabel">to connect your phone</div>
+                <div id="QRCode"></div>
             </div>
         </div>
 
@@ -190,14 +208,27 @@
                     <div id="received_data_button" class="received_data_button">Copy&nbsp;to&nbsp;clipboard</div>
                 </div>
             </div>
+
         </div>
     </div>
 
+
     <div id="interface-sender" class="interface-sender">
-        Sender interface
-        <input id="data_input" type="text" /><div id="button_input" class="received_data_button">Send</div>
+        <div class="sender_input_password">
+            <div>Enter password (tabs: password, image, doc, text</div>
+            <div class="received_data">
+                <div class="received_data_label">
+                    <div id="received_data_label_data" class="received_data_label_data" data-data="">
+                        <input id="data_input_password" class="data_input_password" type="text" />
+                    </div>
+                </div>
+                <div class="received_data_menu">
+                    <div id="button_input_password" class="received_data_button">Send</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-<script src="/static/js/CopyPaste.js"></script>
+    <script src="/static/js/CopyPaste.js"></script>
 </body>
 </html>

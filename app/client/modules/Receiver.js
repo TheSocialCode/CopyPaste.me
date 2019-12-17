@@ -9,13 +9,12 @@
 
 // import
 const QRCodeGenerator = require('qrcode-generator');
-const SocketIO = require('socket.io-client');
 
 
-module.exports = function(sGateway)
+module.exports = function(socket, sToken)
 {
     // start
-    this.__construct(sGateway);
+    this.__construct(socket, sToken);
 };
 
 module.exports.prototype = {
@@ -33,57 +32,27 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (sGateway)
+    __construct: function (socket, sToken)
     {
-        // log
-        if (console) console.log('Connecting user');
-
-        // setup
-        this._socket = new SocketIO.connect(sGateway);
-
+        // store
+        this._socket = socket;
+        this._sToken = sToken;
 
         // register
         let classRoot = this;
 
         // configure
-        this._socket.on('connect', function() { classRoot._socketOnConnect(); });
-        this._socket.on('connect_failed', function() { classRoot._socketConnectFailed(); });
-        this._socket.on('disconnect', function() { classRoot._socketOnDisconnect(); });
-
-
-        let sURL = window.location.href;
-        console.log('startup token', sURL.substr(sURL.lastIndexOf('/')));
-
-
         this._socket.on('token', function(sToken) { classRoot._setupToken(sToken); });
         this._socket.on('data-password', function(sPassword) { classRoot._showPassword(sPassword); });
-        this._socket.on('data-openurl', function(sURL) { classRoot._openURL(sURL); });
+        this._socket.on('sender_connected', function() { classRoot._onSenderConnected(); });
 
+        this._socket.on('connect_error', function(err) {
+            // handle server error here
+            console.log('Error connecting to server');
+        });
 
-        // 4. open url (also show URL)
-        // 6. show version in bottom/footer
-        // 7. onConnect remove QR code -> you are now connected -> check 4 character code
-        // 8. change URL to token
-        // 10. register token in server
-    },
-
-    _socketOnConnect: function ()
-    {
-        // 1. logon with php
-        if (console) console.log('User connected'); // (socket id = ' + this._socket.id + ')');
-
-        if (!this._sToken) this._socket.emit('request_token');
-
-    },
-
-    _socketConnectFailed: function()
-    {
-        if (console) console.log('You are logged off .. trying to connect ...');
-    },
-
-    _socketOnDisconnect: function()
-    {
-        if (console) console.warn('Connection with server was lost .. reconnecting ..');
+        // show
+        document.getElementById('interface-receiver').style.display = 'inline-block';
     },
 
 
@@ -97,18 +66,14 @@ module.exports.prototype = {
         var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
         qr.addData(sURL);
         qr.make();
-        document.getElementById('QRCodePlaceHolder').innerHTML = qr.createImgTag(5);
+        document.getElementById('QRCode').innerHTML = qr.createImgTag(5);
 
-
-        if (console) console.log('sToken = ' + sToken);
 
         // store
         this._sToken = sToken;
 
 
-
-        document.getElementById("copy_token").innerHTML = sToken;
-        document.getElementById("copy_token").addEventListener(
+        document.getElementById("QRCode").addEventListener(
             'click',
             function(e)
             {
@@ -126,15 +91,22 @@ module.exports.prototype = {
 
 
 
-
-
-        document.getElementById("token_url").innerHTML = sURL;
+        //document.getElementById("token_url").innerHTML = sURL;
 
         // document.getElementById("content").innerHTML = response.html;
         // document.title = response.pageTitle;
         // if (window.history.pushState) {
         //     window.history.pushState({}, null, "/" + sToken);
         // }
+    },
+
+
+    _onSenderConnected: function()
+    {
+        console.log('Sender connected');
+
+        document.getElementById('QR-holder').style.display = 'none';
+
     },
 
     _showPassword: function (sPassword)
@@ -149,25 +121,15 @@ module.exports.prototype = {
         // document.getElementById('transferredData').appendChild(newEl);
 
 
+        document.getElementById('transferredData').style.display = 'block';
+
+
+        console.log('Password received:', sPassword);
 
 
         document.getElementById('received_data_label_data').setAttribute('data-data', sPassword); // #todo alter to encrypted js
         document.getElementById('received_data_label_data').innerText = '*******';
         document.getElementById('received_data_button').addEventListener('click', this._onClickCopyToClipboard);
-
-
-
-
-        // setup
-        //newEl.appendChild(document.createTextNode(sPassword));
-        //newEl.innerHTML =
-
-
-    },
-
-    _openURL: function (sURL)
-    {
-        window.open(sURL);
     },
 
     _onClickCopyToClipboard: function()
