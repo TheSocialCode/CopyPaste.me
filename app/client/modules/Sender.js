@@ -23,6 +23,9 @@ module.exports.prototype = {
     // connection
     _socket: null,
     _sToken: '',
+    _aTabs: [],
+    _sCurrentDataType: '',
+    _elCurrentDataInput: null,
 
 
     // ----------------------------------------------------------------------------
@@ -53,7 +56,7 @@ module.exports.prototype = {
             // configure
             this._socket.on('token_not_found', function() { classRoot._onTokenNotFound(); });
             this._socket.on('token_connected', function() { classRoot._onTokenConnected(); });
-            this._socket.on('receiver_disconnected', function() { classRoot._onReceiverDisconnected(); });
+            this._socket.on('receiver_disconnected', function() { classRoot._onReceiverDisconnected(); }); // #todo
 
             // connect
             this._socket.emit('connect_token', sToken);
@@ -64,15 +67,48 @@ module.exports.prototype = {
 
             document.getElementById('button_input_password').addEventListener('click', function(){
 
-                console.log('Value password', document.getElementById('data_input_password').value);
+                switch(this._sCurrentDataType)
+                {
+                    case 'password':
 
-                let sPassword = document.getElementById('data_input_password').value;
+                        let sPassword = this._elCurrentDataInput.value;
+                        this._socket.emit('data-password', { sPassword:sPassword, sToken:sToken });
+                        console.log('value = ' + sPassword);
+                        break;
 
-                // connect
-                this._socket.emit('data-password', { sPassword:sPassword, sToken:sToken });
+                    case 'url':
+
+                        let sURL = this._elCurrentDataInput.value;
+                        this._socket.emit('data-url', { sURL:sURL, sToken:sToken });
+                        console.log('value = ' + sURL);
+                        break;
+
+                    case 'text':
+
+                        let sText = this._elCurrentDataInput.value;
+                        this._socket.emit('data-text', { sText:sText, sToken:sToken });
+                        console.log('value = ' + sText);
+                        break;
+
+                    case 'image':
+
+                        let sImage = document.getElementById('data_input_image_file', this._elCurrentDataInput).value;
+                        this._socket.emit('data-image', { sImage:sImage, sToken:sToken });
+                        console.log('value = ' + sImage);
+                        break;
+
+                    case 'document':
+
+                        let sDocument = document.getElementById('data_input_document_file', this._elCurrentDataInput).value;
+                        this._socket.emit('data-document', { sDocument:sDocument, sToken:sToken });
+                        console.log('value = ' + sDocument);
+                        break;
+                }
 
             }.bind(this));
 
+
+            this._setupTabMenu();
         }
 
 
@@ -83,6 +119,7 @@ module.exports.prototype = {
         // 10. register token in server
     },
 
+
     _onTokenNotFound: function()
     {
         console.log('Sender: Token not found');
@@ -92,5 +129,90 @@ module.exports.prototype = {
     {
         console.log('Sender: Token connected');
     },
+
+
+
+    // --------
+
+
+    _setupTabMenu: function()
+    {
+        // find
+        let elSenderMenu = document.getElementById('sender_menu');
+
+        // store
+        this._aTabs = document.querySelectorAll('.sender_menu_tab', elSenderMenu);
+
+        //
+        for (let nTabIndex = 0; nTabIndex < this._aTabs.length; nTabIndex++)
+        {
+            // register
+            let elTab = this._aTabs[nTabIndex];
+
+            elTab.addEventListener('click', function(sDataType)
+            {
+                // focus
+                this._focusTab(sDataType);
+
+                // toggle
+                this._focusDataInput(sDataType);
+
+            }.bind(this, elTab.getAttribute('data-type')));
+        }
+
+        this._focusDataInput('password');
+    },
+
+    _focusTab: function(sDataType)
+    {
+
+        for (let nTabIndex = 0; nTabIndex < this._aTabs.length; nTabIndex++)
+        {
+            // register
+            let elTab = this._aTabs[nTabIndex];
+
+            if (elTab.getAttribute('data-type') === sDataType)
+            {
+                elTab.classList.add('selected');
+
+                this._focusDataInput(sDataType);
+            }
+            else
+            {
+                elTab.classList.remove('selected');
+            }
+        }
+    },
+
+    _focusDataInput: function(sDataType)
+    {
+        // store
+        this._sCurrentDataType = sDataType;
+
+        // init
+        let aInputs = ['data_input_password', 'data_input_url', 'data_input_text', 'data_input_image', 'data_input_document'];
+
+        for (let nIndex = 0; nIndex < aInputs.length; nIndex++)
+        {
+            // register
+            let sInputName = aInputs[nIndex];
+            let elInput = document.getElementById(sInputName);
+
+            if (aInputs[nIndex] === 'data_input_' + sDataType)
+            {
+                // store
+                this._elCurrentDataInput = elInput;
+
+                // show
+                this._elCurrentDataInput.classList.add('selected');
+            }
+            else
+            {
+                // hide
+                elInput.classList.remove('selected');
+            }
+
+        }
+    }
 
 };
