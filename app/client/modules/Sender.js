@@ -67,43 +67,42 @@ module.exports.prototype = {
 
             document.getElementById('button_input_password').addEventListener('click', function(){
 
+
+                // todo
+                // 1. disable button on empty value
+                // 2. option to clear value
+                // 3. clear value after send
+
+
+                let value = null;
+
                 switch(this._sCurrentDataType)
                 {
                     case 'password':
-
-                        let sPassword = this._elCurrentDataInput.value;
-                        this._socket.emit('data-password', { sPassword:sPassword, sToken:sToken });
-                        console.log('value = ' + sPassword);
-                        break;
-
                     case 'url':
-
-                        let sURL = this._elCurrentDataInput.value;
-                        this._socket.emit('data-url', { sURL:sURL, sToken:sToken });
-                        console.log('value = ' + sURL);
-                        break;
-
                     case 'text':
 
-                        let sText = this._elCurrentDataInput.value;
-                        this._socket.emit('data-text', { sText:sText, sToken:sToken });
-                        console.log('value = ' + sText);
+                        value = this._elCurrentDataInput.value;
                         break;
 
                     case 'image':
 
-                        let sImage = document.getElementById('data_input_image_file', this._elCurrentDataInput).value;
-                        this._socket.emit('data-image', { sImage:sImage, sToken:sToken });
-                        console.log('value = ' + sImage);
+                        value = document.getElementById('data_input_image_file', this._elCurrentDataInput).value;
                         break;
 
                     case 'document':
 
-                        let sDocument = document.getElementById('data_input_document_file', this._elCurrentDataInput).value;
-                        this._socket.emit('data-document', { sDocument:sDocument, sToken:sToken });
-                        console.log('value = ' + sDocument);
+                        value = document.getElementById('data_input_document_file', this._elCurrentDataInput).value;
                         break;
                 }
+
+                console.log('Type = ' + this._sCurrentDataType, 'value = ' + value);
+
+                this._socket.emit('data', { sType:this._sCurrentDataType, value:value, sToken:sToken });
+
+
+                // rooms
+
 
             }.bind(this));
 

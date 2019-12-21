@@ -55,9 +55,6 @@ module.exports = {
         this._io.on('connection', function(socket)
         {
 
-            console.log('a user connected', socket.id);
-
-
             if (!classRoot._aSockets[''+socket.id])
             {
                 console.log('New user connected');
@@ -75,9 +72,7 @@ module.exports = {
 
 
 
-            socket.on('disconnect', function(){
-                console.log('user disconnected');
-            });
+            socket.on('disconnect', classRoot._onUserDisconnect);
 
 
             socket.on('chat message', function(msg){
@@ -95,9 +90,6 @@ module.exports = {
 
 
                 socket.emit('token', sToken);
-
-
-                console.log('aTokens' + classRoot._aTokens);
             });
 
 
@@ -123,11 +115,13 @@ module.exports = {
             });
 
 
-            socket.on('data-password', function(data){
+            socket.on('data', function(data) {
 
-                classRoot._aTokens['' + data.sToken].receiver.emit('data-password', data.sPassword)
+                classRoot._aTokens['' + data.sToken].receiver.emit('data', { sType:data.sType, value:data.value });
 
             });
+
+
 
 
         });
@@ -135,6 +129,13 @@ module.exports = {
         this._http.listen(3000, function(){
             console.log('listening on *:3000');
         });
+    },
+
+    _onUserDisconnect: function()
+    {
+        console.log('User disconnected ...');
+
+        // find token connected to user
     }
 
 };

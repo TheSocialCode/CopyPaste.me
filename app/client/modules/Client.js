@@ -27,6 +27,7 @@ module.exports.prototype = {
     _client: null,
 
 
+
     // ----------------------------------------------------------------------------
     // --- Constructor ------------------------------------------------------------
     // ----------------------------------------------------------------------------
@@ -37,39 +38,26 @@ module.exports.prototype = {
      */
     __construct: function (sGateway)
     {
-        // log
-        if (console) console.log('Connecting user');
-
-        // setup
+        // 1. setup
         this._socket = new SocketIO.connect(sGateway);
 
-        // register
+        // 2. register
         let classRoot = this;
 
-        // configure
+        // 3. configure
         this._socket.on('connect', function() { classRoot._socketOnConnect(); });
         this._socket.on('connect_failed', function() { classRoot._socketConnectFailed(); });
         this._socket.on('disconnect', function() { classRoot._socketOnDisconnect(); });
 
-        // register
-        let sURL = window.location.href; // ------------------------> move to Utils
-        let sToken = sURL.substr(sURL.lastIndexOf('/') + 1);
+        // 4. register
+        let sToken = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
 
-        // init
+        // 5. init
         this._client = (!sToken || sToken.length === 0) ? new Receiver(this._socket, sToken) : new Sender(this._socket, sToken);
-
-
-
-        // 4. open url (also show URL)
-        // 6. show version in bottom/footer
-        // 7. onConnect remove QR code -> you are now connected -> check 4 character code
     },
 
     _socketOnConnect: function ()
     {
-        // 1. logon with php
-        if (console) console.log('User connected'); // (socket id = ' + this._socket.id + ')');
-
         if (!this._sToken) this._socket.emit('request_token');
 
     },
