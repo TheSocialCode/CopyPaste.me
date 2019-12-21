@@ -26,6 +26,10 @@ module.exports.prototype = {
     _aTabs: [],
     _sCurrentDataType: '',
     _elCurrentDataInput: null,
+    _elSenderInterface: null,
+    _elInputPassword: null,
+    _elInputURL: null,
+    _elInputText: null,
 
 
     // ----------------------------------------------------------------------------
@@ -44,6 +48,11 @@ module.exports.prototype = {
 
         // register
         let classRoot = this;
+        this._elSenderInterface = document.getElementById('interface-sender');
+        this._elInputPassword = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_password"]');
+        this._elInputURL = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_url"]');
+        this._elInputText = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_text"]');
+        this._elButtonSend = this._elSenderInterface.querySelector('[data-mimoto-id="button_input_password"]');
 
         // validate
         if (!new RegExp(/^[0-9a-z]{32}$/g).test(this._sToken))
@@ -62,16 +71,62 @@ module.exports.prototype = {
             this._socket.emit('connect_token', sToken);
 
             // show
-            document.getElementById('interface-sender').style.display = 'inline-block';
+            this._elSenderInterface.style.display = 'inline-block';
 
 
-            document.getElementById('button_input_password').addEventListener('click', function(){
 
 
-                // todo
-                // 1. disable button on empty value
-                // 2. option to clear value
-                // 3. clear value after send
+            this._elInputPassword.addEventListener('change', this._validatePassword.bind(this));
+            this._elInputPassword.addEventListener('keyup', this._validatePassword.bind(this));
+            this._elInputPassword.addEventListener('paste', this._validatePassword.bind(this));
+            this._elInputPassword.addEventListener('inout', this._validatePassword.bind(this));
+
+            this._elInputURL.addEventListener('change', this._validateURL.bind(this));
+            this._elInputURL.addEventListener('keyup', this._validateURL.bind(this));
+            this._elInputURL.addEventListener('paste', this._validateURL.bind(this));
+            this._elInputURL.addEventListener('inout', this._validateURL.bind(this));
+
+            this._elInputText.addEventListener('change', this._validateText.bind(this));
+            this._elInputText.addEventListener('keyup', this._validateText.bind(this));
+            this._elInputText.addEventListener('paste', this._validateText.bind(this));
+            this._elInputText.addEventListener('inout', this._validateText.bind(this));
+
+
+            document.getElementById('data_input_image_file').addEventListener('change', function() {
+
+                console.log('Uploaded!');
+
+                let imageInput = document.getElementById('data_input_image_file');
+
+                if (imageInput.files && imageInput.files[0])
+                {
+
+                    var reader = new FileReader();
+
+                    reader.onload = function(e) {
+
+                        console.log('File found', imageInput.files[0].name, e.target.result);
+
+                        //$('#blah').attr('src', e.target.result);
+
+                        document.getElementById('data_input_document_preview').setAttribute('src', e.target.result);
+                    };
+
+                    reader.readAsDataURL(imageInput.files[0]);
+                }
+
+            }.bind(this));
+
+
+
+            this._elButtonSend.addEventListener('click', function(){
+
+
+                // validate
+                if (this._elButtonSend.classList.contains('disabled')) return;
+
+
+                // validate input ipv contains(class)
 
 
                 let value = null;
@@ -82,26 +137,40 @@ module.exports.prototype = {
                     case 'url':
                     case 'text':
 
+                        // read
                         value = this._elCurrentDataInput.value;
+
+                        // clear
+                        this._elCurrentDataInput.value = '';
+
                         break;
 
                     case 'image':
 
-                        value = document.getElementById('data_input_image_file', this._elCurrentDataInput).value;
+                        // read
+                        value = document.getElementById('data_input_document_preview').getAttribute('src');
+
+                        // clear
+                        document.getElementById('data_input_document_preview').remove();
+
                         break;
 
                     case 'document':
 
-                        value = document.getElementById('data_input_document_file', this._elCurrentDataInput).value;
+                        value = this._elCurrentDataInput.getElementById('data_input_document_file').value;
                         break;
                 }
 
                 console.log('Type = ' + this._sCurrentDataType, 'value = ' + value);
 
+
+                // disable
+                this._toggleSendButton(false);
+
+
                 this._socket.emit('data', { sType:this._sCurrentDataType, value:value, sToken:sToken });
 
 
-                // rooms
 
 
             }.bind(this));
@@ -117,6 +186,31 @@ module.exports.prototype = {
         // 8. change URL to token
         // 10. register token in server
     },
+
+
+    _getDataUri: function(url, callback) {
+
+        var image = new Image();
+
+        image.onload = function () {
+            var canvas = document.createElement('canvas');
+            canvas.width = this.naturalWidth; // or 'width' if you want a special/scaled size
+            canvas.height = this.naturalHeight; // or 'height' if you want a special/scaled size
+
+            canvas.getContext('2d').drawImage(this, 0, 0);
+
+            // Get raw image data
+            callback(canvas.toDataURL('image/png').replace(/^data:image\/(png|jpg);base64,/, ''));
+
+            // ... or get as Data URI
+            callback(canvas.toDataURL('image/png'));
+        };
+
+        image.src = url;
+    },
+
+
+
 
 
     _onTokenNotFound: function()
@@ -195,7 +289,7 @@ module.exports.prototype = {
         {
             // register
             let sInputName = aInputs[nIndex];
-            let elInput = document.getElementById(sInputName);
+            let elInput = this._elSenderInterface.querySelector('[data-mimoto-id="' + sInputName + '"]');
 
             if (aInputs[nIndex] === 'data_input_' + sDataType)
             {
@@ -211,6 +305,42 @@ module.exports.prototype = {
                 elInput.classList.remove('selected');
             }
 
+        }
+    },
+
+
+    _validatePassword: function()
+    {
+        // 1. toggle
+        this._toggleSendButton(this._elInputPassword.value.length > 0);
+    },
+
+    _validateURL: function()
+    {
+        // 1. init
+        var expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+        var regex = new RegExp(expression);
+
+        // 2. toggle
+        this._toggleSendButton(this._elInputURL.value.match(regex));
+    },
+
+    _validateText: function()
+    {
+        // 1. toggle
+        this._toggleSendButton(this._elInputText.value.length > 0);
+    },
+
+
+    _toggleSendButton: function(bEnable)
+    {
+        if (bEnable)
+        {
+            this._elButtonSend.classList.remove('disabled');
+        }
+        else
+        {
+            this._elButtonSend.classList.add('disabled');
         }
     }
 

@@ -105,6 +105,20 @@
         border-radius: 3px;
         cursor: pointer;
     }
+
+    div.button.disabled {
+        background-color: #e5e5e5;
+        color: #999999;
+        cursor: default;
+    }
+    div.button.disabled:hover {
+        background-color: #e5e5e5;
+        color: #999999;
+        cursor: default;
+    }
+
+
+
     div.button:hover {
         display: inline-block;
         background-color: #000000;
@@ -399,21 +413,22 @@
             <div class="sender_data">
                 <div class="sender_data_label">
                     <div class="sender_data_label_data" data-data="">
-                        <input id="data_input_password" class="data_input selected" type="password" placeholder="Enter password" />
-                        <input id="data_input_url" class="data_input" type="text" placeholder="Enter URL" />
-                        <textarea id="data_input_text" class="data_input" placeholder="Enter text"></textarea>
-                        <div id="data_input_image" class="data_input">
+                        <input data-mimoto-id="data_input_password" class="data_input selected" type="password" placeholder="Enter password" />
+                        <input data-mimoto-id="data_input_url" class="data_input" type="text" placeholder="Enter URL" />
+                        <textarea data-mimoto-id="data_input_text" class="data_input" placeholder="Enter text"></textarea>
+                        <div data-mimoto-id="data_input_image" class="data_input">
                             <div class="button" onclick="document.getElementById('data_input_image_file').click();">Select image</div>
-                            <input type="file" style="display:none;" id="data_input_image_file" name="data_input_image_file"/>
+                            <input id="data_input_image_file" type="file" style="display:none;" accept='image/*' name="data_input_image_file"/>
+                            <img id="data_input_document_preview" width="300" />
                         </div>
-                        <div id="data_input_document" class="data_input">
+                        <div data-mimoto-id="data_input_document" class="data_input">
                             <div class="button" onclick="document.getElementById('data_input_document_file').click();">Select document</div>
-                            <input type="file" style="display:none;" id="data_input_document_file" name="data_input_image_document"/>
+                            <input id="data_input_document_file" type="file" style="display:none;" name="data_input_image_document"/>
                         </div>
                     </div>
                 </div>
                 <div class="sender_data_menu">
-                    <div id="button_input_password" class="button">Send</div>
+                    <div data-mimoto-id="button_input_password" class="button disabled">Send</div>
                 </div>
             </div>
         </div>
@@ -429,7 +444,7 @@
 
         <div id="template-data" class="receiver_data">
             <div class="receiver_data_label">
-                <div id="receiver_data_label_data" class="receiver_data_label_data" data-data=""></div>
+                <div data-mimoto-id="receiver_data_label_data" class="receiver_data_label_data" data-data=""></div>
                 <div class="receiver_data_options">
                     <span data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</span> |
                     <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
@@ -437,7 +452,7 @@
                 </div>
             </div>
             <div class="receiver_data_menu">
-                <div id="receiver_data_button" class="button">Copy&nbsp;to&nbsp;clipboard</div>
+                <div data-mimoto-id="receiver_data_button" class="button">Copy&nbsp;to&nbsp;clipboard</div>
             </div>
         </div>
 
@@ -454,7 +469,6 @@
         </div>
 
     </div>
-
 
     <script src="/static/js/CopyPaste.js"></script>
 </body>

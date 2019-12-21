@@ -99,7 +99,7 @@ module.exports.prototype = {
         this._elData.removeAttribute('id');
 
         // 4. show
-        this._elDataContainer.append(this._elData);
+        this._elDataContainer.insertBefore(this._elData, this._elDataContainer.firstChild);
 
         // 5. init
         this._nTimeToAutoDestruct = new Date().getTime() + 5 * 60 * 1000;
@@ -108,21 +108,34 @@ module.exports.prototype = {
         console.log('Data type ' + this._data.sType + ' received:', this._data.value);
 
 
+        //list = document.querySelectorAll('[data-action="delete"]');
+
+
+
         switch(this._data.sType)
         {
             case 'password':
 
-                document.getElementById('receiver_data_label_data', this._elData).innerText = '* * * * * * * * *';
+                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = '* * * * * * * * *';
                 break;
 
             case 'url':
             case 'text':
 
-                document.getElementById('receiver_data_label_data', this._elData).innerText = this._data.value;
-
+                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value;
                 break;
 
             case 'image':
+
+
+                var elImage = document.createElement('img');
+
+                // loader -> get originalWidth or max width
+
+                elImage.setAttribute('width', 400);
+                elImage.setAttribute('src', this._data.value);
+
+                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').append(elImage);
 
                 break;
 
@@ -132,16 +145,16 @@ module.exports.prototype = {
 
 
         // 7. configure
-        document.getElementById('receiver_data_button', this._elData).addEventListener('click', this._onClickCopyToClipboard);
+        this._elData.querySelector('[data-mimoto-id=receiver_data_button]').addEventListener('click', this._onClickCopyToClipboard);
 
 
-        document.getElementById('receiver_data_option_clearnow', this._elData).addEventListener('click', function(elData) {
+        this._elData.querySelector('[data-mimoto-id=receiver_data_option_clearnow]').addEventListener('click', function(elData) {
 
             this._clearData(elData);
 
         }.bind(this, this._elData));
 
-        document.getElementById('receiver_data_option_extend', this._elData).addEventListener('click', function(elData) {
+        this._elData.querySelector('[data-mimoto-id=receiver_data_option_extend]').addEventListener('click', function(elData) {
 
             this._setExtendAutoDestructionDelay(elData)
 
@@ -177,7 +190,7 @@ module.exports.prototype = {
         sRemainingTime += ((nSeconds === 60) ? ((nMinutes !== 0) ? 0 : nSeconds) : nSeconds) + ' ' + ((nSeconds === 1) ? 'sec' : 'secs');
 
 
-        document.getElementById('receiver_data_lifetime', this._elData).innerText = sRemainingTime;
+        this._elData.querySelector('[data-mimoto-id=receiver_data_lifetime]').innerText = sRemainingTime;
 
         // verify and send
         return (nDifference <= 0);
