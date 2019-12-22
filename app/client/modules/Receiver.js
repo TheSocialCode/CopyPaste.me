@@ -105,10 +105,6 @@ module.exports.prototype = {
 
         // 4. store
         this._aReceivedData.push(receivedData);
-
-        console.log('Height', this._elDataContainer.firstChild.offsetHeight);
-
-
     }
 
 };

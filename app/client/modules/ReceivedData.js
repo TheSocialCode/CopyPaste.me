@@ -103,8 +103,46 @@ module.exports.prototype = {
         // 4. show
         this._elDataContainer.insertBefore(this._elData, this._elDataContainer.firstChild);
 
+        // 5. register
+        let nPlaceholderHeight = this._elData.offsetHeight + 10;
+
+        // 6. verify
+        if (this._elDataContainer.children.length > 1)
+        {
+            // a. hide
+            this._elData.style.display = 'none';
+
+            // b. init
+            let elPlaceholder = document.createElement('div');
+
+            // c. setup
+            elPlaceholder.classList.add('receiver_data_placeholder');
+
+            // d. show
+            this._elDataContainer.insertBefore(elPlaceholder, this._elDataContainer.firstChild);
+
+            // e. start animation
+            let timerIntro = setTimeout(function(elPlaceholder)
+            {
+                elPlaceholder.style.height = nPlaceholderHeight + 'px';
+
+            }.bind(this, elPlaceholder), 10);
+
+            // f. show actual element
+            let timerIntroEnd = setTimeout(function(elData, elPlaceholder)
+            {
+                elPlaceholder.remove();
+                elData.style.display = 'block';
+
+            }.bind(this, this._elData, elPlaceholder), 310);
+        }
+
+
+        // ---
+
+
         // 5. init
-        this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900;
+        this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900 + ((this._elDataContainer.children.length > 1) ? 1000 : 0);
 
         // 6. show data or data representation
         switch(this._data.sType)
@@ -214,6 +252,14 @@ module.exports.prototype = {
     {
         // 1. cleanup
         clearInterval(this._timer);
+
+
+
+
+
+        console.log('Height', this._elDataContainer.firstChild.offsetHeight);
+
+
 
         // 2. clear
         this._elDataContainer.removeChild(this._elData);

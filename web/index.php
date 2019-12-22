@@ -11,7 +11,7 @@
     body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
         margin: 0;
-        padding: 20px 0 0 30px;
+        padding: 20px 0 25px 30px;
         background-color: #6FA8DC;
         text-align: center;
     }
@@ -171,8 +171,13 @@
         display: none;
     }
 
-    div.receiver_data_container > div {
-        margin-bottom: 10px;
+    div.receiver_data_container > div:not(:first-child) {
+        margin-top: 10px;
+    }
+
+    div.receiver_data_placeholder {
+        height: 0;
+        transition: height 0.3s ease-out;
     }
 
     div.receiver_data {

@@ -344,14 +344,25 @@ module.exports.prototype = {
     _validateURL: function()
     {
         // 1. init
-        var expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+        var expression = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
         var regex = new RegExp(expression);
 
         // 2. toggle
         this._toggleSendButton(this._elInputURL.value.match(regex));
 
-        // 3. store
-        this._data.value = this._elInputURL.value;
+        // 3. init
+        var protocolExpression = /(https?:\/\/)/gi;
+        var protocolRegex = new RegExp(protocolExpression);
+
+        // 4. store
+        if (!this._elInputURL.value.match(protocolRegex))
+        {
+            this._data.value = 'https://' + this._elInputURL.value;
+        }
+        else
+        {
+            this._data.value = this._elInputURL.value;
+        }
     },
 
     _validateText: function()
