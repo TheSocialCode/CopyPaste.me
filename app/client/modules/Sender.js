@@ -22,14 +22,14 @@ module.exports.prototype = {
 
     // connection
     _socket: null,
-    _sToken: '',
     _aTabs: [],
-    _sCurrentDataType: '',
     _elCurrentDataInput: null,
     _elSenderInterface: null,
     _elInputPassword: null,
     _elInputURL: null,
     _elInputText: null,
+    _bValidated: false,
+    _data: {},
 
 
     // ----------------------------------------------------------------------------
@@ -42,11 +42,11 @@ module.exports.prototype = {
      */
     __construct: function (socket, sToken)
     {
-        // store
+        // 1. store
         this._socket = socket;
-        this._sToken = sToken;
+        this._data.sToken = sToken;
 
-        // register
+        // 2. register
         let classRoot = this;
         this._elSenderInterface = document.getElementById('interface-sender');
         this._elInputPassword = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_password"]');
@@ -54,164 +54,31 @@ module.exports.prototype = {
         this._elInputText = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_text"]');
         this._elButtonSend = this._elSenderInterface.querySelector('[data-mimoto-id="button_input_password"]');
 
-        // validate
-        if (!new RegExp(/^[0-9a-z]{32}$/g).test(this._sToken))
+        // 3. validate
+        if (!new RegExp(/^[0-9a-z]{32}$/g).test(this._data.sToken))
         {
+            // a. open
             window.open('/', '_self');
             return;
         }
         else
         {
-            // configure
+            // a. configure
             this._socket.on('token_not_found', function() { classRoot._onTokenNotFound(); });
             this._socket.on('token_connected', function() { classRoot._onTokenConnected(); });
             this._socket.on('receiver_disconnected', function() { classRoot._onReceiverDisconnected(); }); // #todo
 
-            // connect
-            this._socket.emit('connect_token', sToken);
+            // b. connect
+            this._socket.emit('connect_token', this._data.sToken);
 
-            // show
-            this._elSenderInterface.style.display = 'inline-block';
+            // c. show
+            this._elSenderInterface.style.display = 'inline-block'; // #todo add class ipv style
 
-
-
-
-            this._elInputPassword.addEventListener('change', this._validatePassword.bind(this));
-            this._elInputPassword.addEventListener('keyup', this._validatePassword.bind(this));
-            this._elInputPassword.addEventListener('paste', this._validatePassword.bind(this));
-            this._elInputPassword.addEventListener('inout', this._validatePassword.bind(this));
-
-            this._elInputURL.addEventListener('change', this._validateURL.bind(this));
-            this._elInputURL.addEventListener('keyup', this._validateURL.bind(this));
-            this._elInputURL.addEventListener('paste', this._validateURL.bind(this));
-            this._elInputURL.addEventListener('inout', this._validateURL.bind(this));
-
-            this._elInputText.addEventListener('change', this._validateText.bind(this));
-            this._elInputText.addEventListener('keyup', this._validateText.bind(this));
-            this._elInputText.addEventListener('paste', this._validateText.bind(this));
-            this._elInputText.addEventListener('inout', this._validateText.bind(this));
-
-
-            document.getElementById('data_input_image_file').addEventListener('change', function() {
-
-                console.log('Uploaded!');
-
-                let imageInput = document.getElementById('data_input_image_file');
-
-                if (imageInput.files && imageInput.files[0])
-                {
-
-                    var reader = new FileReader();
-
-                    reader.onload = function(e) {
-
-                        console.log('File found', imageInput.files[0].name, e.target.result);
-
-                        //$('#blah').attr('src', e.target.result);
-
-                        document.getElementById('data_input_document_preview').setAttribute('src', e.target.result);
-                    };
-
-                    reader.readAsDataURL(imageInput.files[0]);
-                }
-
-            }.bind(this));
-
-
-
-            this._elButtonSend.addEventListener('click', function(){
-
-
-                // validate
-                if (this._elButtonSend.classList.contains('disabled')) return;
-
-
-                // validate input ipv contains(class)
-
-
-                let value = null;
-
-                switch(this._sCurrentDataType)
-                {
-                    case 'password':
-                    case 'url':
-                    case 'text':
-
-                        // read
-                        value = this._elCurrentDataInput.value;
-
-                        // clear
-                        this._elCurrentDataInput.value = '';
-
-                        break;
-
-                    case 'image':
-
-                        // read
-                        value = document.getElementById('data_input_document_preview').getAttribute('src');
-
-                        // clear
-                        document.getElementById('data_input_document_preview').remove();
-
-                        break;
-
-                    case 'document':
-
-                        value = this._elCurrentDataInput.getElementById('data_input_document_file').value;
-                        break;
-                }
-
-                console.log('Type = ' + this._sCurrentDataType, 'value = ' + value);
-
-
-                // disable
-                this._toggleSendButton(false);
-
-
-                this._socket.emit('data', { sType:this._sCurrentDataType, value:value, sToken:sToken });
-
-
-
-
-            }.bind(this));
-
-
+            // d. setup
+            this._setupInput();
             this._setupTabMenu();
         }
-
-
-        // 4. open url (also show URL)
-        // 6. show version in bottom/footer
-        // 7. onConnect remove QR code -> you are now connected -> check 4 character code
-        // 8. change URL to token
-        // 10. register token in server
     },
-
-
-    _getDataUri: function(url, callback) {
-
-        var image = new Image();
-
-        image.onload = function () {
-            var canvas = document.createElement('canvas');
-            canvas.width = this.naturalWidth; // or 'width' if you want a special/scaled size
-            canvas.height = this.naturalHeight; // or 'height' if you want a special/scaled size
-
-            canvas.getContext('2d').drawImage(this, 0, 0);
-
-            // Get raw image data
-            callback(canvas.toDataURL('image/png').replace(/^data:image\/(png|jpg);base64,/, ''));
-
-            // ... or get as Data URI
-            callback(canvas.toDataURL('image/png'));
-        };
-
-        image.src = url;
-    },
-
-
-
-
 
     _onTokenNotFound: function()
     {
@@ -227,6 +94,34 @@ module.exports.prototype = {
 
     // --------
 
+
+    _setupInput: function()
+    {
+        // 1. configure input: password
+        this._elInputPassword.addEventListener('change', this._validatePassword.bind(this));
+        this._elInputPassword.addEventListener('keyup', this._validatePassword.bind(this));
+        this._elInputPassword.addEventListener('paste', this._validatePassword.bind(this));
+        this._elInputPassword.addEventListener('input', this._validatePassword.bind(this));
+
+        // 2. configure input: URL
+        this._elInputURL.addEventListener('change', this._validateURL.bind(this));
+        this._elInputURL.addEventListener('keyup', this._validateURL.bind(this));
+        this._elInputURL.addEventListener('paste', this._validateURL.bind(this));
+        this._elInputURL.addEventListener('input', this._validateURL.bind(this));
+
+        // 3. configure input: text
+        this._elInputText.addEventListener('change', this._validateText.bind(this));
+        this._elInputText.addEventListener('keyup', this._validateText.bind(this));
+        this._elInputText.addEventListener('paste', this._validateText.bind(this));
+        this._elInputText.addEventListener('input', this._validateText.bind(this));
+
+        // 4. configure input: image & document
+        document.getElementById('data_input_image_file').addEventListener('change', this._onSelectImage.bind(this));
+        document.getElementById('data_input_document_file').addEventListener('change', this._onSelectDocument.bind(this));
+
+        // 5. configure send button
+        this._elButtonSend.addEventListener('click', this._onButtonSendClick.bind(this));
+    },
 
     _setupTabMenu: function()
     {
@@ -280,7 +175,7 @@ module.exports.prototype = {
     _focusDataInput: function(sDataType)
     {
         // store
-        this._sCurrentDataType = sDataType;
+        this._data.sType = sDataType;
 
         // init
         let aInputs = ['data_input_password', 'data_input_url', 'data_input_text', 'data_input_image', 'data_input_document'];
@@ -304,8 +199,136 @@ module.exports.prototype = {
                 // hide
                 elInput.classList.remove('selected');
             }
-
         }
+    },
+
+    _onSelectImage: function()
+    {
+        // 1. find
+        let imageInput = document.getElementById('data_input_image_file');
+
+        // 2. validate
+        if (imageInput.files && imageInput.files[0])
+        {
+            // a. init
+            var reader = new FileReader();
+
+            // b. configure
+            reader.onload = function(e)
+            {
+                // I. store
+                this._data.value = {
+                    fileName: imageInput.files[0].name,
+                    base64: e.target.result
+                };
+
+                // II. show
+                document.getElementById('data_input_document_preview').setAttribute('src', e.target.result);
+
+                // III. toggle
+                this._validateImage();
+
+            }.bind(this);
+
+            // reader.onerror = function (error) { console.log('Error: ', error); };
+
+            // c. load
+            reader.readAsDataURL(imageInput.files[0]);
+        }
+    },
+
+    _onSelectDocument: function()
+    {
+        // 1. find
+        let documentInput = document.getElementById('data_input_document_file');
+
+        // 2. validate
+        if (documentInput.files && documentInput.files[0])
+        {
+            // a. init
+            var reader = new FileReader();
+
+            // b. configure
+            reader.onload = function(e)
+            {
+                // I. store
+                this._data.value = {
+                    fileName: documentInput.files[0].name,
+                    base64: e.target.result
+                };
+
+                // II. show
+                // ...
+
+                // III. toggle
+                this._validateDocument();
+
+            }.bind(this);
+
+            // reader.onerror = function (error) { console.log('Error: ', error); };
+
+            // c. load
+            reader.readAsDataURL(documentInput.files[0]);
+        }
+    },
+
+    _onButtonSendClick: function()
+    {
+        // 1. validate
+        if (!this._bValidated) return;
+
+        // 2. disable
+        this._toggleSendButton(false);
+
+        // 3. broadcast
+        this._socket.emit('data', this._data);
+
+        // 4. clear
+        this._data.value = null;
+
+        // 5. cleanup
+        this._clearInput();
+    },
+
+    _clearInput: function()
+    {
+        // 1. prepare
+        document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.add('clear');
+
+        // 2. time clearing of value
+        let timerValue = setTimeout(function()
+        {
+            switch(this._data.sType)
+            {
+                case 'password':
+                case 'url':
+                case 'text':
+
+                    // clear
+                    this._elCurrentDataInput.value = '';
+                    break;
+
+                case 'image':
+
+                    // clear
+                    document.getElementById('data_input_document_preview').remove();
+                    break;
+
+                case 'document':
+
+                    // clear
+                    document.getElementById('data_input_document_preview').remove();
+                    break;
+            }
+        }.bind(this), 600);
+
+        // 3. time clearing of animation
+        let timerCover = setTimeout(function()
+        {
+            // a. cleanup
+            document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.remove('clear');
+
+        }.bind(this), 1200);
     },
 
 
@@ -313,6 +336,9 @@ module.exports.prototype = {
     {
         // 1. toggle
         this._toggleSendButton(this._elInputPassword.value.length > 0);
+
+        // 2. store
+        this._data.value = this._elInputPassword.value;
     },
 
     _validateURL: function()
@@ -323,12 +349,30 @@ module.exports.prototype = {
 
         // 2. toggle
         this._toggleSendButton(this._elInputURL.value.match(regex));
+
+        // 3. store
+        this._data.value = this._elInputURL.value;
     },
 
     _validateText: function()
     {
         // 1. toggle
         this._toggleSendButton(this._elInputText.value.length > 0);
+
+        // 2. store
+        this._data.value = this._elInputText.value;
+    },
+
+    _validateImage: function()
+    {
+        // 1. toggle
+        this._toggleSendButton(true);
+    },
+
+    _validateDocument: function()
+    {
+        // 1. toggle
+        this._toggleSendButton(true);
     },
 
 
@@ -337,10 +381,12 @@ module.exports.prototype = {
         if (bEnable)
         {
             this._elButtonSend.classList.remove('disabled');
+            this._bValidated = true;
         }
         else
         {
             this._elButtonSend.classList.add('disabled');
+            this._bValidated = false;
         }
     }
 

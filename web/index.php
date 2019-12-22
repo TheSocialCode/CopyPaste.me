@@ -104,6 +104,7 @@
         padding: 8px 12px 10px 12px;
         border-radius: 3px;
         cursor: pointer;
+        white-space: nowrap;
     }
 
     div.button.disabled {
@@ -209,6 +210,8 @@
         padding: 12px 20px 12px 15px;
         width: 100%;
         font-size: larger;
+        height: auto;
+        max-height: 200px;
     }
 
     div.receiver_data_options {
@@ -309,7 +312,101 @@
         border-radius: 3px;
         border: #e5e5e5 1px solid;
         flex: auto;
+        position: relative;
     }
+
+        div.sender_data_label_data_cover {
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 1000;
+            border-radius: 3px;
+            visibility: hidden;
+        }
+
+        .clear div.sender_data_label_data_cover {
+            visibility: visible;
+        }
+
+            div.sender_data_label_cover_internal {
+                position: relative;
+                background-color: #1F588C;
+                text-align: left;
+
+                overflow: hidden;
+
+                width: 0;
+                height: 100%;
+
+                white-space: nowrap;
+
+                transition-timing-function: ease-in-out;
+            }
+
+            div.sender_data_label_cover_label {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                text-align: center;
+                color: #ffffff;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .clear div.sender_data_label_cover_internal {
+                animation: clearvalue-cover-internal 1.2s;
+            }
+
+            @keyframes clearvalue-cover-internal {
+                0% {
+                    width: 0;
+                    margin-left: 0;
+                }
+                49% {
+                    width: 100%;
+                    margin-left: 0;
+                }
+                50% {
+                    width: 100%;
+                    margin-left: 0;
+                }
+
+                99% {
+                    width: 0;
+                    margin-left: 100%;
+                }
+                100% {
+                    width: 0;
+                    margin-left: 0;
+                }
+            }
+
+
+        .clear div.sender_data_label_data_input {
+            animation: clearvalue-cover-input 1.2s;
+        }
+
+        @keyframes clearvalue-cover-input {
+            0% {
+                opacity: 1;
+            }
+            49% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+
     div.sender_data_menu {
         position: relative;
         display: block;
@@ -365,6 +462,38 @@
         display: block;
     }
 
+
+
+    div.data_input_image
+    {
+        display: flex;
+    }
+
+
+
+    div.data_input_image_preview {
+        display: inline-block;
+        background-color: #999999;
+        width: 200px;
+        height: 100%;
+    }
+
+        div.data_input_image_menu {
+            flex: content;
+            background-color: cornflowerblue;
+            margin-right: 12px;
+        }
+
+        div.data_input_image_preview {
+            flex: auto;
+            width: 100%;
+            background-color: #6FA8DC;
+        }
+
+            img.data_input_image_preview {
+
+            }
+
 </style>
 <body>
 
@@ -412,18 +541,34 @@
             </div>
             <div class="sender_data">
                 <div class="sender_data_label">
-                    <div class="sender_data_label_data" data-data="">
-                        <input data-mimoto-id="data_input_password" class="data_input selected" type="password" placeholder="Enter password" />
-                        <input data-mimoto-id="data_input_url" class="data_input" type="text" placeholder="Enter URL" />
-                        <textarea data-mimoto-id="data_input_text" class="data_input" placeholder="Enter text"></textarea>
-                        <div data-mimoto-id="data_input_image" class="data_input">
-                            <div class="button" onclick="document.getElementById('data_input_image_file').click();">Select image</div>
-                            <input id="data_input_image_file" type="file" style="display:none;" accept='image/*' name="data_input_image_file"/>
-                            <img id="data_input_document_preview" width="300" />
+                    <div data-mimoto-id="sender_data_label_data" class="sender_data_label_data">
+                        <div class="sender_data_label_data_cover">
+                            <div class="sender_data_label_cover_internal"></div>
+                            <div class="sender_data_label_cover_label">Done!</div>
                         </div>
-                        <div data-mimoto-id="data_input_document" class="data_input">
-                            <div class="button" onclick="document.getElementById('data_input_document_file').click();">Select document</div>
-                            <input id="data_input_document_file" type="file" style="display:none;" name="data_input_image_document"/>
+                        <div class="sender_data_label_data_input">
+                            <input data-mimoto-id="data_input_password" class="data_input selected" type="password" placeholder="Enter password" />
+                            <input data-mimoto-id="data_input_url" class="data_input" type="text" placeholder="Enter URL" />
+                            <textarea data-mimoto-id="data_input_text" class="data_input" placeholder="Enter text"></textarea>
+                            <div data-mimoto-id="data_input_image" class="data_input">
+                                <div class="data_input_image">
+                                    <div class="data_input_image_menu">
+                                        <div class="button" onclick="document.getElementById('data_input_image_file').click();">Select image</div>
+                                        <input id="data_input_image_file" type="file" style="display:none;" accept='image/*' name="data_input_image_file"/>
+                                    </div>
+                                    <div class="data_input_image_preview">
+                                        <div class="data_input_image_preview">
+                                            <img id="data_input_image_preview" class="data_input_image_preview" />
+                                            Filename
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-mimoto-id="data_input_document" class="data_input">
+                                <div class="button" onclick="document.getElementById('data_input_document_file').click();">Select document</div>
+                                <input id="data_input_document_file" type="file" style="display:none;" name="data_input_image_document"/>
+                                <img id="data_input_image_preview" width="300" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -448,7 +593,7 @@
                 <div class="receiver_data_options">
                     <span data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</span> |
                     <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
-                    clears in <span data-mimoto-id="receiver_data_lifetime">5 mins</span>
+                    clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
                 </div>
             </div>
             <div class="receiver_data_menu">

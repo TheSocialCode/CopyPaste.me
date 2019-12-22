@@ -17,6 +17,7 @@ module.exports.prototype = {
 
     // connection
     _elDataContainer: null,
+    _elButton: null,
     _elData: null,
     _data: null,
     _timer: null,
@@ -97,18 +98,21 @@ module.exports.prototype = {
         // 2. copy and prepare
         this._elData = elDataTemplate.cloneNode(true);
         this._elData.removeAttribute('id');
+        this._elButton = this._elData.querySelector('[data-mimoto-id="receiver_data_button"]');
 
         // 4. show
         this._elDataContainer.insertBefore(this._elData, this._elDataContainer.firstChild);
 
         // 5. init
-        this._nTimeToAutoDestruct = new Date().getTime() + 5 * 60 * 1000;
+        this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900;
 
 
-        console.log('Data type ' + this._data.sType + ' received:', this._data.value);
+        //console.log('Data type ' + this._data.sType + ' received:', this._data.value);
 
 
         //list = document.querySelectorAll('[data-action="delete"]');
+
+
 
 
 
@@ -117,12 +121,19 @@ module.exports.prototype = {
             case 'password':
 
                 this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = '* * * * * * * * *';
+                this._elButton.innerText = 'Copy to clipboard';
                 break;
 
             case 'url':
+
+                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value;
+                this._elButton.innerText = 'Open URL';
+                break;
+
             case 'text':
 
                 this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value;
+                this._elButton.innerText = 'Copy to clipboard';
                 break;
 
             case 'image':
@@ -132,20 +143,24 @@ module.exports.prototype = {
 
                 // loader -> get originalWidth or max width
 
-                elImage.setAttribute('width', 400);
-                elImage.setAttribute('src', this._data.value);
+                elImage.setAttribute('width', 300); // #todo setup default container
+                elImage.setAttribute('src', this._data.value.base64);
 
                 this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').append(elImage);
+                this._elButton.innerText = 'Download';
 
                 break;
 
             case 'document':
+
+                this._elButton.innerText = 'Download';
+                break;
         }
 
 
 
         // 7. configure
-        this._elData.querySelector('[data-mimoto-id=receiver_data_button]').addEventListener('click', this._onClickCopyToClipboard);
+        this._elButton.addEventListener('click', this._onButtonClick.bind(this));
 
 
         this._elData.querySelector('[data-mimoto-id=receiver_data_option_clearnow]').addEventListener('click', function(elData) {
@@ -154,11 +169,11 @@ module.exports.prototype = {
 
         }.bind(this, this._elData));
 
-        this._elData.querySelector('[data-mimoto-id=receiver_data_option_extend]').addEventListener('click', function(elData) {
+        this._elData.querySelector('[data-mimoto-id=receiver_data_option_extend]').addEventListener('click', function() {
 
-            this._setExtendAutoDestructionDelay(elData)
+            this._setExtendAutoDestructionDelay()
 
-        }.bind(this, this._elData));
+        }.bind(this));
 
 
         this._timer = setInterval(function()
@@ -189,20 +204,35 @@ module.exports.prototype = {
         if (nMinutes > 0) sRemainingTime = nMinutes + ' ' + ((nMinutes === 1) ? 'min' : 'mins') + ' ';
         sRemainingTime += ((nSeconds === 60) ? ((nMinutes !== 0) ? 0 : nSeconds) : nSeconds) + ' ' + ((nSeconds === 1) ? 'sec' : 'secs');
 
-
+        // update
         this._elData.querySelector('[data-mimoto-id=receiver_data_lifetime]').innerText = sRemainingTime;
 
         // verify and send
         return (nDifference <= 0);
     },
 
-    _setExtendAutoDestructionDelay: function(elData)
+    _setExtendAutoDestructionDelay: function()
     {
-        // define and store
-        //this._nTimeToAutoDestruct;
+
+        console.log('Before', this._nTimeToAutoDestruct);
+
+        let nExtendedDuration = 60 * 1000;
 
 
-        //indien kleiner dan 95% dan aanvullen tot 5, ander +5
+
+        let nNewTime = Math.round((this._nTimeToAutoDestruct - new Date().getTime()) / nExtendedDuration) * nExtendedDuration + (nExtendedDuration + 900);
+
+
+        console.log('Multiple = ', Math.round((this._nTimeToAutoDestruct - new Date().getTime()) / nExtendedDuration));
+        console.log('nNewTime', nNewTime);
+
+
+        this._nTimeToAutoDestruct = new Date().getTime() + nNewTime;
+
+
+
+        console.log('After', this._nTimeToAutoDestruct);
+
 
         //this._nTimeToAutoDestruct = Math.ceil(this._nTimeToAutoDestruct)
 
@@ -222,26 +252,71 @@ module.exports.prototype = {
     },
 
 
-    _onClickCopyToClipboard: function()
+    _onButtonClick: function()
+    {
+        switch(this._data.sType)
+        {
+            case 'password':
+
+                this._copyToClipboard(this._data.value);
+                break;
+
+            case 'url':
+
+                console.log('url', this._data.value);
+                window.open(this._data.value, '_blank');
+                break;
+
+            case 'text':
+
+                this._copyToClipboard(this._data.value);
+                break;
+
+            case 'image':
+
+
+                var link = document.createElement("a");
+
+                link.setAttribute("href", this._data.value.base64);
+                link.setAttribute("download", this._data.value.fileName);
+                link.click();
+
+                break;
+
+            case 'document':
+
+                var link = document.createElement("a");
+
+                link.setAttribute("href", this._data.value.base64);
+                link.setAttribute("download", this._data.value.fileName);
+                link.click();
+
+                break;
+        }
+
+
+
+        //
+        //
+        // // register
+        // let elTooltip = document.getElementById('tooltip');
+        //
+        // elTooltip.classList.remove('tooltip-fade');
+        // elTooltip.style.display = 'inline-block';
+        // //elTooltip.style.opacity = 0.5;
+        //
+        // elTooltip.classList.add('tooltip-fade');
+    },
+
+    _copyToClipboard: function(sValue)
     {
         // copy to clipboard
         const el = document.createElement('textarea');
-        el.value = document.getElementById('received_data_label_data').getAttribute('data-data');
+        el.value = sValue; //document.getElementById('received_data_label_data').getAttribute('data-data');
         document.body.appendChild(el);
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
-
-
-
-        // register
-        let elTooltip = document.getElementById('tooltip');
-
-        elTooltip.classList.remove('tooltip-fade');
-        elTooltip.style.display = 'inline-block';
-        //elTooltip.style.opacity = 0.5;
-
-        elTooltip.classList.add('tooltip-fade');
     }
 
 };

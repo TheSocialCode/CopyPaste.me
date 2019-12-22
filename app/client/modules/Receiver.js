@@ -90,7 +90,7 @@ module.exports.prototype = {
         receivedData.addEventListener(receivedData.CLEARED, function(receivedData)
         {
             // a. verify and show
-            if (this._elDataContainer.children.length === 0) this._elWaiting.style.display = 'block';
+            if (this._elDataContainer.children.length === 0) this._elWaiting.style.display = 'block'; // #todo - move to css class
 
             // b. find
             for (let nIndex = 0; nIndex < this._aReceivedData.length; nIndex++)
@@ -105,6 +105,10 @@ module.exports.prototype = {
 
         // 4. store
         this._aReceivedData.push(receivedData);
+
+        console.log('Height', this._elDataContainer.firstChild.offsetHeight);
+
+
     }
 
 };
