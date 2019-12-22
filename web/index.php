@@ -1,7 +1,10 @@
 <!doctype html>
 <html>
 <head>
-    <title>CopyPaste.me - Easy device-to-device data transfer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+    <title>CopyPaste.me - Frictionless sharing between devices</title>
 </head>
 <style>
 
@@ -175,6 +178,9 @@
     div.receiver_data {
         background-color: #ffffff;
         border-radius: 5px;
+    }
+
+    div.receiver_data_content {
         display:flex;
 
         min-width: 400px;
@@ -215,11 +221,13 @@
     }
 
     div.receiver_data_options {
-        margin-top: 7px;
-        margin-left: 6px;
+        padding: 0 20px 9px 15px;
+        border-radius: 5px;
         font-size: smaller;
+        background-color: #f5f5f5;
         color: #999999;
         font-style: italic;
+        text-align: left;
     }
 
     span.receiver_data_option {
@@ -588,16 +596,18 @@
         <!-- template: data -->
 
         <div id="template-data" class="receiver_data">
-            <div class="receiver_data_label">
-                <div data-mimoto-id="receiver_data_label_data" class="receiver_data_label_data" data-data=""></div>
-                <div class="receiver_data_options">
-                    <span data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</span> |
-                    <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
-                    clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
+            <div class="receiver_data_content">
+                <div class="receiver_data_label">
+                    <div data-mimoto-id="receiver_data_label_data" class="receiver_data_label_data" data-data=""></div>
+                </div>
+                <div class="receiver_data_menu">
+                    <div data-mimoto-id="receiver_data_button" class="button">Copy&nbsp;to&nbsp;clipboard</div>
                 </div>
             </div>
-            <div class="receiver_data_menu">
-                <div data-mimoto-id="receiver_data_button" class="button">Copy&nbsp;to&nbsp;clipboard</div>
+            <div class="receiver_data_options">
+                <span data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</span> |
+                <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
+                clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
             </div>
         </div>
 

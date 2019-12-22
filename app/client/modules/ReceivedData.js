@@ -106,16 +106,7 @@ module.exports.prototype = {
         // 5. init
         this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900;
 
-
-        //console.log('Data type ' + this._data.sType + ' received:', this._data.value);
-
-
-        //list = document.querySelectorAll('[data-action="delete"]');
-
-
-
-
-
+        // 6. show data or data representation
         switch(this._data.sType)
         {
             case 'password':
@@ -157,25 +148,24 @@ module.exports.prototype = {
                 break;
         }
 
-
-
         // 7. configure
         this._elButton.addEventListener('click', this._onButtonClick.bind(this));
 
-
+        // 8. configure
         this._elData.querySelector('[data-mimoto-id=receiver_data_option_clearnow]').addEventListener('click', function(elData) {
 
             this._clearData(elData);
 
         }.bind(this, this._elData));
 
+        // 9. configure
         this._elData.querySelector('[data-mimoto-id=receiver_data_option_extend]').addEventListener('click', function() {
 
             this._setExtendAutoDestructionDelay()
 
         }.bind(this));
 
-
+        // 10. setup
         this._timer = setInterval(function()
         {
             if (this._updateTimer())
@@ -196,47 +186,28 @@ module.exports.prototype = {
         let nMinutes = Math.floor((nDifference % (1000 * 60 * 60)) / (1000 * 60));
         let nSeconds = Math.floor((nDifference % (1000 * 60)) / 1000);
 
-
-        //console.log(nDifference, 'Minutes = ' + nMinutes, 'Seconds = ' + nSeconds);
-
-        // build
+        // 3. build
         let sRemainingTime = '';
         if (nMinutes > 0) sRemainingTime = nMinutes + ' ' + ((nMinutes === 1) ? 'min' : 'mins') + ' ';
         sRemainingTime += ((nSeconds === 60) ? ((nMinutes !== 0) ? 0 : nSeconds) : nSeconds) + ' ' + ((nSeconds === 1) ? 'sec' : 'secs');
 
-        // update
+        // 4. update
         this._elData.querySelector('[data-mimoto-id=receiver_data_lifetime]').innerText = sRemainingTime;
 
-        // verify and send
+        // 5. verify and send
         return (nDifference <= 0);
     },
 
     _setExtendAutoDestructionDelay: function()
     {
-
-        console.log('Before', this._nTimeToAutoDestruct);
-
+        // 1. define
         let nExtendedDuration = 60 * 1000;
 
-
-
+        // 2. extend
         let nNewTime = Math.round((this._nTimeToAutoDestruct - new Date().getTime()) / nExtendedDuration) * nExtendedDuration + (nExtendedDuration + 900);
 
-
-        console.log('Multiple = ', Math.round((this._nTimeToAutoDestruct - new Date().getTime()) / nExtendedDuration));
-        console.log('nNewTime', nNewTime);
-
-
+        // 3. update and store
         this._nTimeToAutoDestruct = new Date().getTime() + nNewTime;
-
-
-
-        console.log('After', this._nTimeToAutoDestruct);
-
-
-        //this._nTimeToAutoDestruct = Math.ceil(this._nTimeToAutoDestruct)
-
-
     },
 
     _clearData: function()
@@ -250,7 +221,6 @@ module.exports.prototype = {
         // 3.
         this.dispatchEvent(this.CLEARED);
     },
-
 
     _onButtonClick: function()
     {
