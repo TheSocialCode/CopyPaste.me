@@ -103,40 +103,6 @@ module.exports.prototype = {
         // 4. show
         this._elDataContainer.insertBefore(this._elData, this._elDataContainer.firstChild);
 
-        // 5. register
-        let nPlaceholderHeight = this._elData.offsetHeight + 10;
-
-        // 6. verify
-        if (this._elDataContainer.children.length > 1)
-        {
-            // a. hide
-            this._elData.style.display = 'none';
-
-            // b. init
-            let elPlaceholder = document.createElement('div');
-
-            // c. setup
-            elPlaceholder.classList.add('receiver_data_placeholder');
-
-            // d. show
-            this._elDataContainer.insertBefore(elPlaceholder, this._elDataContainer.firstChild);
-
-            // e. start animation
-            let timerIntro = setTimeout(function(elPlaceholder)
-            {
-                elPlaceholder.style.height = nPlaceholderHeight + 'px';
-
-            }.bind(this, elPlaceholder), 10);
-
-            // f. show actual element
-            let timerIntroEnd = setTimeout(function(elData, elPlaceholder)
-            {
-                elPlaceholder.remove();
-                elData.style.display = 'block';
-
-            }.bind(this, this._elData, elPlaceholder), 310);
-        }
-
 
         // ---
 
@@ -213,6 +179,88 @@ module.exports.prototype = {
 
         }.bind(this), 100);
 
+
+        // register
+        let elContent = this._elData.querySelector('[data-mimoto-id="content"]');
+
+        // 6. verify
+        if (this._elDataContainer.children.length === 0)
+        {
+            elContent.classList.add('show');
+        }
+        else
+        {
+            this._show(elContent);
+        }
+    },
+
+    _show: function(elContent)
+    {
+        // 5. register
+        let nPlaceholderHeight = this._elData.offsetHeight + 10;
+
+        // a. register
+        let elPlaceholder = this._elData.querySelector('[data-mimoto-id="placeholder"]');
+
+        // b. hide
+        elContent.style.display = 'none'; // #todo - move to css class
+
+        // c. start animation
+        let timerIntro = setTimeout(function(elPlaceholder)
+        {
+            elPlaceholder.style.height = nPlaceholderHeight + 'px';
+
+        }.bind(this, elPlaceholder), 10);
+
+        // d. show actual element
+        let timerIntroEnd = setTimeout(function(elPlaceholder, elContent)
+        {
+            elPlaceholder.style.display = 'none';
+            elContent.style.display = 'block';
+
+            // c. start animation
+            let fadeInIntro = setTimeout(function(elContent)
+            {
+                elContent.classList.add('show');
+
+            }.bind(this, elContent), 10);
+
+        }.bind(this, elPlaceholder, elContent), 310);
+    },
+
+    _hide: function()
+    {
+        // 1. register
+        let nPlaceholderHeight = this._elData.offsetHeight + 10;
+
+        // 2. register
+        let elContent = this._elData.querySelector('[data-mimoto-id="content"]');
+        let elPlaceholder = this._elData.querySelector('[data-mimoto-id="placeholder"]');
+
+        // 3. hide
+        elContent.style.display = 'none'; // #todo - move to css class
+
+        // 4. setup
+        elPlaceholder.style.height = nPlaceholderHeight;
+        elPlaceholder.style.display = 'block';
+
+        // 5. start animation
+        let timerOutro = setTimeout(function(elPlaceholder)
+        {
+            elPlaceholder.style.height = 0;
+
+        }.bind(this, elPlaceholder), 10);
+
+        // 7. show actual element
+        let timerOutroEnd = setTimeout(function()
+        {
+            // 2. clear
+            this._elDataContainer.removeChild(this._elData);
+
+            // 3.
+            this.dispatchEvent(this.CLEARED);
+
+        }.bind(this), 310);
     },
 
     _updateTimer: function()
@@ -253,19 +301,8 @@ module.exports.prototype = {
         // 1. cleanup
         clearInterval(this._timer);
 
-
-
-
-
-        console.log('Height', this._elDataContainer.firstChild.offsetHeight);
-
-
-
-        // 2. clear
-        this._elDataContainer.removeChild(this._elData);
-
-        // 3.
-        this.dispatchEvent(this.CLEARED);
+        // 2. hide
+        this._hide();
     },
 
     _onButtonClick: function()

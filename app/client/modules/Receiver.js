@@ -42,17 +42,15 @@ module.exports.prototype = {
     {
         // store
         this._socket = socket;
-        this._sToken = sToken;
 
         // register
-        let classRoot = this;
         this._elDataContainer = document.getElementById('receiver_data_container');
         this._elWaiting = document.getElementById('waiting');
 
         // configure
-        this._socket.on('token', function(sToken) { classRoot._setupToken(sToken); });
-        this._socket.on('data', function(data) { classRoot._onData(data); });
-        this._socket.on('sender_connected', function() { classRoot._onSenderConnected(); });
+        this._socket.on('token', this._setupToken.bind(this));
+        this._socket.on('data', this._onData.bind(this));
+        this._socket.on('sender_connected', this._onSenderConnected.bind(this));
 
         this._socket.on('connect_error', function(err) {
             // handle server error here
@@ -65,8 +63,11 @@ module.exports.prototype = {
 
     _setupToken: function (sToken)
     {
-        // create
-        this._qrcode = new QRCode(window.location.protocol + '//' + window.location.hostname + '/' + sToken);
+        // 1. store
+        this._sToken = sToken;
+
+        // 2. create
+        this._qrcode = new QRCode(window.location.protocol + '//' + window.location.hostname + '/' + this._sToken);
     },
 
 

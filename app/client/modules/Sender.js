@@ -47,7 +47,6 @@ module.exports.prototype = {
         this._data.sToken = sToken;
 
         // 2. register
-        let classRoot = this;
         this._elSenderInterface = document.getElementById('interface-sender');
         this._elInputPassword = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_password"]');
         this._elInputURL = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_url"]');
@@ -64,9 +63,9 @@ module.exports.prototype = {
         else
         {
             // a. configure
-            this._socket.on('token_not_found', function() { classRoot._onTokenNotFound(); });
-            this._socket.on('token_connected', function() { classRoot._onTokenConnected(); });
-            this._socket.on('receiver_disconnected', function() { classRoot._onReceiverDisconnected(); }); // #todo
+            this._socket.on('token_not_found', this._onTokenNotFound.bind(this));
+            this._socket.on('token_connected', this._onTokenConnected.bind(this));
+            this._socket.on('receiver_disconnected', this._onReceiverDisconnected.bind(this));
 
             // b. connect
             this._socket.emit('connect_token', this._data.sToken);
@@ -88,6 +87,11 @@ module.exports.prototype = {
     _onTokenConnected: function()
     {
         console.log('Sender: Token connected');
+    },
+
+    _onReceiverDisconnected: function()
+    {
+        console.log('Receiver disconnected');
     },
 
 
@@ -153,6 +157,8 @@ module.exports.prototype = {
 
     _focusTab: function(sDataType)
     {
+        // 1. cleanup
+        this._discardAllInput();
 
         for (let nTabIndex = 0; nTabIndex < this._aTabs.length; nTabIndex++)
         {
@@ -298,28 +304,8 @@ module.exports.prototype = {
         // 2. time clearing of value
         let timerValue = setTimeout(function()
         {
-            switch(this._data.sType)
-            {
-                case 'password':
-                case 'url':
-                case 'text':
+            this._discardAllInput(this._data.sType);
 
-                    // clear
-                    this._elCurrentDataInput.value = '';
-                    break;
-
-                case 'image':
-
-                    // clear
-                    document.getElementById('data_input_document_preview').remove();
-                    break;
-
-                case 'document':
-
-                    // clear
-                    document.getElementById('data_input_document_preview').remove();
-                    break;
-            }
         }.bind(this), 600);
 
         // 3. time clearing of animation
@@ -331,6 +317,20 @@ module.exports.prototype = {
         }.bind(this), 1200);
     },
 
+    _discardAllInput: function(sType)
+    {
+        if (sType === 'password' || !sType) this._elInputPassword.value = '';
+        if (sType === 'url' || !sType) this._elInputURL.value = '';
+        if (sType === 'text' || !sType) this._elInputText.value = '';
+        if (sType === 'image' || !sType)
+        {
+            //document.getElementById('data_input_image_preview').remove();
+        }
+        if (sType === 'document' || !sType)
+        {
+            //document.getElementById('data_input_document_preview').remove();
+        }
+    },
 
     _validatePassword: function()
     {

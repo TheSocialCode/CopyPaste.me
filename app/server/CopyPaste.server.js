@@ -37,105 +37,111 @@ module.exports = {
      */
     __construct: function (sGateway)
     {
-        // init
+        // 1. init
         this._app = Module_Express();
         this._http = Module_HTTP.createServer(this.app);
         this._io = Module_SocketIO(this._http);
 
+        // 2. configure
+        this._io.on('connection', this._onUserConnect.bind(this));
 
-        this._app.get('/', function(req, res){
-            //res.sendFile(__dirname + '/index.html');
-            res.send('<h1>Hello world 1</h1>');
-        });
-
-
-        var classRoot = this;
-
-
-        this._io.on('connection', function(socket)
-        {
-
-            if (!classRoot._aSockets[''+socket.id])
-            {
-                console.log('New user connected');
-            }
-            else
-            {
-                console.log('Existing user reconnected');
-            }
-
-            // this._aSockets[socket.id] = {
-            //     socket,
-            //     aTokens: []
-            // }
-
-
-
-
-            socket.on('disconnect', classRoot._onUserDisconnect);
-
-
-            socket.on('chat message', function(msg){
-                console.log('message: ' + msg);
-            });
-
-            socket.on('request_token', function() {
-
-                let sToken = Module_GenerateUniqueID({ length: 32 });
-
-
-                classRoot._aTokens['' + sToken] = {
-                    receiver: socket,
-                };
-
-
-                socket.emit('token', sToken);
-            });
-
-
-            socket.on('connect_token', function(sToken) {
-
-                if (classRoot._aTokens['' + sToken])
-                {
-                    classRoot._aTokens['' + sToken].sender = socket;
-
-
-                    // store list of connections per client (sender or receiver)
-
-                    socket.emit('token_connected');
-
-                    classRoot._aTokens['' + sToken].receiver.emit('sender_connected')
-                }
-                else
-                {
-                    socket.emit('token_not_found');
-                }
-
-                console.log('Connecting to token', sToken);
-            });
-
-
-            socket.on('data', function(data) {
-
-                classRoot._aTokens['' + data.sToken].receiver.emit('data', { sType:data.sType, value:data.value });
-
-            });
-
-
-
-
-        });
-
+        // 3. listen
         this._http.listen(3000, function(){
             console.log('listening on *:3000');
         });
     },
 
-    _onUserDisconnect: function()
+    _onUserConnect: function(socket)
     {
-        console.log('User disconnected ...');
+
+        if (!this._aSockets['' + socket.id])
+        {
+            console.log('New user connected', socket.id);
+
+            // init and store
+            this._aSockets['' + socket.id] = {
+                 socket,
+                 aTokens: []
+            }
+        }
+        else
+        {
+            console.log('------------------- Existing user reconnected');
+        }
+
+        // configure
+        socket.on('disconnect', this._onUserDisconnect.bind(this, socket));
+        socket.on('request_token', this._onRequestToken.bind(this, socket));
+        socket.on('connect_token', this._onConnectToken.bind(this, socket));
+        socket.on('data', this._onData.bind(this));
+
+    },
+
+    _onUserDisconnect: function(socket)
+    {
+        console.log('User disconnected ...', socket.id);
+
+
+        if (this._aSockets['' + socket.id])
+        {
+            if (this._aSockets['' + socket.id].socket.id === socket.id)
+            {
+                console.log('=== User found');
+            }
+        }
 
         // find token connected to user
+
+
+        //socket.emit('receiver_disconnected')
+
+
+        if (this._aSockets[socket.id])
+        {
+            console.log('[    ] --- User is registered!');
+        }
+    },
+
+    _onRequestToken: function(socket)
+    {
+        // 1. create
+        let sToken = Module_GenerateUniqueID({ length: 32 });
+
+        // 2. init and store
+        this._aTokens['' + sToken] = {
+            receiver: socket
+        };
+
+        // 3. broadcast
+        socket.emit('token', sToken);
+    },
+
+    _onConnectToken: function(socket, sToken)
+    {
+        if (this._aTokens['' + sToken])
+        {
+            this._aTokens['' + sToken].sender = socket;
+
+
+            // store list of connections per client (sender or receiver)
+
+            socket.emit('token_connected');
+
+            this._aTokens['' + sToken].receiver.emit('sender_connected')
+        }
+        else
+        {
+            socket.emit('token_not_found');
+        }
+
+        console.log('Connecting to token', sToken);
+    },
+
+    _onData: function(data)
+    {
+        // #todo - valaidate existance
+
+        this._aTokens['' + data.sToken].receiver.emit('data', { sType:data.sType, value:data.value });
     }
 
 };
