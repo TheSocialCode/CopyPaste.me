@@ -193,7 +193,7 @@ module.exports.prototype = {
             }.bind(this, elTab.getAttribute('data-type')));
         }
 
-        this._focusDataInput('image');
+        this._focusDataInput('password');
     },
 
     _focusTab: function(sDataType)
