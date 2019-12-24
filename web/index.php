@@ -257,6 +257,12 @@
         overflow: scroll;
     }
 
+        div.receiver_data_label_data img {
+            width: auto;
+            max-width: 100%;
+            max-height: 100px;
+        }
+
     div.receiver_data_options {
         padding: 0 20px 9px 15px;
         border-radius: 5px;
@@ -499,7 +505,7 @@
     }
 
     div.data_input {
-        padding: 12px 20px 12px 15px;
+        padding: 12px 15px 12px 15px;
         width: 100%;
         font-size: larger;
         display: none;
@@ -509,37 +515,83 @@
         display: block;
     }
 
-
-
     div.data_input_image
     {
         display: flex;
     }
 
+    div.data_input_image_menu {
+        flex: content;
+        margin-right: 12px;
+    }
 
 
     div.data_input_image_preview {
-        display: inline-block;
-        background-color: #999999;
-        width: 200px;
-        height: 100%;
+        display: block;
+        width: 100%;
+        height: 125px;
+        visibility: hidden;
     }
 
-        div.data_input_image_menu {
-            flex: content;
-            background-color: cornflowerblue;
-            margin-right: 12px;
+        div.data_input_image_preview-visible {
+            visibility: visible;
         }
 
-        div.data_input_image_preview {
+        div.data_input_image_preview_imagecontainer {
             flex: auto;
             width: 100%;
-            background-color: #6FA8DC;
+            background-color: #f5f5f5;
+            border: 1px solid #e5e5e5;
+            border-radius: 3px;
         }
 
-            img.data_input_image_preview {
-
+            img.data_input_image_preview_image {
+                display: block;
+                max-width: 100%;
+                max-height: 100px;
             }
+
+            div.data_input_image_preview_label {
+                font-size: small;
+                background-color: #ffffff;
+                padding: 7px 0 0 1px;
+                font-style: italic;
+                overflow: hidden;
+                word-break: break-word;
+            }
+
+
+    div.data_input_document
+    {
+        display: flex;
+    }
+
+    div.data_input_document_menu {
+        flex: content;
+        margin-right: 12px;
+    }
+
+    div.data_input_document_preview {
+        display: block;
+        width: 100%;
+        height: 125px;
+        visibility: hidden;
+    }
+
+        div.data_input_document_preview-visible {
+            visibility: visible;
+        }
+
+        div.data_input_document_preview_label {
+            font-size: small;
+            background-color: #ffffff;
+            padding: 7px 0 0 1px;
+            font-style: italic;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+
 
     div.main-interface {
         display: flex;
@@ -701,18 +753,24 @@
                                                 <div class="button" onclick="document.getElementById('data_input_image_file').click();">Select image</div>
                                                 <input id="data_input_image_file" type="file" style="display:none;" accept='image/*' name="data_input_image_file"/>
                                             </div>
-                                            <div class="data_input_image_preview">
-                                                <div class="data_input_image_preview">
-                                                    <img id="data_input_image_preview" class="data_input_image_preview" />
-                                                    Filename
+                                            <div data-mimoto-id="data_input_image_preview" class="data_input_image_preview">
+                                                <div class="data_input_image_preview_imagecontainer">
+                                                    <img data-mimoto-id="data_input_image_preview_image" class="data_input_image_preview_image" />
                                                 </div>
+                                                <div data-mimoto-id="data_input_image_preview_label" class="data_input_image_preview_label"></div>
                                             </div>
                                         </div>
                                     </div>
                                     <div data-mimoto-id="data_input_document" class="data_input">
-                                        <div class="button" onclick="document.getElementById('data_input_document_file').click();">Select document</div>
-                                        <input id="data_input_document_file" type="file" style="display:none;" name="data_input_image_document"/>
-                                        <img id="data_input_image_preview" width="300" />
+                                        <div class="data_input_document">
+                                            <div class="data_input_document_menu">
+                                                <div class="button" onclick="document.getElementById('data_input_document_file').click();">Select document</div>
+                                                <input id="data_input_document_file" type="file" style="display:none;" name="data_input_document_file"/>
+                                            </div>
+                                            <div data-mimoto-id="data_input_document_preview" class="data_input_document_preview">
+                                                <div data-mimoto-id="data_input_document_preview_label" class="data_input_document_preview_label"></div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

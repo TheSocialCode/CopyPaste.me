@@ -148,6 +148,7 @@ module.exports.prototype = {
 
             case 'document':
 
+                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value.fileName;
                 this._elButton.innerText = 'Download';
                 break;
         }

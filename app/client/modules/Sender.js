@@ -28,6 +28,8 @@ module.exports.prototype = {
     _elInputPassword: null,
     _elInputURL: null,
     _elInputText: null,
+    _elInputImage: null,
+    _elInputDocumnent: null,
     _bValidated: false,
     _data: {},
 
@@ -51,6 +53,8 @@ module.exports.prototype = {
         this._elInputPassword = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_password"]');
         this._elInputURL = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_url"]');
         this._elInputText = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_text"]');
+        this._elInputImage = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_image"]');
+        this._elInputDocument = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_document"]');
         this._elButtonSend = this._elSenderInterface.querySelector('[data-mimoto-id="button_input_password"]');
 
         // 3. validate
@@ -189,7 +193,7 @@ module.exports.prototype = {
             }.bind(this, elTab.getAttribute('data-type')));
         }
 
-        this._focusDataInput('password');
+        this._focusDataInput('image');
     },
 
     _focusTab: function(sDataType)
@@ -266,7 +270,9 @@ module.exports.prototype = {
                 };
 
                 // II. show
-                document.getElementById('data_input_document_preview').setAttribute('src', e.target.result);
+               this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview"]').classList.add('data_input_image_preview-visible');
+               this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview_image"]').setAttribute('src', this._data.value.base64);
+               this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview_label"]').innerText = this._data.value.fileName;
 
                 // III. toggle
                 this._validateImage();
@@ -301,7 +307,8 @@ module.exports.prototype = {
                 };
 
                 // II. show
-                // ...
+                this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_preview"]').classList.add('data_input_document_preview-visible');
+                this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_preview_label"]').innerText = this._data.value.fileName;
 
                 // III. toggle
                 this._validateDocument();
@@ -361,11 +368,11 @@ module.exports.prototype = {
         if (sType === 'text' || !sType) this._elInputText.value = '';
         if (sType === 'image' || !sType)
         {
-            //document.getElementById('data_input_image_preview').remove();
+            this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview"]').classList.remove('data_input_image_preview-visible');
         }
         if (sType === 'document' || !sType)
         {
-            //document.getElementById('data_input_document_preview').remove();
+            this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_preview"]').classList.remove('data_input_document_preview-visible');
         }
     },
 
