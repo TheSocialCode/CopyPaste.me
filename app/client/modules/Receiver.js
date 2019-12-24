@@ -13,10 +13,10 @@ const ReceivedData = require('./ReceivedData');
 const QRCode = require('./QRCode');
 
 
-module.exports = function(socket, sToken)
+module.exports = function(socket)
 {
     // start
-    this.__construct(socket, sToken);
+    this.__construct(socket);
 };
 
 module.exports.prototype = {
@@ -38,7 +38,7 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (socket, sToken)
+    __construct: function (socket)
     {
         // store
         this._socket = socket;
@@ -49,8 +49,11 @@ module.exports.prototype = {
 
         // configure
         this._socket.on('token', this._setupToken.bind(this));
+        this._socket.on('token_not_found', this._onTokenNotFound.bind(this));
         this._socket.on('data', this._onData.bind(this));
         this._socket.on('sender_connected', this._onSenderConnected.bind(this));
+        this._socket.on('sender_disconnected', this._onSenderDisconnected.bind(this));
+        this._socket.on('sender_reconnected', this._onSenderReconnected.bind(this));
 
         this._socket.on('connect_error', function(err) {
             // handle server error here
@@ -58,8 +61,36 @@ module.exports.prototype = {
         });
 
         // show
-        document.getElementById('interface-receiver').style.display = 'inline-block';
+        document.querySelector('[data-mimoto-id="interface-receiver"]').style.display = 'inline-block';
     },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Public methods ---------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    connect: function()
+    {
+        // 1. request
+        this._socket.emit('receiver_request_token');
+    },
+
+    reconnect: function()
+    {
+        console.log('Receiver: reconnect ' + this._sToken);
+
+        // 1. request
+        this._socket.emit('receiver_reconnect_to_token', this._sToken);
+    },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Private methods --------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
 
     _setupToken: function (sToken)
     {
@@ -70,12 +101,46 @@ module.exports.prototype = {
         this._qrcode = new QRCode(window.location.protocol + '//' + window.location.hostname + '/' + this._sToken);
     },
 
+    _onTokenNotFound: function()
+    {
+        this._showAlertMessage('This session expired. <a href="/">Reload</a> page to make new connection.', true);
+    },
 
     _onSenderConnected: function()
     {
+        console.log('Sender was connected');
+
         // 1. toggle interface
         document.getElementById('QR-holder').style.display = 'none';
         document.getElementById('waiting').style.display = 'block';
+    },
+
+    _onSenderDisconnected: function()
+    {
+        console.log('Sender was disconnected');
+        this._showAlertMessage("The other device has been disconnected.");
+
+        // 1. toggle interface
+        document.getElementById('QR-holder').style.display = 'inline-block'; // #todo - move to classes
+        document.getElementById('waiting').style.display = 'none';
+    },
+
+    _onSenderReconnected: function()
+    {
+        console.log('Sender was reconnected');
+        this._hideAlertMessage();
+
+        // 1. toggle interface
+
+        document.getElementById('QR-holder').style.display = 'none';
+        if (this._elDataContainer.children.length > 0)
+        {
+            document.getElementById('waiting').style.display = 'none';
+        }
+        else
+        {
+            document.getElementById('waiting').style.display = 'block';
+        }
     },
 
     _onData: function(data)
@@ -106,6 +171,29 @@ module.exports.prototype = {
 
         // 4. store
         this._aReceivedData.push(receivedData);
+    },
+
+    _showAlertMessage(sMessage, bDisableInterface)
+    {
+        // 1. register
+        let elAlertMessage = document.querySelector('[data-mimoto-id="alertmessage"]');
+
+        // 2. show
+        elAlertMessage.style.display = 'inline-block';
+
+        // 3. output
+        elAlertMessage.innerHTML = sMessage;
+
+        // 4. hide
+        if (bDisableInterface) document.querySelector('[data-mimoto-id="interface-receiver"]').style.display = 'none';
+    },
+
+    _hideAlertMessage()
+    {
+        let elAlertMessage = document.querySelector('[data-mimoto-id="alertmessage"]');
+
+        // 2. show
+        elAlertMessage.style.display = 'none';
     }
 
 };

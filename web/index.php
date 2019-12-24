@@ -570,17 +570,84 @@
                     color: #1F588C;
                 }
 
+
+
+    div.warning_security_compromised {
+        color: #ffffff;
+        display: none;
+    }
+
+        .security_compromised div.warning_security_compromised {
+            display: block;
+        }
+
+        div.warning_security_compromised_title {
+            padding-top: 25px;
+            font-weight: bold;
+            font-size: larger;
+        }
+
+        div.warning_security_compromised a {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        div.warning_security_compromised a:hover {
+            color: #000000;
+        }
+
+        body.security_compromised {
+            background-color: #E06666;
+        }
+
+        .security_compromised div.info-subtitle {
+            color: #000000;
+        }
+
+        .security_compromised div.main-interface-footer a:hover {
+            color: #000000;
+        }
+
+    div.alertmessage {
+        margin: 25px 0 35px 0;
+        padding: 12px 16px 12px 16px;
+        background-color: gold;
+        color: #000000;
+        display:none;
+        border-radius: 5px;
+    }
+
+        div.alertmessage a {
+            color: #000000;
+            text-decoration: underline;
+        }
+
+        div.alertmessage a:hover {
+            text-decoration: none;
+        }
+
 </style>
 <body>
     <div class="main-interface">
+
         <div class="main-interface-content">
 
             <div class="interface-intro">
                 <div class="info-title"><a href="/">CopyPaste.me</a></div>
-                <div class="info-subtitle">Frictionless sharing between devices<!-- Easily and securely transfer passwords from your phone to this device --></div>
+                <div class="info-subtitle">Frictionless sharing between devices</div>
+                <div data-mimoto-id="alertmessage" class="alertmessage"></div>
+
+                <div class="warning_security_compromised">
+                    <div class="warning_security_compromised_title">WARNING: Security compromised</div>
+                    <p>It appears a third device got connected to your session.</p>
+                    <p>Just to be sure we shut down it down.</p>
+                    <p>Your data is safe!</p>
+                    <br>
+                    <p>To start a new session, <a href="/">reload</a> this page!</p>
+                </div>
             </div>
 
-            <div id="interface-receiver" class="interface-receiver">
+            <div data-mimoto-id="interface-receiver" class="interface-receiver">
 
                 <!-- QR code -->
 
@@ -608,7 +675,7 @@
             </div>
 
 
-            <div id="interface-sender" class="interface-sender">
+            <div data-mimoto-id="interface-sender" class="interface-sender">
                 <div class="sender_input">
                     <div id="sender_menu" class="sender_menu">
                         <div data-type="password" class="sender_menu_tab selected">Password</div>

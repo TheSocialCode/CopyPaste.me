@@ -47,7 +47,7 @@ module.exports.prototype = {
         this._data.sToken = sToken;
 
         // 2. register
-        this._elSenderInterface = document.getElementById('interface-sender');
+        this._elSenderInterface = document.querySelector('[data-mimoto-id="interface-sender"]');
         this._elInputPassword = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_password"]');
         this._elInputURL = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_url"]');
         this._elInputText = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_text"]');
@@ -65,10 +65,9 @@ module.exports.prototype = {
             // a. configure
             this._socket.on('token_not_found', this._onTokenNotFound.bind(this));
             this._socket.on('token_connected', this._onTokenConnected.bind(this));
+            this._socket.on('token_reconnected', this._onTokenReconnected.bind(this));
             this._socket.on('receiver_disconnected', this._onReceiverDisconnected.bind(this));
-
-            // b. connect
-            this._socket.emit('connect_token', this._data.sToken);
+            this._socket.on('receiver_reconnected', this._onReceiverReconnected.bind(this));
 
             // c. show
             this._elSenderInterface.style.display = 'inline-block'; // #todo add class ipv style
@@ -79,9 +78,36 @@ module.exports.prototype = {
         }
     },
 
+
+
+    // ----------------------------------------------------------------------------
+    // --- Public methods ---------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    connect: function()
+    {
+        // 1. connect
+        this._socket.emit('sender_connect_to_token', this._data.sToken);
+    },
+
+    reconnect: function()
+    {
+        console.log('Sender: reconnect ' + this._sToken);
+    },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Event ------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
     _onTokenNotFound: function()
     {
         console.log('Sender: Token not found');
+
+        this._showAlertMessage('The link you are trying to use is not working. Please try again.', true);
     },
 
     _onTokenConnected: function()
@@ -89,14 +115,28 @@ module.exports.prototype = {
         console.log('Sender: Token connected');
     },
 
+    _onTokenReconnected: function()
+    {
+        console.log('Sender: Token reconnected');
+    },
+
     _onReceiverDisconnected: function()
     {
-        console.log('Receiver disconnected');
+        console.log('Receiver was disconnected - show message for new QR - Connect new device');
+        this._showAlertMessage('The other device is not connected. Is it still online?', true);
+    },
+
+    _onReceiverReconnected: function()
+    {
+        console.log('Receiver was reconnected');
+        this._hideAlertMessage();
     },
 
 
 
-    // --------
+    // ----------------------------------------------------------------------------
+    // --- Private methods --------------------------------------------------------
+    // ----------------------------------------------------------------------------
 
 
     _setupInput: function()
@@ -399,6 +439,30 @@ module.exports.prototype = {
             this._elButtonSend.classList.add('disabled');
             this._bValidated = false;
         }
+    },
+
+
+    _showAlertMessage(sMessage, bDisableInterface)
+    {
+        // 1. register
+        let elAlertMessage = document.querySelector('[data-mimoto-id="alertmessage"]');
+
+        // 2. show
+        elAlertMessage.style.display = 'inline-block';
+
+        // 3. output
+        elAlertMessage.innerHTML = sMessage;
+
+        // 4. hide
+        if (bDisableInterface) document.querySelector('[data-mimoto-id="interface-sender"]').style.display = 'none';
+    },
+
+    _hideAlertMessage()
+    {
+        let elAlertMessage = document.querySelector('[data-mimoto-id="alertmessage"]');
+
+        // 2. show
+        elAlertMessage.style.display = 'none';
     }
 
 };

@@ -46,22 +46,27 @@ module.exports.prototype = {
         this._socket.on('reconnect', this._socketOnReconnect.bind(this));
         this._socket.on('connect_failed', this._socketConnectFailed.bind(this));
         this._socket.on('disconnect', this._socketOnDisconnect.bind(this));
+        this._socket.on('security_compromised', this._onSecurityCompromised.bind(this));
 
         // 3. register
         let sToken = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
 
         // 4. init
-        this._client = (!sToken || sToken.length === 0) ? new Receiver(this._socket, sToken) : new Sender(this._socket, sToken);
+        this._client = (!sToken || sToken.length === 0) ? new Receiver(this._socket) : new Sender(this._socket, sToken);
     },
 
     _socketOnConnect: function ()
     {
-        if (!this._sToken) this._socket.emit('request_token');
+        console.warn('Connect!!');
+
+        this._client.connect();
     },
 
     _socketOnReconnect: function ()
     {
         console.warn('Reconnect!!');
+
+        this._client.reconnect();
     },
 
     _socketConnectFailed: function()
@@ -72,6 +77,20 @@ module.exports.prototype = {
     _socketOnDisconnect: function()
     {
         if (console) console.warn('Connection with server was lost .. reconnecting ..');
+    },
+
+    _onSecurityCompromised: function()
+    {
+        // 1. clear
+        delete this._socket;
+
+        // 2. disable interface
+        document.querySelector('[data-mimoto-id="interface-receiver"]').remove();
+        document.querySelector('[data-mimoto-id="interface-sender"]').remove();
+
+        // 2. show warning
+        document.body.classList.add('security_compromised');
+
     }
 
 };
