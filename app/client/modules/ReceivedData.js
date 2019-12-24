@@ -316,7 +316,6 @@ module.exports.prototype = {
 
             case 'url':
 
-                console.log('url', this._data.value);
                 window.open(this._data.value, '_blank');
                 break;
 

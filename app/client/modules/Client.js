@@ -57,26 +57,22 @@ module.exports.prototype = {
 
     _socketOnConnect: function ()
     {
-        console.warn('Connect!!');
-
         this._client.connect();
     },
 
     _socketOnReconnect: function ()
     {
-        console.warn('Reconnect!!');
-
         this._client.reconnect();
     },
 
     _socketConnectFailed: function()
     {
-        if (console) console.log('You are logged off .. trying to connect ...');
+        //if (console) console.log('You are logged off .. trying to connect ...');
     },
 
     _socketOnDisconnect: function()
     {
-        if (console) console.warn('Connection with server was lost .. reconnecting ..');
+        //if (console) console.warn('Connection with server was lost .. reconnecting ..');
     },
 
     _onSecurityCompromised: function()

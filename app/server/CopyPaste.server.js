@@ -29,7 +29,7 @@ module.exports = {
     // utils
     _timerGarbageCollection: null,
     _aPairsMarkedForRemoval: [],
-    _nGarbageMaxAge: 1 * 60 * 1000,
+    _nGarbageMaxAge: 3 * 60 * 1000,
 
 
     // ----------------------------------------------------------------------------
@@ -64,8 +64,6 @@ module.exports = {
     {
         // 1. verify
         if (this._aSockets['' + socket.id]) { console.log('Existing user reconnected (p.s. This should not be happening!)'); return; }
-
-        console.log('New user connected', socket.id);
 
         // 2. build
         let socketData = {
@@ -105,25 +103,12 @@ module.exports = {
         // 5. update
         this._aSockets['' + receiverSocket.id].sToken = sToken;
 
-        console.log('');
-        console.log('Sockets');
-        console.log('=====================================================');
-        console.log(this._aSockets);
-        console.log('');
-        console.log('Pairs');
-        console.log('-----------------------------------------------------');
-        console.log(this._aPairs);
-        console.log('');
-        console.log('');
-
         // 6. broadcast
         receiverSocket.emit('token', sToken);
     },
 
     _onReceiverReconnectToToken: function(receiverSocket, sToken)
     {
-        console.log('Receiver reconnect to ', sToken);
-
         // 1. validate
         if (!this._aPairs['' + sToken])
         {
@@ -159,7 +144,7 @@ module.exports = {
         receiverSocket.emit('token_reconnected');
 
         // 7. save from garbage collection
-        if (this._aPairsMarkedForRemoval['' + sToken]) delete this._aPairsMarkedForRemoval['' + sToken];
+        this._saveFromRemoval(sToken);
 
         // 8. broadcast
         if (pair.sender) pair.sender.emit('receiver_reconnected')
@@ -205,7 +190,7 @@ module.exports = {
         senderSocket.emit((bReconnect) ? 'token_reconnected' : 'token_connected');
 
         // 7. save from garbage collection
-        if (this._aPairsMarkedForRemoval['' + sToken]) delete this._aPairsMarkedForRemoval['' + sToken];
+        this._saveFromRemoval(sToken);
 
         // 8. broadcast
         if (pair.receiver) pair.receiver.emit((bReconnect) ? 'sender_reconnected' : 'sender_connected');
@@ -213,9 +198,6 @@ module.exports = {
 
     _onUserDisconnect: function(socket)
     {
-        console.log('User disconnected ...', socket.id);
-
-
         // 1. validate
         if (!this._aSockets['' + socket.id]) return;
 
@@ -228,56 +210,38 @@ module.exports = {
         // 4. validate
         if (!sToken) return;
 
-
-
-
-        // cleanup connected pair
-
-        // cleanup
+        // 5. cleanup
         delete this._aSockets['' + socket.id];
 
-
-        console.log('this._aSockets.length = ' + this._aSockets.length);
-
-
-
-        // 4. load
+        // 6. load
         let pair = this._aPairs['' + sToken];
 
-
+        // 7. validate
         if (pair.receiver && pair.receiver.id === socket.id)
         {
-            console.log('Receiver of pair has been disconnected');
-
-            // cleanup
+            // a. cleanup
             pair.receiver = null;
 
-            // mark
+            // b. mark
             this._markForRemoval(sToken);
 
+            // c. broadcast
             if (pair.sender) pair.sender.emit('receiver_disconnected');
         }
 
+        // 8. validate
         if (pair.sender && pair.sender.id === socket.id)
         {
-            console.log('Sender of pair has been diconnected');
-
-            // cleanup
+            // a. cleanup
             pair.sender = null;
 
-            // mark
+            // b. mark
             this._markForRemoval(sToken);
 
+            // c. broadcast
             if (pair.receiver) pair.receiver.emit('sender_disconnected');
         }
-
-
-        // cleanup if both removed
-        // array: aUnusedTokens -> timestamp
-
     },
-
-
 
     _onData: function(data)
     {
@@ -290,36 +254,35 @@ module.exports = {
 
     _broadcastSecurityWarning: function(requestingSocket, pair, sToken)
     {
-        // a. broadcast breach to current user
+        // 1. broadcast breach to current user
         requestingSocket.emit('security_compromised');
 
-        // b. cleanup
+        // 2. cleanup
         delete this._aSockets['' + requestingSocket.id];
 
-        // c. verify
+        // 3. verify
         if (pair.receiver)
         {
-            // I. broadcast
+            // a. broadcast
             pair.receiver.emit('security_compromised');
 
-            // II. cleanup
+            // b. cleanup
             delete this._aSockets['' + pair.receiver.id];
         }
 
-        // d. verify
+        // 4. verify
         if (pair.sender)
         {
-            // I. broadcast
+            // a. broadcast
             pair.sender.emit('security_compromised');
 
-            // II. cleanup
+            // b. cleanup
             delete this._aSockets['' + pair.sender.id];
         }
 
-        // e. clear
+        // 5. clear
         delete this._aPairs['' + sToken];
     },
-
 
     _markForRemoval: function(sToken)
     {
@@ -327,79 +290,59 @@ module.exports = {
         if (this._aPairsMarkedForRemoval['' + sToken]) return;
 
         // 2. store
-        this._aPairsMarkedForRemoval.push({
+        this._aPairsMarkedForRemoval['' + sToken] = {
             sToken: sToken,
             nMomentItGotMarked: new Date().getTime()
-        });
+        };
+    },
+
+    _saveFromRemoval: function(sToken)
+    {
+        // 1. verify
+        if (!this._aPairs['' + sToken]) return;
+
+        // 2. load
+        let pair = this._aPairs['' + sToken];
+
+        // 3. validate
+        if (pair.receiver && pair.sender)
+        {
+            if (this._aPairsMarkedForRemoval['' + sToken]) delete this._aPairsMarkedForRemoval['' + sToken];
+        }
     },
 
     _collectGarbage: function()
     {
-
-        // send remaining connection message about end of session
-        // senderTimeout
-        // receiverTimeout
-        // if both connected or reconnected -> end of markedAsGarbage
-
-
-
-
-
-        // read
-        let nItemCount = this._aPairsMarkedForRemoval.length;
-
-
-
-        console.log('Garbage', nItemCount, this._aPairsMarkedForRemoval);
-
-        // verify
-        if (nItemCount > 0)
+        // 1. verify all garbage items
+        for (let sKey in this._aPairsMarkedForRemoval)
         {
-            // verify all garbage items
-            for (let nItemIndex = 0; nItemIndex < nItemCount; nItemIndex++)
+            // a. register
+            let itemInGarbage = this._aPairsMarkedForRemoval[sKey];
+
+            // I. check expiration
+            if (new Date().getTime() - itemInGarbage.nMomentItGotMarked > this._nGarbageMaxAge)
             {
-                // register
-                let itemInGarbage = this._aPairsMarkedForRemoval[nItemIndex];
+                // 1. validate [ possibly not necessary ] todo
+                if (!this._aPairs['' + itemInGarbage.sToken]) continue;
 
-                if (new Date().getTime() - itemInGarbage.nMomentItGotMarked > this._nGarbageMaxAge)
+                // 2. register
+                let pair = this._aPairs['' + itemInGarbage.sToken];
+
+                // 3. check if pair is obsolete
+                if (!pair.sender && !pair.receiver)
                 {
-                    console.log('Remove from garbage maybe?');
+                    // a. remove
+                    delete this._aPairs['' + itemInGarbage.sToken];
 
-                    // 1. validate [ possibly not necessary ] todo
-                    if (!this._aPairs['' + itemInGarbage.sToken]) continue;
-
-                    let pair = this._aPairs['' + itemInGarbage.sToken];
-
-                    // pair is obsolete
-                    if (!pair.sender && !pair.receiver)
-                    {
-                        console.log('Yeah, do it!');
-
-                        delete this._aPairs['' + itemInGarbage.sToken];
-
-                        // remove
-                        this._aPairsMarkedForRemoval.splice(nItemIndex, 1);
-
-                        // update
-                        nItemIndex--;
-                        nItemCount--;
-                    }
-
-                    // pair is perfectly fine
-                    if (pair.sender && pair.receiver)
-                    {
-                        // remove
-                        this._aPairsMarkedForRemoval.splice(nItemIndex, 1);
-
-                        // update
-                        nItemIndex--;
-                        nItemCount--;
-                    }
+                    // b. remove
+                    delete this._aPairsMarkedForRemoval[sKey];
                 }
+
+                // 4. check if pair is perfectly fine, and if so, remove from garbage
+                if (pair.sender && pair.receiver) delete this._aPairsMarkedForRemoval[sKey];
             }
         }
     }
-
 };
 
 // auto-start

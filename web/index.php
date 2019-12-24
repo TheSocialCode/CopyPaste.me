@@ -609,7 +609,7 @@
         }
 
     div.alertmessage {
-        margin: 25px 0 35px 0;
+        margin: 25px 0 25px 0;
         padding: 12px 16px 12px 16px;
         background-color: gold;
         color: #000000;

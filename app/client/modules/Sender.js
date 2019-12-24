@@ -87,13 +87,14 @@ module.exports.prototype = {
 
     connect: function()
     {
-        // 1. connect
+        // 1, broadcast
         this._socket.emit('sender_connect_to_token', this._data.sToken);
     },
 
     reconnect: function()
     {
-        console.log('Sender: reconnect ' + this._sToken);
+        // 1, broadcast
+        this._socket.emit('sender_reconnect_to_token', this._data.sToken);
     },
 
 
@@ -105,30 +106,26 @@ module.exports.prototype = {
 
     _onTokenNotFound: function()
     {
-        console.log('Sender: Token not found');
-
         this._showAlertMessage('The link you are trying to use is not working. Please try again.', true);
     },
 
     _onTokenConnected: function()
     {
-        console.log('Sender: Token connected');
+        //console.log('Sender: Token connected');
     },
 
     _onTokenReconnected: function()
     {
-        console.log('Sender: Token reconnected');
+        //console.log('Sender: Token reconnected');
     },
 
     _onReceiverDisconnected: function()
     {
-        console.log('Receiver was disconnected - show message for new QR - Connect new device');
-        this._showAlertMessage('The other device is not connected. Is it still online?', true);
+        this._showAlertMessage('The receiving device is not connected. Is it still online?', true);
     },
 
     _onReceiverReconnected: function()
     {
-        console.log('Receiver was reconnected');
         this._hideAlertMessage();
     },
 

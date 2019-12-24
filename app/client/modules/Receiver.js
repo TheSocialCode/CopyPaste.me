@@ -30,6 +30,7 @@ module.exports.prototype = {
     _qrcode: null,
 
 
+
     // ----------------------------------------------------------------------------
     // --- Constructor ------------------------------------------------------------
     // ----------------------------------------------------------------------------
@@ -108,30 +109,27 @@ module.exports.prototype = {
 
     _onSenderConnected: function()
     {
-        console.log('Sender was connected');
+        // 1. reset
+        this._hideAlertMessage();
 
-        // 1. toggle interface
+        // 2. toggle interface
         document.getElementById('QR-holder').style.display = 'none';
-        document.getElementById('waiting').style.display = 'block';
+        if (this._elDataContainer.children.length === 0) document.getElementById('waiting').style.display = 'block';
     },
 
     _onSenderDisconnected: function()
     {
-        console.log('Sender was disconnected');
         this._showAlertMessage("The other device has been disconnected.");
 
         // 1. toggle interface
-        document.getElementById('QR-holder').style.display = 'inline-block'; // #todo - move to classes
         document.getElementById('waiting').style.display = 'none';
     },
 
     _onSenderReconnected: function()
     {
-        console.log('Sender was reconnected');
         this._hideAlertMessage();
 
         // 1. toggle interface
-
         document.getElementById('QR-holder').style.display = 'none';
         if (this._elDataContainer.children.length > 0)
         {
