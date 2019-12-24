@@ -346,30 +346,32 @@ module.exports.prototype = {
 
                 break;
         }
-
-
-
-        //
-        //
-        // // register
-        // let elTooltip = document.getElementById('tooltip');
-        //
-        // elTooltip.classList.remove('tooltip-fade');
-        // elTooltip.style.display = 'inline-block';
-        // //elTooltip.style.opacity = 0.5;
-        //
-        // elTooltip.classList.add('tooltip-fade');
     },
 
     _copyToClipboard: function(sValue)
     {
         // copy to clipboard
         const el = document.createElement('textarea');
-        el.value = sValue; //document.getElementById('received_data_label_data').getAttribute('data-data');
+        el.value = sValue;
         document.body.appendChild(el);
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
+
+
+        // ---
+
+
+        // 1. prepare
+        this._elData.classList.add('clear');
+
+        // 3. time clearing of animation
+        let timerCover = setTimeout(function()
+        {
+            // a. cleanup
+            this._elData.classList.remove('clear');
+
+        }.bind(this), 1200);
     }
 
 };

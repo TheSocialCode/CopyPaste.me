@@ -243,6 +243,9 @@
         background-color: #f5f5f5;
         border-radius: 5px;
         width: 100%;
+
+        flex: auto;
+        position: relative;
     }
 
     div.receiver_data_label_data {
@@ -795,9 +798,14 @@
                         <div data-mimoto-id="placeholder" class="receiver_data_placeholder"></div>
                     </div>
                     <div data-mimoto-id="content" class="receiver_data_content_container">
+                        <div class="sender_data_label_data_cover">
+                            <div class="sender_data_label_cover_internal"></div>
+                            <div class="sender_data_label_cover_label">Copied to clipboard!</div>
+                        </div>
                         <div class="receiver_data_content">
                             <div class="receiver_data_label">
-                                <div data-mimoto-id="receiver_data_label_data" class="receiver_data_label_data" data-data=""></div>
+
+                                <div data-mimoto-id="receiver_data_label_data" class="receiver_data_label_data"></div>
                             </div>
                             <div class="receiver_data_menu">
                                 <div data-mimoto-id="receiver_data_button" class="button">Copy&nbsp;to&nbsp;clipboard</div>
@@ -808,18 +816,6 @@
                             <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
                             clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
                         </div>
-                    </div>
-                </div>
-
-
-                <!-- template: tooltip -->
-
-                <div id="tooltip" class="tooltip">
-                    <div class="tooltip-label">Copied&nbsp;to&nbsp;clipboard!</div>
-                    <div class="tooltip-pointer">
-                        <svg width="14" height="10">
-                            <polygon points="0,0 14,0 7,10 0,0" style="fill:#000000;"></polygon>
-                        </svg>
                     </div>
                 </div>
 
