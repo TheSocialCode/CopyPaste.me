@@ -694,8 +694,8 @@
 
                 <div class="warning_security_compromised">
                     <div class="warning_security_compromised_title">WARNING: Security compromised</div>
-                    <p>It appears a third device got connected to your session.</p>
-                    <p>Just to be sure we shut down it down.</p>
+                    <p>It appears a third device tried to connect to your session.</p>
+                    <p>Just to be sure, we shut it down.</p>
                     <p>Your data is safe!</p>
                     <br>
                     <p>To start a new session, <a href="/">reload</a> this page!</p>
