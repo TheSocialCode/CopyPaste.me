@@ -114,6 +114,7 @@
         border-radius: 3px;
         cursor: pointer;
         white-space: nowrap;
+        user-select: none;
     }
 
     div.button.disabled {
@@ -274,6 +275,7 @@
         color: #999999;
         font-style: italic;
         text-align: left;
+        user-select: none;
     }
 
     span.receiver_data_option {
@@ -328,6 +330,7 @@
         color: #999999;
         cursor: pointer;
         box-shadow: inset 0 -6px 6px -6px #858585;
+        user-select: none;
     }
 
     div.sender_menu_tab:hover {
