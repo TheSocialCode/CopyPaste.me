@@ -91,14 +91,18 @@ module.exports.prototype = {
 
     connect: function()
     {
+        console.log('CHECK - sender_connect_to_token');
+
         // 1, broadcast
         this._socket.emit('sender_connect_to_token', this._data.sToken);
     },
 
     reconnect: function()
     {
+        //console.log('CHECK - sender_REconnect_to_token');
+
         // 1, broadcast
-        this._socket.emit('sender_reconnect_to_token', this._data.sToken);
+        //this._socket.emit('sender_reconnect_to_token', this._data.sToken);
     },
 
 

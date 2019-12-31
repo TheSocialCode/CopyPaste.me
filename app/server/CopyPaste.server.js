@@ -17,6 +17,13 @@ const Module_GenerateUniqueID = require('generate-unique-id');
 
 module.exports = {
 
+    // sonfig
+    _config: {
+        mode: 'prod',   // options: "prod" (no output)  | "dev" (output debugging comments)
+        https: true,    // options: 'true' (runs on https)  | 'false' (runs on http)
+    },
+
+
     // services
     _app: null,
     _http: null,
@@ -41,30 +48,71 @@ module.exports = {
     /**
      * Constructor
      */
-    __construct: function (sGateway)
+    __construct: function(config)
     {
-        // 1. init
+        // 1. store
+        if (config.mode && config.mode === 'prod' || config.mode === 'dev') this._config.mode = config.mode;
+        if (config.https === true || config.https === false) this._config.https = config.https;
+
+        // 2. init
         this._app = Module_Express();
         this._http = Module_HTTP.createServer(this.app);
         this._io = Module_SocketIO(this._http);
 
-        // 2. configure
+        // 3. configure
         this._io.on('connection', this._onUserConnect.bind(this));
 
-        // 3. listen
-        this._http.listen(3000, function(){
-            console.log('listening on *:3000');
-        });
+        // 4. listen
+        this._http.listen(3000, function()
+        {
+            // a. cleanup
+            console.clear();
 
-        // 4. setup
-        this._timerGarbageCollection = setInterval(this._collectGarbage.bind(this), 2000);
+            // b. prepare
+            let aLines = ['', 'CopyPaste.me', 'listening on *:3000 ' + JSON.stringify(this._config), ''];
+
+            // c. find max length
+            let nMaxLength = 0;
+            for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
+            {
+                // I. calculate
+                if (aLines[nLineIndex].length > nMaxLength) nMaxLength = aLines[nLineIndex].length;
+            }
+
+            // d. build and output lines
+            for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
+            {
+                // I. build
+                if (aLines[nLineIndex].length === 0)
+                {
+                    while(aLines[nLineIndex].length < nMaxLength) aLines[nLineIndex] += '-';
+                    aLines[nLineIndex] = '----' + aLines[nLineIndex] + '----';
+                }
+                else
+                {
+                    while(aLines[nLineIndex].length < nMaxLength) aLines[nLineIndex] += ' ';
+                    aLines[nLineIndex] = '--- ' + aLines[nLineIndex] + ' ---';
+                }
+
+                // III. output
+                console.log(aLines[nLineIndex]);
+            }
+
+            // e. output extra line
+            console.log();
+
+        }.bind(this));
+
+        // 5. setup
+        // x. disable
+        //this._timerGarbageCollection = setInterval(this._collectGarbage.bind(this), 2000);
 
     },
 
     _onUserConnect: function(socket)
     {
         // 1. verify
-        if (this._aSockets['' + socket.id]) { console.log('Existing user reconnected (p.s. This should not be happening!)'); return; }
+        if (this._aSockets['' + socket.id]) { this._log('Existing user reconnected (p.s. This should not be happening!)'); return; }
 
         // 2. build
         let socketData = {
@@ -82,6 +130,9 @@ module.exports = {
         socket.on('sender_connect_to_token', this._onSenderConnectToToken.bind(this, socket, false));
         socket.on('sender_reconnect_to_token', this._onSenderConnectToToken.bind(this, socket, true));
         socket.on('data', this._onData.bind(this));
+
+        // 5. debug
+        this._log('New user connected - ' + socket.id);
     },
 
     _onReceiverRequestToken: function(receiverSocket)
@@ -89,34 +140,46 @@ module.exports = {
         // 1. create
         let sToken = Module_GenerateUniqueID({ length: 32 });
 
-        // 2. verify
+        // 2. output
+        this._log('Socket.id = ' + receiverSocket.id + ' requests token = ' + sToken);
+
+        // 3. verify
         if (this._aPairs['' + sToken] || !this._aSockets['' + receiverSocket.id]) return;
 
-        // 3. build
+        // 4. build
         let pair = {
             receiver: receiverSocket,
             sender: null
         };
 
-        // 4. store
+        // 5. store
         this._aPairs['' + sToken] = pair;
 
-        // 5. update
+        // 6. update
         this._aSockets['' + receiverSocket.id].sToken = sToken;
 
-        // 6. broadcast
+        // 7. broadcast
         receiverSocket.emit('token', sToken);
+
+        // 8. output
+        this._logUsers('After `_onReceiverRequestToken` by socket.id = ' + receiverSocket.id);
     },
 
     _onReceiverReconnectToToken: function(receiverSocket, sToken)
     {
-        // 1. validate
+        // 1. output
+        this._log('Receiver wants to reconnect to token ' + sToken);
+
+        // 2. validate
         if (!this._aPairs['' + sToken])
         {
-            // a. broadcast
+            // a. output
+            this._log('Token = ' + sToken + ' not found for reconnecting receiver');
+
+            // b. broadcast
             receiverSocket.emit('token_not_found');
 
-            // b. exit
+            // c. exit
             return;
         }
 
@@ -124,12 +187,16 @@ module.exports = {
         // ---
 
 
-        // 2. load
+        // 3. load
         let pair = this._aPairs['' + sToken];
 
-        // 3. validate
+        // 4. validate
         if (pair.receiver)
         {
+            // 1. output
+            this._log('Pair already has a `receiver` connected. sToken = ' + sToken);
+
+            // 2. warn
             this._broadcastSecurityWarning(receiverSocket, pair, sToken);
             return;
         }
@@ -138,7 +205,7 @@ module.exports = {
         // ---
 
 
-        // 4. store
+        // 5. store
         this._aPairs['' + sToken].receiver = receiverSocket;
 
         // 6. broadcast
@@ -148,11 +215,17 @@ module.exports = {
         this._saveFromRemoval(sToken);
 
         // 8. broadcast
-        if (pair.sender) pair.sender.emit('receiver_reconnected')
+        if (pair.sender) pair.sender.emit('receiver_reconnected');
+
+        // 9. output
+        this._logUsers('After `_onReceiverRequestToken` by socket.id = ' + receiverSocket.id);
     },
 
     _onSenderConnectToToken: function(senderSocket, bReconnect, sToken)
     {
+        // 0. output
+        this._log('Sender wants to reconnect to token ' + sToken);
+
         // 1. validate
         if (!this._aPairs['' + sToken])
         {
@@ -173,6 +246,10 @@ module.exports = {
         // 3. validate
         if (pair.sender)
         {
+            // 1. output
+            this._log('Pair already has a sender connected. sToken = ' + sToken);
+
+            // 2. warn
             this._broadcastSecurityWarning(senderSocket, pair, sToken);
             return;
         }
@@ -199,6 +276,9 @@ module.exports = {
 
     _onUserDisconnect: function(socket)
     {
+        // 0. output
+        this._log('Socket.id = ' + socket.id + ' has disconnected');
+
         // 1. validate
         if (!this._aSockets['' + socket.id]) return;
 
@@ -287,6 +367,10 @@ module.exports = {
 
     _markForRemoval: function(sToken)
     {
+        // x. disable
+        return;
+
+
         // 1. skip if already marked
         if (this._aPairsMarkedForRemoval['' + sToken]) return;
 
@@ -299,6 +383,10 @@ module.exports = {
 
     _saveFromRemoval: function(sToken)
     {
+        // x. disable
+        return;
+
+
         // 1. verify
         if (!this._aPairs['' + sToken]) return;
 
@@ -314,6 +402,10 @@ module.exports = {
 
     _collectGarbage: function()
     {
+        // x. disable
+        return;
+
+
         // 1. verify all garbage items
         for (let sKey in this._aPairsMarkedForRemoval)
         {
@@ -343,8 +435,50 @@ module.exports = {
                 if (pair.sender && pair.receiver) delete this._aPairsMarkedForRemoval[sKey];
             }
         }
+    },
+
+    _log: function()
+    {
+        // 1. output when in dev mode
+        if (this._config.mode === 'dev') if (console) console.log.apply(this, arguments);
+    },
+
+    _logUsers: function(sTitle)
+    {
+        // 1. verify
+        if (this._config.mode !== 'dev') return;
+
+        // 2. output
+        console.log('');
+        console.log('Users: ' + sTitle);
+        console.log('Sockets');
+        console.log('=========================');
+        console.log(this._aSockets);
+        console.log('');
+        console.log('Pairs');
+        console.log('-------------------------');
+        console.log(this._aPairs);
+        console.log('');
+        console.log('');
     }
+
 };
 
+// init
+this.Mimoto = {};
+this.Mimoto.config = {};
+
+// read
+process.argv.forEach((value, index) => {
+    if (value.substr(0, 5) === 'mode=')
+    {
+        this.Mimoto.config.mode = (value.substr(5) === 'dev') ? 'dev' : 'prod';
+    }
+    if (value.substr(0, 6) === 'https=')
+    {
+        this.Mimoto.config.https = (value.substr(6) === 'false') ? false : true;
+    }
+});
+
 // auto-start
-module.exports.__construct();
+module.exports.__construct(this.Mimoto.config);
