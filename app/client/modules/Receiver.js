@@ -26,6 +26,8 @@ module.exports.prototype = {
     _sToken: '',
     _elDataContainer: null,
     _elWaiting: null,
+    _elClearClipboard: null,
+    _elClearClipboardButton: null,
     _aReceivedData: [],
     _qrcode: null,
 
@@ -47,6 +49,8 @@ module.exports.prototype = {
         // register
         this._elDataContainer = document.getElementById('receiver_data_container');
         this._elWaiting = document.getElementById('waiting');
+        this._elClearClipboard = document.querySelector('receiver_clipboard_clear');
+        this._elClearClipboardButton = document.querySelector('receiver_clipboard_clear_button');
 
         // configure
         this._socket.on('token', this._setupToken.bind(this));
@@ -58,7 +62,7 @@ module.exports.prototype = {
 
         this._socket.on('connect_error', function(err) {
             // handle server error here
-            console.log('Error connecting to server');
+            if (console) console.log('Error connecting to server');//, err);
         });
 
         // show
@@ -74,13 +78,15 @@ module.exports.prototype = {
 
     connect: function()
     {
+        //console.log('Receiver: request token');
+
         // 1. request
         this._socket.emit('receiver_request_token');
     },
 
     reconnect: function()
     {
-        console.log('Receiver: reconnect ' + this._sToken);
+        //console.log('Receiver: reconnect ' + this._sToken);
 
         // 1. request
         this._socket.emit('receiver_reconnect_to_token', this._sToken);

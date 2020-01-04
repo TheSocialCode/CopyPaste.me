@@ -788,6 +788,10 @@
                 </div>
             </div>
 
+<!--            <div data-mimoto-id="receiver_clipboard_clear">-->
+<!--                Don't forget to clear your clipboard after you copied sensitive data to it.-->
+<!--                <div data-mimoto-id="receiver_clipboard_clear_button" class="button">Clear now!</div>-->
+<!--            </div>-->
 
             <!-- General -->
 

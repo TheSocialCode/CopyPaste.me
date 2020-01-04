@@ -1,0 +1,6 @@
+{
+    "ssl": {
+        "key": "absolute path to your key file (.key)",
+        "certificate": "absolute path to your certificate file (.crt)"
+    }
+}

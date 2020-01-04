@@ -38,8 +38,10 @@ module.exports.prototype = {
      */
     __construct: function (sGateway)
     {
-        // 1. setup
-        this._socket = new SocketIO.connect(sGateway);
+        //console.warn('sGateway = ' + sGateway);
+
+        // 2. connect
+        this._socket = new SocketIO(sGateway, {secure: true }).connect();//, {secure: true, rejectUnauthorized: false });
 
         // 2. configure
         this._socket.on('connect', this._socketOnConnect.bind(this));
@@ -57,6 +59,8 @@ module.exports.prototype = {
 
     _socketOnConnect: function ()
     {
+        //console.log('Client: connected');
+
         this._client.connect();
     },
 
@@ -67,12 +71,12 @@ module.exports.prototype = {
 
     _socketConnectFailed: function()
     {
-        //if (console) console.log('You are logged off .. trying to connect ...');
+        if (console) console.log('You are logged off .. trying to connect ...');
     },
 
     _socketOnDisconnect: function()
     {
-        //if (console) console.warn('Connection with server was lost .. reconnecting ..');
+        if (console) console.warn('Connection with server was lost .. reconnecting ..');
     },
 
     _onSecurityCompromised: function()

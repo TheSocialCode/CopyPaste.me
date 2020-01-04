@@ -91,7 +91,7 @@ module.exports.prototype = {
 
     connect: function()
     {
-        console.log('CHECK - sender_connect_to_token');
+        //console.log('CHECK - sender_connect_to_token');
 
         // 1, broadcast
         this._socket.emit('sender_connect_to_token', this._data.sToken);

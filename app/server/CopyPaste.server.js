@@ -9,6 +9,8 @@
 
 // import
 const Module_HTTP = require('http');
+const Module_FS = require('fs');
+const Module_HTTPS = require('https');
 const Module_SocketIO = require('socket.io');
 const Module_Express = require('express');
 const Module_GenerateUniqueID = require('generate-unique-id');
@@ -26,7 +28,7 @@ module.exports = {
 
     // services
     _app: null,
-    _http: null,
+    _server: null,
     _io: null,
 
     // data
@@ -55,15 +57,37 @@ module.exports = {
         if (config.https === true || config.https === false) this._config.https = config.https;
 
         // 2. init
-        this._app = Module_Express();
-        this._http = Module_HTTP.createServer(this.app);
-        this._io = Module_SocketIO(this._http);
+        if (this._config.https)
+        {
+            // a. load
+            let jsonConfigFile = Module_FS.readFileSync('CopyPaste.config.json');
 
-        // 3. configure
+            // b. convert
+            let configFile = JSON.parse(jsonConfigFile);
+
+            // c. setup
+            this._server = new Module_HTTPS.createServer({
+                key: Module_FS.readFileSync(configFile.ssl.key.toString(), 'utf8'),
+                cert: Module_FS.readFileSync(configFile.ssl.certificate.toString(), 'utf8')
+            });
+        }
+        else
+        {
+            // a. init
+            this._app = Module_Express();
+
+            // b. setup
+            this._server = new Module_HTTP.createServer(this.app);
+        }
+
+        // 3. setup
+        this._io = Module_SocketIO(this._server);
+
+        // 4. configure
         this._io.on('connection', this._onUserConnect.bind(this));
 
-        // 4. listen
-        this._http.listen(3000, function()
+        // 5. listen
+        this._server.listen(3000, function()
         {
             // a. cleanup
             console.clear();
