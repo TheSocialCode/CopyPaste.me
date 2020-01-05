@@ -9,7 +9,7 @@ div.interface-receiver {
     display: none;
     width: 100%;
     max-width: 600px;
-    padding: 0 20px 0 20px;
+    padding: 0 10px 0 10px;
 }
 
 div.receiver_data_container {
@@ -52,8 +52,6 @@ div.receiver_data_content_container.show {
 
 div.receiver_data_content {
     display:flex;
-
-    min-width: 400px;
     margin-left: auto;
     margin-right: auto;
     max-width: 600px;
