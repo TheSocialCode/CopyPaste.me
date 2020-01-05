@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
     <title>CopyPaste.me - Frictionless sharing between devices</title>
+
+    <meta name="description" content="Easily and quickly share passwords and other data between nearby devices.">
+    <meta name="keywords" content="sharing, frictionless, passwords, tool, free">
+    <meta property="og:title" content="Frictionless sharing" />
+    <meta property="og:url" content="<?php echo $_SERVER['SERVER_PROTOCOL'].$_SERVER['HTTP_HOST'] ?>" />
+    <meta property="og:description" content="Easily and quickly share passwords and other data between nearby devices.">
+    <meta property="og:image" content="<? $_SERVER['SERVER_PROTOCOL'].$_SERVER['HTTP_HOST'] ?>/static/images/copypaste-preview.png">
+
 </head>
 <style data-mimoto-id="css-startup">
 
