@@ -147,12 +147,6 @@ module.exports.prototype = {
 
             case 'document':
 
-                console.warn('Image', this._data);
-                console.warn('Image', this._b64toBlob(this._data.value.base64));
-
-
-
-
                 this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value.fileName;
                 this._elButton.innerText = 'Download';
                 break;
