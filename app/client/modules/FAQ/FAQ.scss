@@ -1,0 +1,42 @@
+
+div.interface-faq {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 600px;
+    text-align: center;
+    margin-bottom: 70px;
+    line-height: 24px;
+    padding: 0 10px 0 10px;
+}
+
+h1.faq_title {
+    font-size: x-large;
+    font-weight: bold;
+    color: $textcolor-light;
+    margin-bottom: 35px;
+}
+
+h2.faq_question {
+    font-size: large;
+    font-weight: bold;
+    color: $textcolor-dark;
+}
+
+
+p.faq_answer {
+
+    font-size: medium;
+    color: $textcolor-light;
+    margin-bottom: 35px;
+
+    & a {
+        color: $textcolor-light;
+        text-decoration: underline;
+    }
+
+    & a:hover {
+        color: $textcolor-dark;
+        text-decoration: none;
+    }
+}

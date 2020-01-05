@@ -14,12 +14,13 @@ import './CopyPaste.client.scss';
 const Client = require('./modules/Client');
 
 
-
-
 // connect
 document.addEventListener('DOMContentLoaded', function () {
 
-    // startup
+    // 1. verify
+    if (window.location.pathname.toLowerCase() === '/faq') return;
+
+    // 2. startup
     this.client = new Client(window.location.protocol + '//' + window.location.hostname +  ':3000');
 
 }, true);
