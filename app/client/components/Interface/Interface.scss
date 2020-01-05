@@ -6,7 +6,8 @@ html, body {
 }
 
 body {
-    font-family: "Calibri", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    //font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: $support-color-light;
@@ -31,8 +32,12 @@ div.main-interface-footer {
     padding: 10px 0 10px 0;
     flex-shrink: 0;
     font-size: smaller;
-    background-color: #74828F; //#C25B56;//$background-light;
+    background-color: $background-footer;
     box-shadow: inset 0 6px 6px -6px #24323F;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
 }
 
 div.main-interface-footer a {
