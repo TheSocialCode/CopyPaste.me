@@ -65,7 +65,7 @@
                 <p class="faq_answer">If you don't have a service like Airdrop or your devices aren't all connected to the same iCloud account, sharing data between devices can be a hassle. Most of the time you left with painstakingly typing in your password character by character while reading it from you phone. And having to at least start over  three to five times because of a typo. Even more when your add the stress of colleagues or friends looking over your shoulder.</p>
 
                 <h2 class="faq_question">So how does it work?</h2>
-                <p class="faq_answer">Your `receiving` device shows a QR code. By scanning this code with, for instance, your phone, Voila: a realtime connection is set up and you are ready for sharing (for people with technical knowledge: I'm connecting the two devices using socket.io). When you send your data, it's immediately forwarded to the receiving device without storing it on the server. Therfor there will be not traces of logs of what you share.</p>
+                <p class="faq_answer">Your `receiving` device shows a QR code. By scanning this code with, for instance, your phone, Voila: a realtime connection is set up and you are ready for sharing (for people with technical knowledge: I'm connecting the two devices using socket.io). When you send your data, it's immediately forwarded to the receiving device without storing it on the server. Therefore there will be not traces of logs of what you share.</p>
             </div>
 
 <?php break; default: ?>
