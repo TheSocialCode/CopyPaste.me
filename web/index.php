@@ -1,3 +1,12 @@
+<?php
+
+    // 1. prepare
+    $sProtocol = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') ? 'https://' : 'http://';
+
+    // 2. build
+    $sURL = $sProtocol.$_SERVER['HTTP_HOST'];
+    
+?>
 <!doctype html>
 <html>
 <head>
@@ -9,9 +18,9 @@
     <meta name="description" content="Easily and quickly share passwords and other data between nearby devices.">
     <meta name="keywords" content="sharing, frictionless, passwords, tool, free">
     <meta property="og:title" content="Frictionless sharing" />
-    <meta property="og:url" content="<?php echo $_SERVER['SERVER_PROTOCOL'].$_SERVER['HTTP_HOST'] ?>" />
+    <meta property="og:url" content="<?php echo $sURL ?>" />
     <meta property="og:description" content="Easily and quickly share passwords and other data between nearby devices.">
-    <meta property="og:image" content="<? $_SERVER['SERVER_PROTOCOL'].$_SERVER['HTTP_HOST'] ?>/static/images/copypaste-preview.png">
+    <meta property="og:image" content="<?php echo $sURL ?>/static/images/copypaste-preview.png">
 
 </head>
 <style data-mimoto-id="css-startup">
