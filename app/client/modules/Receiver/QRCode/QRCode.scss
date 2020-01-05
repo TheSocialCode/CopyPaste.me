@@ -1,0 +1,23 @@
+
+div.QR-holder {
+    display: inline-block;
+}
+div.QRCodePlaceHolder {
+    position: center;
+    border-radius: 5px;
+    background: $background-light;
+    padding: 15px 5px 5px 5px;
+
+    box-shadow: 1px 3px 10px $support-color-dark;
+    min-height: 210px;
+    width: 210px;
+}
+div.QRCodePlaceHolder-label {
+    text-align: center;
+    font-weight: bold;
+    font-size: large;
+}
+div.QRCodePlaceHolder-sublabel {
+    text-align: center;
+    font-size: smaller;
+}

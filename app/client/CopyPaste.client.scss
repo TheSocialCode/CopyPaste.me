@@ -1,0 +1,44 @@
+// colors
+$support-color-light: #6fa8dc;
+$support-color-dark: #1f588c;
+$textcolor-light: #ffffff;
+$textcolor-dark: #000000;
+$background-light: #ffffff;
+$background-lightgray: #e5e5e5;
+$background-lightergray: #f5f5f5;
+$background-dark: #000000;
+$background-alert: #E06666;
+
+
+
+$support-color-light: #96C0CE;
+$support-color-dark: #525564;
+$textcolor-light: #ffffff;
+$textcolor-dark: #525564;
+$background-light: #ffffff;
+$background-lightgray: #EEE6DB;
+$background-lightergray: #FEF6EB;
+$background-dark: #C25B56;
+$background-alert: #C25B56;
+
+//$support-color-light: #B7C68B;
+//$support-color-dark: #6E8243;
+//$textcolor-light: #FEF6EB;
+//$textcolor-dark: #525564;
+//$background-light: #ffffff;
+//$background-lightgray: #EEE6DB;
+//$background-lightergray: #FEF6EB;
+//$background-dark: #C25B56;
+
+
+
+
+// presets
+div {
+    box-sizing : border-box;
+}
+
+// imports
+@import 'components/Interface/Interface';
+@import 'components/Button/Button';
+@import 'modules/Client';

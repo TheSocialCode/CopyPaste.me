@@ -1,0 +1,36 @@
+
+div.warning_security_compromised {
+    color: $textcolor-light;
+    display: none;
+}
+
+.security_compromised div.warning_security_compromised {
+    display: block;
+}
+
+div.warning_security_compromised_title {
+    padding-top: 25px;
+    font-weight: bold;
+    font-size: larger;
+}
+
+div.warning_security_compromised a {
+    color: $textcolor-light;
+    font-weight: bold;
+}
+
+div.warning_security_compromised a:hover {
+    color: $textcolor-dark;
+}
+
+body.security_compromised {
+    background-color: $background-alert;
+}
+
+.security_compromised div.info-subtitle {
+    color: $textcolor-dark;
+}
+
+.security_compromised div.main-interface-footer a:hover {
+    color: $textcolor-dark;
+}

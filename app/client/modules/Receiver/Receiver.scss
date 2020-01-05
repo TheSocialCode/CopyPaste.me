@@ -1,0 +1,123 @@
+// imports
+@import 'QRCode/QRCode';
+
+
+/* --- receiver --- */
+
+
+div.interface-receiver {
+    display: none;
+    width: 100%;
+    max-width: 600px;
+    padding: 0 20px 0 20px;
+}
+
+div.receiver_data_container {
+    display: none;
+}
+
+
+div.receiver_data {
+    position: relative;
+}
+
+div.receiver_data_placeholder_container {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+div.receiver_data_placeholder {
+    position: relative;
+    border-radius: 5px;
+    height: 0;
+    margin-top: 0;
+    width: 100%;
+    transition: height 0.3s ease-in-out;
+}
+
+div.receiver_data_content_container {
+    position: relative;
+    background-color: $background-light;
+    border-radius: 5px;
+    margin-bottom: 10px;
+
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+div.receiver_data_content_container.show {
+    opacity: 1;
+}
+
+div.receiver_data_content {
+    display:flex;
+
+    min-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 600px;
+    text-align: center;
+}
+
+div.receiver_data_menu {
+    position: relative;
+    display: block;
+    flex: auto;
+    padding: 9px 9px 9px 9px;
+    text-align: right;
+    background-color: $background-lightergray;
+    border-radius: 5px;
+}
+
+div.receiver_data_label {
+    color: $support-color-dark;
+    text-align: left;
+    padding: 8px 0 8px 8px;
+    background-color: $background-lightergray;
+    border-radius: 5px;
+    width: 100%;
+
+    flex: auto;
+    position: relative;
+}
+
+div.receiver_data_label_data {
+    background-color: $background-light;
+    border-radius: 3px;
+    border: $background-lightgray 1px solid;
+    padding: 12px 20px 12px 15px;
+    width: 100%;
+    font-size: larger;
+    height: auto;
+    max-height: 200px;
+    overflow: scroll;
+}
+
+div.receiver_data_label_data img {
+    width: auto;
+    max-width: 100%;
+    max-height: 100px;
+}
+
+div.receiver_data_options {
+    padding: 0 20px 9px 15px;
+    border-radius: 5px;
+    font-size: smaller;
+    background-color: $background-lightergray;
+    color: #999999;
+    font-style: italic;
+    text-align: left;
+    user-select: none;
+}
+
+span.receiver_data_option {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+span.receiver_data_option:hover {
+    text-decoration: underline;
+    cursor: pointer;
+    color: $support-color-dark;
+}

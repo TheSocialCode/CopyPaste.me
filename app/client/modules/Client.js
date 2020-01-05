@@ -9,8 +9,8 @@
 
 // import
 const SocketIO = require('socket.io-client');
-const Receiver = require('./Receiver');
-const Sender = require('./Sender');
+const Receiver = require('./Receiver/Receiver');
+const Sender = require('./Sender/Sender');
 
 
 module.exports = function(sGateway)

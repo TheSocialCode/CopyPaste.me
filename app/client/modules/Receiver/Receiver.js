@@ -9,8 +9,8 @@
 
 // import
 const QRCodeGenerator = require('qrcode-generator');
-const ReceivedData = require('./ReceivedData');
-const QRCode = require('./QRCode');
+const ReceivedData = require('./ReceivedData/ReceivedData');
+const QRCode = require('./QRCode/QRCode');
 
 
 module.exports = function(socket)

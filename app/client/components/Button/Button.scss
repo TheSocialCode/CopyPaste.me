@@ -1,0 +1,29 @@
+
+div.button {
+    display: inline-block;
+    background-color: $support-color-dark;
+    color: $textcolor-light;
+    font-size: smaller;
+    padding: 8px 12px 10px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+}
+
+div.button.disabled {
+    background-color: $background-lightgray;
+    color: #999999;
+    cursor: default;
+}
+div.button.disabled:hover {
+    background-color: $background-lightgray;
+    color: #999999;
+    cursor: default;
+}
+
+
+div.button:hover {
+    display: inline-block;
+    background-color: $background-dark;
+}

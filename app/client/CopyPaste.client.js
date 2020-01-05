@@ -7,8 +7,13 @@
 'use strict';
 
 
+// import CSS
+import './CopyPaste.client.scss';
+
 // import
 const Client = require('./modules/Client');
+
+
 
 
 // connect
@@ -18,3 +23,6 @@ document.addEventListener('DOMContentLoaded', function () {
     this.client = new Client(window.location.protocol + '//' + window.location.hostname +  ':3000');
 
 }, true);
+
+// show interface
+document.querySelector('[data-mimoto-id="css-startup"]').remove();
