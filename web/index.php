@@ -70,6 +70,16 @@
                 <h2 class="faq_question">So just to be clear, my data is never stored?</h2>
                 <p class="faq_answer">Exactly! Your data is yours and yours alone and this tool is designed to work without the need to store your data. Which is good, because your data shouldn't be stored all over the internet just because you're using online tools.</p>
 
+                <h2 class="faq_question">How can I suggest an improvement or report a bug?</h2>
+                <p class="faq_answer">That's great! The tool gets better the more people contibute. Please mail me at <a href="mailto:sebastian@copypaste.me">sebastian@copypaste.me</a></p>
+
+                <p class="faq_answer">
+                    I hope you enjoy using it!<br>
+                    <br
+                    <strong>Sebastian Kersten</strong>
+                </p>
+
+
             </div>
 
 <?php break; default: ?>
