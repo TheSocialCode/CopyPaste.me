@@ -23,7 +23,6 @@ h2.faq_question {
     color: $textcolor-dark;
 }
 
-
 p.faq_answer {
 
     font-size: medium;
@@ -38,5 +37,15 @@ p.faq_answer {
     & a:hover {
         color: $textcolor-dark;
         text-decoration: none;
+    }
+}
+
+@media screen and (max-width: 450px) {
+    
+    h2.faq_question {
+        text-align: left;
+    }
+    p.faq_answer {
+        text-align: left;
     }
 }
