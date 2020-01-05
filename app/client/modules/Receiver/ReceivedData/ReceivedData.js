@@ -133,7 +133,7 @@ module.exports.prototype = {
 
             case 'image':
 
-
+                console.warn('Image', this._data.value.base64);
                 var elImage = document.createElement('img');
 
                 // loader -> get originalWidth or max width
