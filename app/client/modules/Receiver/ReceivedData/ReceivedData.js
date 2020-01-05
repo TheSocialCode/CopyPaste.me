@@ -148,6 +148,10 @@ module.exports.prototype = {
             case 'document':
 
                 console.warn('Image', this._data);
+                console.warn('Image', this._b64toBlob(this._data.value.base64));
+
+
+
 
                 this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value.fileName;
                 this._elButton.innerText = 'Download';
@@ -373,6 +377,33 @@ module.exports.prototype = {
             this._elData.classList.remove('clear');
 
         }.bind(this), 1200);
+    },
+
+
+
+
+    _b64toBlob: function(b64Data, contentType, sliceSize) {
+        contentType = contentType || '';
+        sliceSize = sliceSize || 512;
+
+        var byteCharacters = atob(b64Data);
+        var byteArrays = [];
+
+        for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+            var byteNumbers = new Array(slice.length);
+            for (var i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+
+            var byteArray = new Uint8Array(byteNumbers);
+
+            byteArrays.push(byteArray);
+        }
+
+        var blob = new Blob(byteArrays, {type: contentType});
+        return blob;
     }
 
 };
