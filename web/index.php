@@ -36,7 +36,7 @@
         <div class="main-interface-content">
 
             <div class="interface-intro">
-                <div class="info-title"><a href="/"><img src="static/images/copypaste-logo.png" width="200"></a></div>
+                <div class="info-title"><a href="/"><img data-mimoto-id="logo" src="static/images/copypaste-logo-regular.png" width="200" alt="CopyPaste.me logo"></a></div>
                 <div class="info-subtitle">Frictionless sharing between devices</div>
                 <div data-mimoto-id="alertmessage" class="alertmessage"></div>
 

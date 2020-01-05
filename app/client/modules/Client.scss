@@ -28,26 +28,3 @@ div.waiting div.label {
     line-height: 24px;
     padding: 20px;
 }
-
-div.info-title {
-    font-size: x-large;
-    font-weight: bold;
-    color: $textcolor-light;
-    padding: 20px 0 0 0;
-}
-div.info-title a {
-    text-decoration: none;
-    color: $textcolor-light;
-}
-div.info-title a:hover {
-    color: $support-color-dark;
-}
-div.info-subtitle {
-    color: $support-color-dark;
-    font-size: medium;
-    padding: 10px 20px 10px 20px;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    font-style: italic;
-}

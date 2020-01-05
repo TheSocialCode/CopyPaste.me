@@ -88,6 +88,9 @@ module.exports.prototype = {
         document.querySelector('[data-mimoto-id="interface-receiver"]').remove();
         document.querySelector('[data-mimoto-id="interface-sender"]').remove();
 
+        // 3. swap logo
+        document.querySelector('[data-mimoto-id="logo"]').src = 'static/images/copypaste-logo-white.png';
+
         // 2. show warning
         document.body.classList.add('security_compromised');
 
