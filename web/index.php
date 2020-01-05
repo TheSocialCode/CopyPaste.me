@@ -66,6 +66,10 @@
 
                 <h2 class="faq_question">So how does it work?</h2>
                 <p class="faq_answer">Your `receiving` device shows a QR code. By scanning this code with, for instance, your phone, Voila: a realtime connection is set up and you are ready for sharing (for people with technical knowledge: I'm connecting the two devices using socket.io). When you send your data, it's immediately forwarded to the receiving device without storing it on the server. Therefore there will be not traces of logs of what you share.</p>
+
+                <h2 class="faq_question">So just to be clear, my data is never stored?</h2>
+                <p class="faq_answer">Exactly! Your data is yours and yours alone and this tool is designed to work without the need to store your data. Which is good, because your data shouldn't be stored all over the internet just because you're using online tools.</p>
+
             </div>
 
 <?php break; default: ?>
