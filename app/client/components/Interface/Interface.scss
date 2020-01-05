@@ -31,7 +31,8 @@ div.main-interface-footer {
     padding: 10px 0 10px 0;
     flex-shrink: 0;
     font-size: smaller;
-    background-color: #74828F//#C25B56;//$background-light;
+    background-color: #74828F; //#C25B56;//$background-light;
+    box-shadow: inset 0 6px 6px -6px #24323F;
 }
 
 div.main-interface-footer a {
