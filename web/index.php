@@ -82,10 +82,11 @@
                 <div class="sender_input">
                     <div id="sender_menu" class="sender_menu">
                         <div data-type="password" class="sender_menu_tab selected">Password</div>
-                        <div data-type="url" class="sender_menu_tab">URL</div>
+<!--                        <div data-type="url" class="sender_menu_tab">URL</div>-->
                         <div data-type="text" class="sender_menu_tab">Text</div>
-                        <div data-type="image" class="sender_menu_tab">Image</div>
-                        <div data-type="document" class="sender_menu_tab">Document</div>
+<!--                        <div data-type="image" class="sender_menu_tab">Image</div>-->
+                        <div data-type="document" class="sender_menu_tab">File</div>
+<!--                        <div data-type="document" class="sender_menu_tab">Document</div>-->
                     </div>
                     <div class="sender_data">
                         <div class="sender_data_label">
