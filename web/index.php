@@ -61,17 +61,21 @@
                 <h1 class="faq_title">Frequently Asked Question</h1>
 
                 <h2 class="faq_question">Why does this tool exist and what do I use it for?</h2>
-                <p class="faq_answer">I needed a tool that could help me when I wanted to login to some website, service or app on a public or a a friend's computer, while my password is in the password manager on my phone because – unless your are Sheldon Cooper – it's too difficult to remember (which is a good thing; please use apps like 1Password or LastPass to improve the security of your data!)</p>
-                <p class="faq_answer">If you don't have a service like Airdrop or your devices aren't all connected to the same iCloud account, sharing data between devices can be a hassle. Most of the time you left with painstakingly typing in your password character by character while reading it from you phone. And having to at least start over  three to five times because of a typo. Even more when your add the stress of colleagues or friends looking over your shoulder.</p>
+                <p class="faq_answer">I needed a tool that could help me when I want to login to some website, service or app on a public or a a friend's computer, while my passwords are in the password manager on my phone (and they are way to difficult to remember, which is a good thing; please use apps like 1Password or LastPass to improve the security of your data!)</p>
+                <p class="faq_answer">If you don't have a service like Airdrop or your devices aren't all connected to the same iCloud account, sharing data between devices can be a hassle. Most of the time you are left with painstakingly typing in your password character by character while reading it from you phone. And having to at least start over three to five times because of a typo. Even more when your add the stress of colleagues or friends looking over your shoulder.</p>
+                <p class="faq_answer">CopyPaste.me helps you transferring any password, texts or file from one device to another. So no more emailing yourself passwords or other things to get stuff from you phone to your computer. (don't judge :p, I think many of us have done it one or twice)</p>
 
                 <h2 class="faq_question">So how does it work?</h2>
-                <p class="faq_answer">Your `receiving` device shows a QR code. By scanning this code with, for instance, your phone, Voila: a realtime connection is set up and you are ready for sharing (for people with technical knowledge: I'm connecting the two devices using socket.io). When you send your data, it's immediately forwarded to the receiving device without storing it on the server. Therefore there will be not traces of logs of what you share.</p>
+                <p class="faq_answer">Your receiving device shows a QR code. By scanning this code with, for instance, your phone, voila: a realtime connection is set up between your devices and you are ready for sharing (for people with technical knowledge: I'm connecting the two devices using socket.io). When you send your data, it's immediately forwarded to the receiving device without storing it on the server. Therefore there will be not traces of logs of what you share.</p>
 
                 <h2 class="faq_question">So just to be clear, my data is never stored?</h2>
                 <p class="faq_answer">Exactly! Your data is yours and yours alone and this tool is designed to work without the need to store your data. Which is good, because your data shouldn't be stored all over the internet just because you're using online tools.</p>
 
+                <h2 class="faq_question">What happens when another person is trying to connect to the same link?</h2>
+                <p class="faq_answer">Don't  worry. A connection only allows two devices. If another person would try to connect, your screen will show a warning about your security being compromised and the connection will immediately be terminated and no data will be sent. Your data is safe!</p>
+
                 <h2 class="faq_question">How can I suggest an improvement or report a bug?</h2>
-                <p class="faq_answer">That's great! The tool gets better the more people contibute. Please mail me at <a href="mailto:sebastian@copypaste.me">sebastian@copypaste.me</a></p>
+                <p class="faq_answer">That's great! The tool gets better the more people contribute. Please mail me at <a href="mailto:sebastian@copypaste.me">sebastian@copypaste.me</a></p>
 
                 <p class="faq_answer">
                     I hope you enjoy using it!<br>
