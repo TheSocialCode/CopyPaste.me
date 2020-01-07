@@ -84,6 +84,8 @@
                 </p>
 
 
+                p.s. Don't share thing that can't stand the day of light, hurt or exclude others ...
+
             </div>
 
 <?php break; default: ?>

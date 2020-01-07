@@ -14,7 +14,7 @@ const Module_HTTPS = require('https');
 const Module_SocketIO = require('socket.io');
 const Module_Express = require('express');
 const Module_GenerateUniqueID = require('generate-unique-id');
-
+const CoreModule_Util = require('util');
 
 
 module.exports = {
@@ -32,13 +32,15 @@ module.exports = {
     _io: null,
 
     // data
-    _aPairs: [],
+    _aActivePairs: [],
+    _aInactivePairs: [],
     _aSockets: [],
 
-    // utils
-    _timerGarbageCollection: null,
-    _aPairsMarkedForRemoval: [],
-    _nGarbageMaxAge: 3 * 60 * 1000,
+    // action types
+    _ACTIONTYPE_CREATED: 'created',
+    _ACTIONTYPE_ARCHIVED: 'archived',
+    _ACTIONTYPE_UNARCHIVED: 'unarchived',
+    _ACTIONTYPE_DATA: 'data',
 
 
 
@@ -126,11 +128,6 @@ module.exports = {
             console.log();
 
         }.bind(this));
-
-        // 5. setup
-        // x. disable
-        //this._timerGarbageCollection = setInterval(this._collectGarbage.bind(this), 2000);
-
     },
 
     _onUserConnect: function(socket)
@@ -165,19 +162,22 @@ module.exports = {
         let sToken = Module_GenerateUniqueID({ length: 32 });
 
         // 2. output
-        this._log('Socket.id = ' + receiverSocket.id + ' requests token = ' + sToken);
+        this._log('Receiver with socket.id = ' + receiverSocket.id + ' requests token = ' + sToken);
 
         // 3. verify
-        if (this._aPairs['' + sToken] || !this._aSockets['' + receiverSocket.id]) return;
+        if (this._aActivePairs['' + sToken] || !this._aSockets['' + receiverSocket.id]) return;
 
         // 4. build
         let pair = {
             receiver: receiverSocket,
-            sender: null
+            sender: null,
+            log: [
+                { action: this._ACTIONTYPE_CREATED, timestamp: new Date().toUTCString() }
+            ]
         };
 
         // 5. store
-        this._aPairs['' + sToken] = pair;
+        this._aActivePairs['' + sToken] = pair;
 
         // 6. update
         this._aSockets['' + receiverSocket.id].sToken = sToken;
@@ -194,8 +194,11 @@ module.exports = {
         // 1. output
         this._log('Receiver wants to reconnect to token ' + sToken);
 
-        // 2. validate
-        if (!this._aPairs['' + sToken])
+        // 2. load
+        let pair = this._getPair(sToken);
+
+        // 3. validate
+        if (pair === false)
         {
             // a. output
             this._log('Token = ' + sToken + ' not found for reconnecting receiver');
@@ -210,9 +213,6 @@ module.exports = {
 
         // ---
 
-
-        // 3. load
-        let pair = this._aPairs['' + sToken];
 
         // 4. validate
         if (pair.receiver)
@@ -230,28 +230,28 @@ module.exports = {
 
 
         // 5. store
-        this._aPairs['' + sToken].receiver = receiverSocket;
+        this._aActivePairs['' + sToken].receiver = receiverSocket;
 
         // 6. broadcast
         receiverSocket.emit('token_reconnected');
 
-        // 7. save from garbage collection
-        this._saveFromRemoval(sToken);
-
-        // 8. broadcast
+        // 7. broadcast
         if (pair.sender) pair.sender.emit('receiver_reconnected');
 
-        // 9. output
+        // 8. output
         this._logUsers('After `_onReceiverRequestToken` by socket.id = ' + receiverSocket.id);
     },
 
     _onSenderConnectToToken: function(senderSocket, bReconnect, sToken)
     {
-        // 0. output
+        // 1. output
         this._log('Sender wants to reconnect to token ' + sToken);
 
-        // 1. validate
-        if (!this._aPairs['' + sToken])
+        // 2. load
+        let pair = this._getPair(sToken);
+
+        // 3. validate
+        if (pair === false)
         {
             // a. broadcast
             senderSocket.emit('token_not_found');
@@ -264,10 +264,7 @@ module.exports = {
         // ---
 
 
-        // 2. load
-        let pair = this._aPairs['' + sToken];
-
-        // 3. validate
+        // 4. validate
         if (pair.sender)
         {
             // 1. output
@@ -282,17 +279,14 @@ module.exports = {
         // ---
 
 
-        // 4. store
-        this._aPairs['' + sToken].sender = senderSocket;
+        // 5. store
+        this._aActivePairs['' + sToken].sender = senderSocket;
 
-        // 5. update
+        // 6. update
         this._aSockets['' + senderSocket.id].sToken = sToken;
 
-        // 6. broadcast
+        // 7. broadcast
         senderSocket.emit((bReconnect) ? 'token_reconnected' : 'token_connected');
-
-        // 7. save from garbage collection
-        this._saveFromRemoval(sToken);
 
         // 8. broadcast
         if (pair.receiver) pair.receiver.emit((bReconnect) ? 'sender_reconnected' : 'sender_connected');
@@ -319,7 +313,7 @@ module.exports = {
         delete this._aSockets['' + socket.id];
 
         // 6. load
-        let pair = this._aPairs['' + sToken];
+        let pair = this._aActivePairs['' + sToken];
 
         // 7. validate
         if (pair.receiver && pair.receiver.id === socket.id)
@@ -327,10 +321,7 @@ module.exports = {
             // a. cleanup
             pair.receiver = null;
 
-            // b. mark
-            this._markForRemoval(sToken);
-
-            // c. broadcast
+            // d. broadcast
             if (pair.sender) pair.sender.emit('receiver_disconnected');
         }
 
@@ -340,21 +331,40 @@ module.exports = {
             // a. cleanup
             pair.sender = null;
 
-            // b. mark
-            this._markForRemoval(sToken);
-
-            // c. broadcast
+            // b. broadcast
             if (pair.receiver) pair.receiver.emit('sender_disconnected');
         }
+
+        // 9. validate
+        if (!pair.receiver && !pair.sender)
+        {
+            // a. move
+            this._aInactivePairs[sToken] = pair;
+
+            // b. clear
+            delete this._aActivePairs[sToken];
+
+            // c. store
+            pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
+        }
+
+        // 10. output
+        this._logUsers('After user disconnected');
     },
 
     _onData: function(data)
     {
-        // 1. validate
-        if (!this._aPairs['' + data.sToken]) return;
+        // 1. load
+        let pair = this._getPair(data.sToken);
 
-        // 2. broadcast
-        this._aPairs['' + data.sToken].receiver.emit('data', { sType:data.sType, value:data.value });
+        // 2. validate
+        if (pair === false || !pair.receiver) return;
+
+        // 3. broadcast
+        pair.receiver.emit('data', { sType:data.sType, value:data.value });
+
+        // 4. store
+        pair.log.push( { type: this._ACTIONTYPE_DATA, timestamp: new Date().toUTCString(), contentType:data.sType } );
     },
 
     _broadcastSecurityWarning: function(requestingSocket, pair, sToken)
@@ -386,79 +396,44 @@ module.exports = {
         }
 
         // 5. clear
-        delete this._aPairs['' + sToken];
+        delete this._aActivePairs['' + sToken];
     },
 
-    _markForRemoval: function(sToken)
+    _getPair: function(sToken)
     {
-        // x. disable
-        return;
+        // 1. prepare
+        sToken = '' + sToken;
 
+        // 2. init
+        let pair = false;
 
-        // 1. skip if already marked
-        if (this._aPairsMarkedForRemoval['' + sToken]) return;
-
-        // 2. store
-        this._aPairsMarkedForRemoval['' + sToken] = {
-            sToken: sToken,
-            nMomentItGotMarked: new Date().getTime()
-        };
-    },
-
-    _saveFromRemoval: function(sToken)
-    {
-        // x. disable
-        return;
-
-
-        // 1. verify
-        if (!this._aPairs['' + sToken]) return;
-
-        // 2. load
-        let pair = this._aPairs['' + sToken];
-
-        // 3. validate
-        if (pair.receiver && pair.sender)
-        {
-            if (this._aPairsMarkedForRemoval['' + sToken]) delete this._aPairsMarkedForRemoval['' + sToken];
-        }
-    },
-
-    _collectGarbage: function()
-    {
-        // x. disable
-        return;
-
-
-        // 1. verify all garbage items
-        for (let sKey in this._aPairsMarkedForRemoval)
+        // 3. locate
+        if (this._aActivePairs[sToken])
         {
             // a. register
-            let itemInGarbage = this._aPairsMarkedForRemoval[sKey];
-
-            // I. check expiration
-            if (new Date().getTime() - itemInGarbage.nMomentItGotMarked > this._nGarbageMaxAge)
+            pair = this._aActivePairs[sToken];
+        }
+        else
+        {
+            // a. validate
+            if (this._aInactivePairs[sToken])
             {
-                // 1. validate [ possibly not necessary ] todo
-                if (!this._aPairs['' + itemInGarbage.sToken]) continue;
+                // I. register
+                pair = this._aInactivePairs[sToken];
 
-                // 2. register
-                let pair = this._aPairs['' + itemInGarbage.sToken];
+                // II. move
+                this._aActivePairs[sToken] = pair;
 
-                // 3. check if pair is obsolete
-                if (!pair.sender && !pair.receiver)
-                {
-                    // a. remove
-                    delete this._aPairs['' + itemInGarbage.sToken];
+                // II. clear
+                delete this._aInactivePairs[sToken];
 
-                    // b. remove
-                    delete this._aPairsMarkedForRemoval[sKey];
-                }
-
-                // 4. check if pair is perfectly fine, and if so, remove from garbage
-                if (pair.sender && pair.receiver) delete this._aPairsMarkedForRemoval[sKey];
+                // IV. store
+                pair.log.push( { type: this._ACTIONTYPE_UNARCHIVED, timestamp: new Date().toUTCString() } );
             }
         }
+
+        // 4. send
+        return pair;
     },
 
     _log: function()
@@ -469,19 +444,31 @@ module.exports = {
 
     _logUsers: function(sTitle)
     {
-        // 1. verify
+        // 1. output
+        console.log('');
+        console.log('Usage: ' + sTitle);
+        console.log('=========================');
+        console.log('Number of sockets:', Object.keys(this._aSockets).length);
+        console.log('Number of active pairs:', Object.keys(this._aActivePairs).length);
+        console.log('Number of inactive pairs:', Object.keys(this._aInactivePairs).length);
+
+        // 2. verify
         if (this._config.mode !== 'dev') return;
 
-        // 2. output
+        // 3. output
         console.log('');
         console.log('Users: ' + sTitle);
         console.log('Sockets');
         console.log('=========================');
         console.log(this._aSockets);
         console.log('');
-        console.log('Pairs');
+        console.log('Active pairs');
         console.log('-------------------------');
-        console.log(this._aPairs);
+        console.log(this._aActivePairs);
+        console.log('');
+        console.log('Inactive pairs');
+        console.log('-------------------------');
+        console.log(CoreModule_Util.inspect(this._aInactivePairs, false, null, true));
         console.log('');
         console.log('');
     }
