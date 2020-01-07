@@ -80,11 +80,14 @@
                 <p class="faq_answer">
                     I hope you enjoy using it!<br>
                     <br
-                    <strong>Sebastian Kersten</strong>
+                    <strong>Sebastian Kersten</strong><br>
+                    <br>
+                    <br>
+                    P.S. - Don't share things that can't stand the day of light, hurt or exclude others. I'm not responsible for your misbehavior. Thanks! ♥
                 </p>
 
 
-                p.s. Don't share thing that can't stand the day of light, hurt or exclude others ...
+
 
             </div>
 
