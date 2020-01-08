@@ -36,6 +36,10 @@ module.exports = {
     _aInactivePairs: [],
     _aSockets: [],
 
+    // logs
+    _aConnectedPairs: [],       // which pairs actually had two devices connected at one point
+    _aUsedPairs: [],            // which pairs where actually used to share data
+
     // action types
     _ACTIONTYPE_CREATED: 'created',
     _ACTIONTYPE_ARCHIVED: 'archived',
@@ -171,6 +175,10 @@ module.exports = {
         let pair = {
             receiver: receiverSocket,
             sender: null,
+            states: {
+                connectionEstablished: false,
+                dataSent: false,
+            },
             log: [
                 { action: this._ACTIONTYPE_CREATED, timestamp: new Date().toUTCString() }
             ]
@@ -186,7 +194,7 @@ module.exports = {
         receiverSocket.emit('token', sToken);
 
         // 8. output
-        this._logUsers('After `_onReceiverRequestToken` by socket.id = ' + receiverSocket.id);
+        this._logUsers('After receiver requests token (socket.id = ' + receiverSocket.id + ')');
     },
 
     _onReceiverReconnectToToken: function(receiverSocket, sToken)
@@ -239,11 +247,14 @@ module.exports = {
         if (pair.sender) pair.sender.emit('receiver_reconnected');
 
         // 8. output
-        this._logUsers('After `_onReceiverRequestToken` by socket.id = ' + receiverSocket.id);
+        this._logUsers('After receiver reconnects to token (socket.id = ' + receiverSocket.id + ')');
     },
 
     _onSenderConnectToToken: function(senderSocket, bReconnect, sToken)
     {
+        // 1. prepare
+        sToken = '' + sToken;
+
         // 1. output
         this._log('Sender wants to reconnect to token ' + sToken);
 
@@ -280,7 +291,7 @@ module.exports = {
 
 
         // 5. store
-        this._aActivePairs['' + sToken].sender = senderSocket;
+        this._aActivePairs[sToken].sender = senderSocket;
 
         // 6. update
         this._aSockets['' + senderSocket.id].sToken = sToken;
@@ -290,6 +301,19 @@ module.exports = {
 
         // 8. broadcast
         if (pair.receiver) pair.receiver.emit((bReconnect) ? 'sender_reconnected' : 'sender_connected');
+
+
+        // --- logging
+
+
+        // 9. update
+        pair.states.connectionEstablished = true;
+
+        // 10. store
+        if (!this._aConnectedPairs[sToken]) this._aConnectedPairs[sToken] = true;
+
+        // 11. output
+        this._logUsers('After sender connects to token (socket.id = ' + senderSocket.id + ')');
     },
 
     _onUserDisconnect: function(socket)
@@ -365,6 +389,16 @@ module.exports = {
 
         // 4. store
         pair.log.push( { type: this._ACTIONTYPE_DATA, timestamp: new Date().toUTCString(), contentType:data.sType } );
+
+
+        // --- logging
+
+
+        // 5. update
+        pair.states.dataSent = true;
+
+        // 6. store
+        if (!this._aUsedPairs[data.sToken]) this._aUsedPairs[data.sToken] = true;
     },
 
     _broadcastSecurityWarning: function(requestingSocket, pair, sToken)
@@ -451,6 +485,9 @@ module.exports = {
         console.log('Number of sockets:', Object.keys(this._aSockets).length);
         console.log('Number of active pairs:', Object.keys(this._aActivePairs).length);
         console.log('Number of inactive pairs:', Object.keys(this._aInactivePairs).length);
+        console.log('---');
+        console.log('Number of pairs that established connection between both devices:', Object.keys(this._aConnectedPairs).length);
+        console.log('Number of pairs that have been used to send data:', Object.keys(this._aUsedPairs).length);
 
         // 2. verify
         if (this._config.mode !== 'dev') return;
