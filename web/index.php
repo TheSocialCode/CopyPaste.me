@@ -87,9 +87,7 @@
                 <p class="faq_answer">I believe tools like this can be funded in a different way, by its well willing users who can contribute financially.</p>
                 <p class="faq_answer">
                     So, if you enjoy using it, please consider making a donation.
-                    <a href="http://paypal.com/thesocialcode" target="_blank" style="color:gold; text-decoration: none; font-weight:bold">
-                        <div class="button">Donate now</div>
-                    </a>
+                    <div class="button" onclick="window.open('https://paypal.me/thesocialcode', '_blank')" style="color:gold; text-decoration: none; font-weight:bold; cursor: pointer">Donate now</div>
                     <br>
                     <br>
                 </p>
