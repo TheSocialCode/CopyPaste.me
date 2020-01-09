@@ -338,8 +338,6 @@ module.exports = {
         // 3. register
         let sToken = registeredSocket.sToken;
 
-        console.log('### A ### - sToken = ' + sToken, registeredSocket);
-
         // 4. validate
         if (!sToken) return;
 
@@ -347,7 +345,6 @@ module.exports = {
         delete this._aSockets['' + socket.id];
 
         // 6. load
-        console.log('### B ### - sToken', sToken);
         let pair = this._getPair(sToken);
 
         // 7. validate
