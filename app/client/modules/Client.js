@@ -40,12 +40,11 @@ module.exports.prototype = {
     {
         //console.warn('sGateway = ' + sGateway);
 
-        // 2. connect
+        // 1. connect
         this._socket = new SocketIO(sGateway, {secure: true }).connect();//, {secure: true, rejectUnauthorized: false });
 
         // 2. configure
         this._socket.on('connect', this._socketOnConnect.bind(this));
-        this._socket.on('reconnect', this._socketOnReconnect.bind(this));
         this._socket.on('connect_failed', this._socketConnectFailed.bind(this));
         this._socket.on('disconnect', this._socketOnDisconnect.bind(this));
         this._socket.on('security_compromised', this._onSecurityCompromised.bind(this));
@@ -59,24 +58,19 @@ module.exports.prototype = {
 
     _socketOnConnect: function ()
     {
-        //console.log('Client: connected');
+        //if (console) console.log('Client: connected');
 
         this._client.connect();
     },
 
-    _socketOnReconnect: function ()
-    {
-        this._client.reconnect();
-    },
-
     _socketConnectFailed: function()
     {
-        if (console) console.log('You are logged off .. trying to connect ...');
+        //if (console) console.log('You are logged off .. trying to connect ...');
     },
 
     _socketOnDisconnect: function()
     {
-        if (console) console.warn('Connection with server was lost .. reconnecting ..');
+        //if (console) console.warn('Connection with server was lost .. reconnecting ..');
     },
 
     _onSecurityCompromised: function()

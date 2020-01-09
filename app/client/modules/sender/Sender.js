@@ -8,8 +8,8 @@
 
 
 // import
-const QRCodeGenerator = require('qrcode-generator');
 const SocketIO = require('socket.io-client');
+const Module_Crypto = require('asymmetric-crypto');
 
 
 module.exports = function(socket, sToken)
@@ -33,6 +33,10 @@ module.exports.prototype = {
     _bValidated: false,
     _data: {},
 
+    // security
+    _myKeyPair: null,
+    _sTheirPublicKey: '',
+
 
     // ----------------------------------------------------------------------------
     // --- Constructor ------------------------------------------------------------
@@ -44,11 +48,14 @@ module.exports.prototype = {
      */
     __construct: function (socket, sToken)
     {
-        // 1. store
+        // 1. create
+        this._myKeyPair = Module_Crypto.keyPair();
+
+        // 2. store
         this._socket = socket;
         this._data.sToken = sToken;
 
-        // 2. register
+        // 3. register
         this._elSenderInterface = document.querySelector('[data-mimoto-id="interface-sender"]');
         this._elInputPassword = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_password"]');
         this._elInputURL = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_url"]');
@@ -57,7 +64,7 @@ module.exports.prototype = {
         this._elInputDocument = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_document"]');
         this._elButtonSend = this._elSenderInterface.querySelector('[data-mimoto-id="button_input_password"]');
 
-        // 3. validate
+        // 4. validate
         if (!new RegExp(/^[0-9a-z]{32}$/g).test(this._data.sToken))
         {
             // a. open
@@ -69,7 +76,7 @@ module.exports.prototype = {
             // a. configure
             this._socket.on('token_not_found', this._onTokenNotFound.bind(this));
             this._socket.on('token_connected', this._onTokenConnected.bind(this));
-            this._socket.on('token_reconnected', this._onTokenReconnected.bind(this));
+            //this._socket.on('token_reconnected', this._onTokenReconnected.bind(this));
             this._socket.on('receiver_disconnected', this._onReceiverDisconnected.bind(this));
             this._socket.on('receiver_reconnected', this._onReceiverReconnected.bind(this));
 
@@ -91,18 +98,10 @@ module.exports.prototype = {
 
     connect: function()
     {
-        //console.log('CHECK - sender_connect_to_token');
+        //if (console) console.log('CHECK - sender_connect_to_token');
 
-        // 1, broadcast
-        this._socket.emit('sender_connect_to_token', this._data.sToken);
-    },
-
-    reconnect: function()
-    {
-        //console.log('CHECK - sender_REconnect_to_token');
-
-        // 1, broadcast
-        //this._socket.emit('sender_reconnect_to_token', this._data.sToken);
+        // 1. broadcast
+        this._socket.emit('sender_connect_to_token', this._data.sToken, this._myKeyPair.publicKey);
     },
 
 
@@ -117,8 +116,11 @@ module.exports.prototype = {
         this._showAlertMessage('The link you are trying to use is not working. Please try again.', true);
     },
 
-    _onTokenConnected: function()
+    _onTokenConnected: function(sReceiverPublicKey)
     {
+        // 1. store
+        this._sTheirPublicKey = sReceiverPublicKey;
+
         //console.log('Sender: Token connected');
     },
 
@@ -334,8 +336,23 @@ module.exports.prototype = {
         // 2. disable
         this._toggleSendButton(false);
 
-        // 3. broadcast
-        this._socket.emit('data', this._data);
+        // 3. verify
+        if (this._data.sType === 'password' || this._data.sType === 'text')
+        {
+            // a. clone
+            let encryptedData = JSON.parse(JSON.stringify(this._data));
+
+            // b. encrypt
+            encryptedData.value = Module_Crypto.encrypt(this._data.value, this._sTheirPublicKey, this._myKeyPair.secretKey);
+
+            // c. broadcast
+            this._socket.emit('data', encryptedData);
+        }
+        else
+        {
+            // a. broadcast
+            this._socket.emit('data', this._data);
+        }
 
         // 4. clear
         this._data.value = null;

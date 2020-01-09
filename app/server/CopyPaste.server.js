@@ -160,7 +160,7 @@ module.exports = {
         this._log('New user connected - ' + socket.id);
     },
 
-    _onReceiverRequestToken: function(receiverSocket)
+    _onReceiverRequestToken: function(receiverSocket, sReceiverPublicKey)
     {
         // 1. create
         let sToken = Module_GenerateUniqueID({ length: 32 });
@@ -174,7 +174,9 @@ module.exports = {
         // 4. build
         let pair = {
             receiver: receiverSocket,
+            receiverPublicKey: sReceiverPublicKey,
             sender: null,
+            senderPublicKey: '',
             states: {
                 connectionEstablished: false,
                 dataSent: false,
@@ -240,17 +242,20 @@ module.exports = {
         // 5. store
         this._aActivePairs['' + sToken].receiver = receiverSocket;
 
-        // 6. broadcast
-        receiverSocket.emit('token_reconnected');
+        // 6. store
+        this._aSockets['' + receiverSocket.id].sToken = sToken;
 
         // 7. broadcast
+        receiverSocket.emit('token_reconnected');
+
+        // 8. broadcast
         if (pair.sender) pair.sender.emit('receiver_reconnected');
 
-        // 8. output
+        // 9. output
         this._logUsers('After receiver reconnects to token (socket.id = ' + receiverSocket.id + ')');
     },
 
-    _onSenderConnectToToken: function(senderSocket, bReconnect, sToken)
+    _onSenderConnectToToken: function(senderSocket, bReconnect, sToken, sSenderPublicKey)
     {
         // 1. prepare
         sToken = '' + sToken;
@@ -293,14 +298,17 @@ module.exports = {
         // 5. store
         this._aActivePairs[sToken].sender = senderSocket;
 
-        // 6. update
+        // 6. store
         this._aSockets['' + senderSocket.id].sToken = sToken;
 
+        // 7. store
+        pair.senderPublicKey = sSenderPublicKey;
+
         // 7. broadcast
-        senderSocket.emit((bReconnect) ? 'token_reconnected' : 'token_connected');
+        senderSocket.emit((bReconnect) ? 'token_reconnected' : 'token_connected', pair.receiverPublicKey);
 
         // 8. broadcast
-        if (pair.receiver) pair.receiver.emit((bReconnect) ? 'sender_reconnected' : 'sender_connected');
+        if (pair.receiver) pair.receiver.emit((bReconnect) ? 'sender_reconnected' : 'sender_connected', pair.senderPublicKey);
 
 
         // --- logging
@@ -330,6 +338,8 @@ module.exports = {
         // 3. register
         let sToken = registeredSocket.sToken;
 
+        console.log('### A ### - sToken = ' + sToken, registeredSocket);
+
         // 4. validate
         if (!sToken) return;
 
@@ -337,9 +347,13 @@ module.exports = {
         delete this._aSockets['' + socket.id];
 
         // 6. load
-        let pair = this._aActivePairs['' + sToken];
+        console.log('### B ### - sToken', sToken);
+        let pair = this._getPair(sToken);
 
         // 7. validate
+        if (pair === false) return;
+
+        // 8. validate
         if (pair.receiver && pair.receiver.id === socket.id)
         {
             // a. cleanup
@@ -349,7 +363,7 @@ module.exports = {
             if (pair.sender) pair.sender.emit('receiver_disconnected');
         }
 
-        // 8. validate
+        // 9. validate
         if (pair.sender && pair.sender.id === socket.id)
         {
             // a. cleanup
@@ -359,7 +373,7 @@ module.exports = {
             if (pair.receiver) pair.receiver.emit('sender_disconnected');
         }
 
-        // 9. validate
+        // 10. validate
         if (!pair.receiver && !pair.sender)
         {
             // a. move
@@ -372,7 +386,7 @@ module.exports = {
             pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
         }
 
-        // 10. output
+        // 11. output
         this._logUsers('After user disconnected');
     },
 
