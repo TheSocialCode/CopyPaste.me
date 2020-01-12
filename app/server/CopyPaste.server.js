@@ -110,7 +110,7 @@ module.exports = {
                 '@author  Sebastian Kersten',
                 '@license MIT',
                 ' ',
-                'Help keeping this service free by donating: https://www.paypal.me/thesocialcode',
+                'Help keeping this service free by donating: https://paypal.me/thesocialcode',
                 ' ',
                 'listening on *:3000 ' + JSON.stringify(this._config),
                 ''
