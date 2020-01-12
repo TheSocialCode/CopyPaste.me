@@ -78,7 +78,7 @@ module.exports.prototype = {
                 let fMethod = this._aEvents[sEvent][nIndex];
 
                 // II. execute
-                fMethod();
+                fMethod.apply(this, Array.prototype.slice.call(arguments, 1));
             }
         }
     },

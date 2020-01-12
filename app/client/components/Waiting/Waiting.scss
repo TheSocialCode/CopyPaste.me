@@ -1,0 +1,29 @@
+div.component_Waiting {
+
+    display: none;
+
+    &.show {
+        display: block;
+    }
+
+    & div.component_Waiting_label {
+        color: $support-color-dark;
+        line-height: 24px;
+        padding: 20px;
+    }
+
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 600px;
+    text-align: center;
+    font-size: medium;
+}
+
+//div.waiting {
+//    margin-left: auto;
+//    margin-right: auto;
+//    max-width: 600px;
+//    text-align: center;
+//    display: none;
+//    font-size: medium;
+//}

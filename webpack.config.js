@@ -1,4 +1,6 @@
 const path = require('path');
+const webpack = require('webpack');
+
 
 module.exports = {
 
@@ -30,4 +32,11 @@ module.exports = {
             },
         ],
     },
+
+
+    // --- output
+
+    plugins: [
+        new webpack.BannerPlugin('CopyPaste.me - Frictionless sharing between devices\nCreated by The Social Code\n\n@author  Sebastian Kersten\n@license MIT\n\nHelp keeping the service free by donating: https://www.paypal.me/thesocialcode\n')
+    ]
 };

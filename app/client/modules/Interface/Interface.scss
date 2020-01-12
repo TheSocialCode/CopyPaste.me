@@ -15,17 +15,53 @@ body {
 }
 
 
+// --- interface layout ---
+
 div.main-interface {
     display: flex;
     min-height: 100%;
     flex-direction: column;
     align-items: stretch;
 }
+
 div.main-interface-content {
     flex-grow: 1;
     justify-content: flex-start;
     padding: 20px 10px 20px 10px;
 }
+
+
+// --- header ---
+
+div.interface-header {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 600px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+div.logo {
+    padding: 20px 0 0 0;
+
+    & > img {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
+div.description {
+    color: $support-color-dark;
+    font-size: medium;
+    padding: 10px 20px 10px 20px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    font-style: italic;
+}
+
+
+// --- footer ---
 
 div.main-interface-footer {
     color: $textcolor-light;
@@ -41,30 +77,10 @@ div.main-interface-footer {
 }
 
 div.main-interface-footer a {
+    color: gold;
     text-decoration: none;
-    color: $textcolor-light;
 }
 
 div.main-interface-footer a:hover {
     text-decoration: underline;
-    //color: $support-color-dark;
-}
-
-div.info-title {
-    padding: 20px 0 0 0;
-
-    & > img {
-        width: 100%;
-        max-width: 200px;
-    }
-}
-
-div.info-subtitle {
-    color: $support-color-dark;
-    font-size: medium;
-    padding: 10px 20px 10px 20px;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    font-style: italic;
 }

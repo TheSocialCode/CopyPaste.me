@@ -12,30 +12,41 @@ const SocketIO = require('socket.io-client');
 const Module_Crypto = require('asymmetric-crypto');
 
 
-module.exports = function(socket, sToken)
+module.exports = function()
 {
     // start
-    this.__construct(socket, sToken);
+    this.__construct();
 };
 
 module.exports.prototype = {
 
-    // connection
-    _socket: null,
-    _aTabs: [],
+    // views
+    _elRoot: null,
     _elCurrentDataInput: null,
-    _elSenderInterface: null,
     _elInputPassword: null,
     _elInputURL: null,
     _elInputText: null,
     _elInputImage: null,
     _elInputDocumnent: null,
+
+    // utils
+    _aEvents: [],
+    _aTabs: [],
+
+    // events
+    REQUEST_DATABROADCAST: 'onRequestDataBroadcast',
+
+    // data types
+    DATATYPE_PASSWORD: 'password',
+    DATATYPE_URL: 'url',
+    DATATYPE_TEXT: 'text',
+    DATATYPE_IMAGE: 'image',
+    DATATYPE_DOCUMENT: 'document',
+
+    // data
     _bValidated: false,
     _data: {},
 
-    // security
-    _myKeyPair: null,
-    _sTheirPublicKey: '',
 
 
     // ----------------------------------------------------------------------------
@@ -48,45 +59,24 @@ module.exports.prototype = {
      */
     __construct: function (socket, sToken)
     {
-        // 1. create
-        this._myKeyPair = Module_Crypto.keyPair();
-
-        // 2. store
+        // 1. store
         this._socket = socket;
         this._data.sToken = sToken;
 
+        // 2. register
+        this._elRoot = document.querySelector('[data-mimoto-id="component_DataInput"]');
+
         // 3. register
-        this._elSenderInterface = document.querySelector('[data-mimoto-id="interface-sender"]');
-        this._elInputPassword = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_password"]');
-        this._elInputURL = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_url"]');
-        this._elInputText = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_text"]');
-        this._elInputImage = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_image"]');
-        this._elInputDocument = this._elSenderInterface.querySelector('[data-mimoto-id="data_input_document"]');
-        this._elButtonSend = this._elSenderInterface.querySelector('[data-mimoto-id="button_input_password"]');
+        this._elInputPassword = this._elRoot.querySelector('[data-mimoto-id="data_input_password"]');
+        this._elInputURL = this._elRoot.querySelector('[data-mimoto-id="data_input_url"]');
+        this._elInputText = this._elRoot.querySelector('[data-mimoto-id="data_input_text"]');
+        this._elInputImage = this._elRoot.querySelector('[data-mimoto-id="data_input_image"]');
+        this._elInputDocument = this._elRoot.querySelector('[data-mimoto-id="data_input_document"]');
+        this._elButtonSend = this._elRoot.querySelector('[data-mimoto-id="button_input_send"]');
 
-        // 4. validate
-        if (!new RegExp(/^[0-9a-z]{32}$/g).test(this._data.sToken))
-        {
-            // a. open
-            window.open('/', '_self');
-            return;
-        }
-        else
-        {
-            // a. configure
-            this._socket.on('token_not_found', this._onTokenNotFound.bind(this));
-            this._socket.on('token_connected', this._onTokenConnected.bind(this));
-            //this._socket.on('token_reconnected', this._onTokenReconnected.bind(this));
-            this._socket.on('receiver_disconnected', this._onReceiverDisconnected.bind(this));
-            this._socket.on('receiver_reconnected', this._onReceiverReconnected.bind(this));
-
-            // c. show
-            this._elSenderInterface.style.display = 'inline-block'; // #todo add class ipv style
-
-            // d. setup
-            this._setupInput();
-            this._setupTabMenu();
-        }
+        // 4. setup
+        this._setupInput();
+        this._setupTabMenu();
     },
 
 
@@ -96,47 +86,58 @@ module.exports.prototype = {
     // ----------------------------------------------------------------------------
 
 
-    connect: function()
+    /**
+     * Show component
+     */
+    show: function()
     {
-        //if (console) console.log('CHECK - sender_connect_to_token');
-
-        // 1. broadcast
-        this._socket.emit('sender_connect_to_token', this._data.sToken, this._myKeyPair.publicKey);
+        // 1. toggle
+        this._elRoot.classList.add('show');
     },
 
-
-
-    // ----------------------------------------------------------------------------
-    // --- Event ------------------------------------------------------------------
-    // ----------------------------------------------------------------------------
-
-
-    _onTokenNotFound: function()
+    /**
+     * Hide component
+     */
+    hide: function()
     {
-        this._showAlertMessage('The link you are trying to use is not working. Please try again.', true);
+        // 1. toggle
+        this._elRoot.classList.remove('show');
     },
 
-    _onTokenConnected: function(sReceiverPublicKey)
+    /**
+     * Add event listener
+     * @param sEvent
+     * @param fMethod
+     */
+    addEventListener: function(sEvent, fMethod)
     {
-        // 1. store
-        this._sTheirPublicKey = sReceiverPublicKey;
+        // 1. verify or init
+        if (!this._aEvents[sEvent]) this._aEvents[sEvent] = [];
 
-        //console.log('Sender: Token connected');
+        // 2. store
+        this._aEvents[sEvent].push(fMethod);
     },
 
-    _onTokenReconnected: function()
+    /**
+     * dispatch event
+     * @param sEvent
+     */
+    dispatchEvent: function(sEvent)
     {
-        //console.log('Sender: Token reconnected');
-    },
+        // 1. validate
+        if (this._aEvents[sEvent])
+        {
+            // a. find
+            let nMethodCount = this._aEvents[sEvent].length;
+            for (let nIndex = 0; nIndex < nMethodCount; nIndex++)
+            {
+                // I. register
+                let fMethod = this._aEvents[sEvent][nIndex];
 
-    _onReceiverDisconnected: function()
-    {
-        this._showAlertMessage('The receiving device is not connected. Is it still online?', true);
-    },
-
-    _onReceiverReconnected: function()
-    {
-        this._hideAlertMessage();
+                // II. execute
+                fMethod.apply(this, Array.prototype.slice.call(arguments, 1));
+            }
+        }
     },
 
 
@@ -193,6 +194,8 @@ module.exports.prototype = {
                 // focus
                 this._focusTab(sDataType);
 
+                console.log('TAB click', sDataType);
+
                 // toggle
                 this._focusDataInput(sDataType);
 
@@ -231,15 +234,15 @@ module.exports.prototype = {
         this._data.sType = sDataType;
 
         // init
-        let aInputs = ['data_input_password', 'data_input_url', 'data_input_text', 'data_input_image', 'data_input_document'];
+        let aInputs = [this.DATATYPE_PASSWORD, this.DATATYPE_URL, this.DATATYPE_TEXT, this.DATATYPE_IMAGE, this.DATATYPE_DOCUMENT];
 
         for (let nIndex = 0; nIndex < aInputs.length; nIndex++)
         {
             // register
             let sInputName = aInputs[nIndex];
-            let elInput = this._elSenderInterface.querySelector('[data-mimoto-id="' + sInputName + '"]');
+            let elInput = this._elRoot.querySelector('[data-mimoto-id="data_input_' + sInputName + '"]');
 
-            if (aInputs[nIndex] === 'data_input_' + sDataType)
+            if (aInputs[nIndex] === sDataType)
             {
                 // store
                 this._elCurrentDataInput = elInput;
@@ -336,23 +339,8 @@ module.exports.prototype = {
         // 2. disable
         this._toggleSendButton(false);
 
-        // 3. verify
-        if (this._data.sType === 'password' || this._data.sType === 'text')
-        {
-            // a. clone
-            let encryptedData = JSON.parse(JSON.stringify(this._data));
-
-            // b. encrypt
-            encryptedData.value = Module_Crypto.encrypt(this._data.value, this._sTheirPublicKey, this._myKeyPair.secretKey);
-
-            // c. broadcast
-            this._socket.emit('data', encryptedData);
-        }
-        else
-        {
-            // a. broadcast
-            this._socket.emit('data', this._data);
-        }
+        // 3. broadcast
+        this.dispatchEvent(this.REQUEST_DATABROADCAST, this._data);
 
         // 4. clear
         this._data.value = null;
@@ -384,14 +372,14 @@ module.exports.prototype = {
 
     _discardAllInput: function(sType)
     {
-        if (sType === 'password' || !sType) this._elInputPassword.value = '';
-        if (sType === 'url' || !sType) this._elInputURL.value = '';
-        if (sType === 'text' || !sType) this._elInputText.value = '';
-        if (sType === 'image' || !sType)
+        if (sType === this.DATATYPE_PASSWORD || !sType) this._elInputPassword.value = '';
+        if (sType === this.DATATYPE_URL || !sType) this._elInputURL.value = '';
+        if (sType === this.DATATYPE_TEXT || !sType) this._elInputText.value = '';
+        if (sType === this.DATATYPE_IMAGE || !sType)
         {
             this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview"]').classList.remove('data_input_image_preview-visible');
         }
-        if (sType === 'document' || !sType)
+        if (sType === this.DATATYPE_DOCUMENT || !sType)
         {
             this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_preview"]').classList.remove('data_input_document_preview-visible');
         }
@@ -464,30 +452,6 @@ module.exports.prototype = {
             this._elButtonSend.classList.add('disabled');
             this._bValidated = false;
         }
-    },
-
-
-    _showAlertMessage(sMessage, bDisableInterface)
-    {
-        // 1. register
-        let elAlertMessage = document.querySelector('[data-mimoto-id="alertmessage"]');
-
-        // 2. show
-        elAlertMessage.style.display = 'inline-block';
-
-        // 3. output
-        elAlertMessage.innerHTML = sMessage;
-
-        // 4. hide
-        if (bDisableInterface) document.querySelector('[data-mimoto-id="interface-sender"]').style.display = 'none';
-    },
-
-    _hideAlertMessage()
-    {
-        let elAlertMessage = document.querySelector('[data-mimoto-id="alertmessage"]');
-
-        // 2. show
-        elAlertMessage.style.display = 'none';
     }
 
 };

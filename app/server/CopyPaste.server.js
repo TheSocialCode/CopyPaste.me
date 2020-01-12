@@ -16,6 +16,9 @@ const Module_Express = require('express');
 const Module_GenerateUniqueID = require('generate-unique-id');
 const CoreModule_Util = require('util');
 
+// clint classes
+const ToggleDirection = require('./../client/components/ToggleDirection/ToggleDirection');
+
 
 module.exports = {
 
@@ -99,7 +102,19 @@ module.exports = {
             console.clear();
 
             // b. prepare
-            let aLines = ['', 'CopyPaste.me', 'listening on *:3000 ' + JSON.stringify(this._config), ''];
+            let aLines = [
+                '',
+                'CopyPaste.me - Frictionless sharing between devices',
+                'Created by The Social Code',
+                ' ',
+                '@author  Sebastian Kersten',
+                '@license MIT',
+                ' ',
+                'Help keeping this service free by donating: https://www.paypal.me/thesocialcode',
+                ' ',
+                'listening on *:3000 ' + JSON.stringify(this._config),
+                ''
+            ];
 
             // c. find max length
             let nMaxLength = 0;
@@ -150,33 +165,35 @@ module.exports = {
 
         // 4. configure
         socket.on('disconnect', this._onUserDisconnect.bind(this, socket));
-        socket.on('receiver_request_token', this._onReceiverRequestToken.bind(this, socket));
-        socket.on('receiver_reconnect_to_token', this._onReceiverReconnectToToken.bind(this, socket));
-        socket.on('sender_connect_to_token', this._onSenderConnectToToken.bind(this, socket, false));
-        socket.on('sender_reconnect_to_token', this._onSenderConnectToToken.bind(this, socket, true));
-        socket.on('data', this._onData.bind(this));
+        socket.on('primarydevice_request_token', this._onPrimaryDeviceRequestToken.bind(this, socket));
+        socket.on('primarydevice_reconnect_to_token', this._onPrimaryDeviceReconnectToToken.bind(this, socket));
+        socket.on('secondarydevice_connect_to_token', this._onSecondaryDeviceConnectToToken.bind(this, socket, false));
+        socket.on('secondarydevice_reconnect_to_token', this._onSecondaryDeviceConnectToToken.bind(this, socket, true));
+        socket.on('data', this._onData.bind(this, socket));
+        socket.on(ToggleDirection.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
 
         // 5. debug
         this._log('New user connected - ' + socket.id);
     },
 
-    _onReceiverRequestToken: function(receiverSocket, sReceiverPublicKey)
+    _onPrimaryDeviceRequestToken: function(primaryDeviceSocket, sPrimaryDevicePublicKey)
     {
         // 1. create
         let sToken = Module_GenerateUniqueID({ length: 32 });
 
         // 2. output
-        this._log('Receiver with socket.id = ' + receiverSocket.id + ' requests token = ' + sToken);
+        this._log('Initial Device with socket.id = ' + primaryDeviceSocket.id + ' requests token = ' + sToken);
 
         // 3. verify
-        if (this._aActivePairs['' + sToken] || !this._aSockets['' + receiverSocket.id]) return;
+        if (this._aActivePairs['' + sToken] || !this._aSockets['' + primaryDeviceSocket.id]) return;
 
         // 4. build
         let pair = {
-            receiver: receiverSocket,
-            receiverPublicKey: sReceiverPublicKey,
-            sender: null,
-            senderPublicKey: '',
+            primaryDevice: primaryDeviceSocket,
+            primaryDevicePublicKey: sPrimaryDevicePublicKey,
+            secondaryDevice: null,
+            secondaryDevicePublicKey: '',
+            direction: ToggleDirection.prototype.DEFAULT,
             states: {
                 connectionEstablished: false,
                 dataSent: false,
@@ -190,19 +207,19 @@ module.exports = {
         this._aActivePairs['' + sToken] = pair;
 
         // 6. update
-        this._aSockets['' + receiverSocket.id].sToken = sToken;
+        this._aSockets['' + primaryDeviceSocket.id].sToken = sToken;
 
         // 7. broadcast
-        receiverSocket.emit('token', sToken);
+        primaryDeviceSocket.emit('token', sToken);
 
         // 8. output
-        this._logUsers('After receiver requests token (socket.id = ' + receiverSocket.id + ')');
+        this._logUsers('After Initial Device requests token (socket.id = ' + primaryDeviceSocket.id + ')');
     },
 
-    _onReceiverReconnectToToken: function(receiverSocket, sToken)
+    _onPrimaryDeviceReconnectToToken: function(primaryDeviceSocket, sToken)
     {
         // 1. output
-        this._log('Receiver wants to reconnect to token ' + sToken);
+        this._log('Primary device wants to reconnect to token ' + sToken);
 
         // 2. load
         let pair = this._getPair(sToken);
@@ -211,10 +228,10 @@ module.exports = {
         if (pair === false)
         {
             // a. output
-            this._log('Token = ' + sToken + ' not found for reconnecting receiver');
+            this._log('Token = ' + sToken + ' not found for reconnecting primary device');
 
             // b. broadcast
-            receiverSocket.emit('token_not_found');
+            primaryDeviceSocket.emit('token_not_found');
 
             // c. exit
             return;
@@ -225,13 +242,13 @@ module.exports = {
 
 
         // 4. validate
-        if (pair.receiver)
+        if (pair.primaryDevice)
         {
             // 1. output
-            this._log('Pair already has a `receiver` connected. sToken = ' + sToken);
+            this._log('Pair already has a primary device connected. sToken = ' + sToken);
 
             // 2. warn
-            this._broadcastSecurityWarning(receiverSocket, pair, sToken);
+            this._broadcastSecurityWarning(primaryDeviceSocket, pair, sToken);
             return;
         }
 
@@ -240,28 +257,28 @@ module.exports = {
 
 
         // 5. store
-        this._aActivePairs['' + sToken].receiver = receiverSocket;
+        this._aActivePairs['' + sToken].primaryDevice = primaryDeviceSocket;
 
         // 6. store
-        this._aSockets['' + receiverSocket.id].sToken = sToken;
+        this._aSockets['' + primaryDeviceSocket.id].sToken = sToken;
 
         // 7. broadcast
-        receiverSocket.emit('token_reconnected');
+        primaryDeviceSocket.emit('token_reconnected');
 
         // 8. broadcast
-        if (pair.sender) pair.sender.emit('receiver_reconnected');
+        if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_reconnected');
 
         // 9. output
-        this._logUsers('After receiver reconnects to token (socket.id = ' + receiverSocket.id + ')');
+        this._logUsers('After primary device reconnects to token (socket.id = ' + primaryDeviceSocket.id + ')');
     },
 
-    _onSenderConnectToToken: function(senderSocket, bReconnect, sToken, sSenderPublicKey)
+    _onSecondaryDeviceConnectToToken: function(secondaryDeviceSocket, bReconnect, sToken, sSecondaryDevicePublicKey)
     {
         // 1. prepare
         sToken = '' + sToken;
 
         // 1. output
-        this._log('Sender wants to reconnect to token ' + sToken);
+        this._log('Secondary device wants to connect to token ' + sToken);
 
         // 2. load
         let pair = this._getPair(sToken);
@@ -270,7 +287,7 @@ module.exports = {
         if (pair === false)
         {
             // a. broadcast
-            senderSocket.emit('token_not_found');
+            secondaryDeviceSocket.emit('token_not_found');
 
             // b. exit
             return;
@@ -281,13 +298,13 @@ module.exports = {
 
 
         // 4. validate
-        if (pair.sender)
+        if (pair.secondaryDevice)
         {
             // 1. output
-            this._log('Pair already has a sender connected. sToken = ' + sToken);
+            this._log('Pair already has a second device connected. sToken = ' + sToken);
 
             // 2. warn
-            this._broadcastSecurityWarning(senderSocket, pair, sToken);
+            this._broadcastSecurityWarning(secondaryDeviceSocket, pair, sToken);
             return;
         }
 
@@ -296,19 +313,19 @@ module.exports = {
 
 
         // 5. store
-        this._aActivePairs[sToken].sender = senderSocket;
+        this._aActivePairs[sToken].secondaryDevice = secondaryDeviceSocket;
 
         // 6. store
-        this._aSockets['' + senderSocket.id].sToken = sToken;
+        this._aSockets['' + secondaryDeviceSocket.id].sToken = sToken;
 
         // 7. store
-        pair.senderPublicKey = sSenderPublicKey;
+        pair.secondaryDevicePublicKey = sSecondaryDevicePublicKey;
 
         // 7. broadcast
-        senderSocket.emit((bReconnect) ? 'token_reconnected' : 'token_connected', pair.receiverPublicKey);
+        secondaryDeviceSocket.emit((bReconnect) ? 'token_reconnected' : 'token_connected', pair.primaryDevicePublicKey);
 
         // 8. broadcast
-        if (pair.receiver) pair.receiver.emit((bReconnect) ? 'sender_reconnected' : 'sender_connected', pair.senderPublicKey);
+        if (pair.primaryDevice) pair.primaryDevice.emit((bReconnect) ? 'secondarydevice_reconnected' : 'secondarydevice_connected', pair.secondaryDevicePublicKey);
 
 
         // --- logging
@@ -321,7 +338,7 @@ module.exports = {
         if (!this._aConnectedPairs[sToken]) this._aConnectedPairs[sToken] = true;
 
         // 11. output
-        this._logUsers('After sender connects to token (socket.id = ' + senderSocket.id + ')');
+        this._logUsers('After secondary device connects to token (socket.id = ' + secondaryDeviceSocket.id + ')');
     },
 
     _onUserDisconnect: function(socket)
@@ -351,27 +368,27 @@ module.exports = {
         if (pair === false) return;
 
         // 8. validate
-        if (pair.receiver && pair.receiver.id === socket.id)
+        if (pair.primaryDevice && pair.primaryDevice.id === socket.id)
         {
             // a. cleanup
-            pair.receiver = null;
+            pair.primaryDevice = null;
 
             // d. broadcast
-            if (pair.sender) pair.sender.emit('receiver_disconnected');
+            if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_disconnected');
         }
 
         // 9. validate
-        if (pair.sender && pair.sender.id === socket.id)
+        if (pair.secondaryDevice && pair.secondaryDevice.id === socket.id)
         {
             // a. cleanup
-            pair.sender = null;
+            pair.secondaryDevice = null;
 
             // b. broadcast
-            if (pair.receiver) pair.receiver.emit('sender_disconnected');
+            if (pair.primaryDevice) pair.primaryDevice.emit('secondarydevice_disconnected');
         }
 
         // 10. validate
-        if (!pair.receiver && !pair.sender)
+        if (!pair.primaryDevice && !pair.secondaryDevice)
         {
             // a. move
             this._aInactivePairs[sToken] = pair;
@@ -387,29 +404,91 @@ module.exports = {
         this._logUsers('After user disconnected');
     },
 
-    _onData: function(data)
+    _onData: function(socket, encryptedData)
     {
-        // 1. load
-        let pair = this._getPair(data.sToken);
+        // 0. output
+        this._log('Socket.id = ' + socket.id + ' has shared data');
 
-        // 2. validate
-        if (pair === false || !pair.receiver) return;
+        // 1. validate
+        if (!this._aSockets['' + socket.id]) return;
 
-        // 3. broadcast
-        pair.receiver.emit('data', { sType:data.sType, value:data.value });
+        // 2. load
+        let registeredSocket = this._aSockets['' + socket.id];
 
-        // 4. store
-        pair.log.push( { type: this._ACTIONTYPE_DATA, timestamp: new Date().toUTCString(), contentType:data.sType } );
+        // 3. register
+        let sToken = registeredSocket.sToken;
+
+        // 4. validate
+        if (!sToken) return;
+
+        // 5. load
+        let pair = this._getPair(sToken);
+
+        // 6. validate
+        if (pair === false) return;
+        if (pair.direction === ToggleDirection.prototype.SWAPPED)
+        {
+            if (!pair.secondaryDevice) return;
+        }
+        else
+        {
+            if (!pair.primaryDevice) return;
+        }
+
+        // 7. register
+        let receivingSocket = (pair.direction === ToggleDirection.prototype.SWAPPED) ? pair.secondaryDevice : pair.primaryDevice;
+
+        // 8. broadcast
+        receivingSocket.emit('data', { sType:encryptedData.sType, value:encryptedData.value });
+
+        // 9. store
+        pair.log.push(
+            {
+                type: this._ACTIONTYPE_DATA,
+                timestamp: new Date().toUTCString(),
+                contentType:encryptedData.sType,
+                direction:pair.direction
+            }
+        );
 
 
         // --- logging
 
 
-        // 5. update
+        // 10. update
         pair.states.dataSent = true;
 
-        // 6. store
-        if (!this._aUsedPairs[data.sToken]) this._aUsedPairs[data.sToken] = true;
+        // 11. store
+        if (!this._aUsedPairs[sToken]) this._aUsedPairs[sToken] = true;
+    },
+
+    _onRequestToggleDirection: function(socket)
+    {
+        // 1. validate
+        if (!this._aSockets['' + socket.id]) return;
+
+        // 2. load
+        let registeredSocket = this._aSockets['' + socket.id];
+
+        // 3. register
+        let sToken = registeredSocket.sToken;
+
+        // 4. load
+        let pair = this._getPair(sToken);
+
+        // 5. validate
+        if (pair === false || !pair.primaryDevice || !pair.secondaryDevice) return;
+
+
+        // ---
+
+
+        // 6. toggle
+        pair.direction = (pair.direction === ToggleDirection.prototype.DEFAULT) ? ToggleDirection.prototype.SWAPPED : ToggleDirection.prototype.DEFAULT;
+
+        // 7. broadcast
+        pair.primaryDevice.emit(ToggleDirection.prototype.TOGGLE_DIRECTION, pair.direction);
+        pair.secondaryDevice.emit(ToggleDirection.prototype.TOGGLE_DIRECTION, pair.direction);
     },
 
     _broadcastSecurityWarning: function(requestingSocket, pair, sToken)
@@ -421,23 +500,23 @@ module.exports = {
         delete this._aSockets['' + requestingSocket.id];
 
         // 3. verify
-        if (pair.receiver)
+        if (pair.primaryDevice)
         {
             // a. broadcast
-            pair.receiver.emit('security_compromised');
+            pair.primaryDevice.emit('security_compromised');
 
             // b. cleanup
-            delete this._aSockets['' + pair.receiver.id];
+            delete this._aSockets['' + pair.primaryDevice.id];
         }
 
         // 4. verify
-        if (pair.sender)
+        if (pair.secondaryDevice)
         {
             // a. broadcast
-            pair.sender.emit('security_compromised');
+            pair.secondaryDevice.emit('security_compromised');
 
             // b. cleanup
-            delete this._aSockets['' + pair.sender.id];
+            delete this._aSockets['' + pair.secondaryDevice.id];
         }
 
         // 5. clear

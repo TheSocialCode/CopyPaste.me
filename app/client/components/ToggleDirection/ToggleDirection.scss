@@ -1,0 +1,24 @@
+div.component_ToggleDirection {
+
+    display: none;
+
+    &.show {
+        display: block;
+    }
+}
+
+div.component_ToggleDirection_button {
+    display: inline-block;
+    margin-top: 30px;
+    background-color: #67909D;
+    color: $textcolor-light;
+    border-radius: 8px;
+    padding: 3px 8px 5px 8px;
+    font-size: small;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+        background-color: $support-color-dark;
+    }
+}

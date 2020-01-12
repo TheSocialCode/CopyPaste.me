@@ -1,11 +1,14 @@
+div.component_DataInput {
 
-/* --- sender --- */
-
-
-div.interface-sender {
     display: none;
+
+    &.show {
+        display: block;
+    }
+
     width: 100%;
     max-width: 600px;
+    margin-bottom: 30px;
 }
 
 div.sender_input {

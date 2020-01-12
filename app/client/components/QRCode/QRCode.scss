@@ -1,8 +1,13 @@
+div.component_QR {
 
-div.QR-holder {
-    display: inline-block;
+    display: none;
+
+    &.show {
+        display: inline-block;
+    }
 }
-div.QRCodePlaceHolder {
+
+div.component_QR_card {
     position: center;
     border-radius: 5px;
     background: $background-light;
@@ -12,12 +17,12 @@ div.QRCodePlaceHolder {
     min-height: 210px;
     width: 210px;
 }
-div.QRCodePlaceHolder-label {
+div.component_QR_card_label {
     text-align: center;
     font-weight: bold;
     font-size: large;
 }
-div.QRCodePlaceHolder-sublabel {
+div.component_QR_card_sublabel {
     text-align: center;
     font-size: smaller;
 }

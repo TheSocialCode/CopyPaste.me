@@ -19,6 +19,14 @@ module.exports = function(sTokenURL)
 
 module.exports.prototype = {
 
+    // components
+    _qrcode: null,
+
+    // views
+    _elRoot: null,
+    _elContainer: null,
+
+
 
     // ----------------------------------------------------------------------------
     // --- Constructor ------------------------------------------------------------
@@ -30,16 +38,20 @@ module.exports.prototype = {
      */
     __construct: function (sTokenURL)
     {
-        // 1. configure
+        // 1. register
+        this._elRoot = document.querySelector('[data-mimoto-id="component_QR"]');
+        this._elContainer = document.querySelector('[data-mimoto-id="component_QR_container"]');
+
+        // 2. configure
         var typeNumber = 4;
         var errorCorrectionLevel = 'L';
         var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
         qr.addData(sTokenURL);
         qr.make();
-        document.getElementById('QRCode').innerHTML = qr.createImgTag(5);
+        this._elContainer.innerHTML = qr.createImgTag(5);
 
-        // 2. configure
-        document.getElementById("QRCode").addEventListener(
+        // 3. configure
+        this._elContainer.addEventListener(
             'click',
             function(e)
             {
@@ -53,6 +65,31 @@ module.exports.prototype = {
 
             }.bind(this, sTokenURL)
         );
+    },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Public methods ---------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
+     * Show component
+     */
+    show: function()
+    {
+        // 1. toggle
+        this._elRoot.classList.add('show');
+    },
+
+    /**
+     * Hide component
+     */
+    hide: function()
+    {
+        // 1. toggle
+        this._elRoot.classList.remove('show');
     }
 
 };

@@ -1,0 +1,22 @@
+// imports
+@import 'QRCode/QRCode';
+@import 'Waiting/Waiting';
+@import 'DataInput/DataInput';
+@import 'DataOutput/DataOutput';
+@import 'ToggleDirection/ToggleDirection';
+@import 'AlertMessage/AlertMessage';
+@import 'SecurityWarning/SecurityWarning';
+@import 'Templates/Templates';
+@import 'FAQ/FAQ';
+
+
+div.component_Client {
+    display: inline-block;
+    width: 100%;
+    max-width: 600px;
+    padding: 0 10px 35px 10px;
+
+    &.disabled {
+        display: none;
+    }
+}

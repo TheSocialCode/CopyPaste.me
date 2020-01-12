@@ -1,0 +1,63 @@
+// imports
+@import 'SharedData/SharedData';
+
+
+div.component_DataOutput {
+
+    display: none;
+
+    &.show {
+        display: block;
+    }
+}
+
+
+
+
+div.receiver_data {
+    position: relative;
+}
+
+div.receiver_data_placeholder_container {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+div.receiver_data_placeholder {
+    position: relative;
+    border-radius: 5px;
+    height: 0;
+    margin-top: 0;
+    width: 100%;
+    transition: height 0.3s ease-in-out;
+}
+
+div.receiver_data_content_container {
+    position: relative;
+    background-color: $background-light;
+    border-radius: 5px;
+    margin-bottom: 10px;
+
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+div.receiver_data_content_container.show {
+    opacity: 1;
+}
+
+div.receiver_clipboard_clear {
+
+    display: none;
+
+    &.show {
+        display: block;
+    }
+
+    background-color: $background-light;
+    border-radius: 5px;
+    color: $textcolor-dark;
+    opacity: 0.5;
+    padding: 10px 20px 10px 20px;
+}
