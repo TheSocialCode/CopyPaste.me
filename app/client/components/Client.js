@@ -419,9 +419,10 @@ module.exports.prototype = {
     {
         // 1. hide
         this._dataInput.hide();
+        this._toggleDirection.hide();
 
         // 2. output
-        this._alertMessage.show('This session expired. <a href="/">Reload</a> page to make new connection.', true);
+        this._alertMessage.show('This session expired. <a href="/" target="_blank">Reload</a> this page to make a new connection.', true);
     },
 
     /**
@@ -430,8 +431,9 @@ module.exports.prototype = {
      */
     _onSecondaryDeviceTokenNotFound: function()
     {
-        // 1. hide
+        // 1. toggle visibility
         this._dataInput.hide();
+        this._toggleDirection.hide();
 
         // 2. output
         this._alertMessage.show('The link you are trying to use is not working. Please try again.', true);
@@ -447,13 +449,11 @@ module.exports.prototype = {
         // 1. store
         this._sTheirPublicKey = sSenderPublicKey;
 
-        // 2. reset
+        // 2. toggle visibility
         this._alertMessage.hide();
-
-        // 3. toggle interface
         this._qrcode.hide();
-        this._toggleDirection.show();
         this._dataOutput.show();
+        if (this._isOutputDevice()) this._toggleDirection.show();
     },
 
     /**
@@ -462,7 +462,12 @@ module.exports.prototype = {
      */
     _onSecondaryDeviceDisconnected: function()
     {
-        this._alertMessage.show("The secondary device has been disconnected.");
+        // 1. toggle visibility
+        this._dataOutput.hide();
+        this._toggleDirection.hide();
+
+        // 2. output
+        this._alertMessage.show("The other device has been disconnected. Is it still online?");
     },
 
     /**
@@ -471,21 +476,37 @@ module.exports.prototype = {
      */
     _onSecondaryDeviceReconnected: function()
     {
+        // 1. toggle visibility
         this._alertMessage.hide();
+        this._dataOutput.show();
+        if (this._isOutputDevice()) this._toggleDirection.show();
     },
 
     _onPrimaryDeviceDisconnected: function()
     {
-        this._alertMessage.show('The receiving device is not connected. Is it still online?', true);
+        // 1. toggle visibility
+        this._dataOutput.hide();
+        this._toggleDirection.hide();
+
+        // 2. output
+        this._alertMessage.show('The other device has been disconnected. Is it still online?');
     },
 
     _onPrimaryDeviceReconnected: function()
     {
+        // 1. toggle visibility
         this._alertMessage.hide();
+        this._dataOutput.show();
+        if (this._isOutputDevice()) this._toggleDirection.show();
     },
 
     _onTokenNotFound: function()
     {
+        // 1. toggle visibility
+        this._dataOutput.hide();
+        this._toggleDirection.hide();
+
+        // 2. output
         this._alertMessage.show('The link you are trying to use is not working. Please try again.', true);
     },
 
@@ -494,12 +515,9 @@ module.exports.prototype = {
         // 1. store
         this._sTheirPublicKey = sPrimaryDevicePublicKey;
 
-
+        // 2. toggle visibility
         this._dataInput.show();
-        //this._toggleDirection.show();
-
-
-        //console.log('ConnectedDevice: Token connected');
+        if (this._isOutputDevice()) this._toggleDirection.show();
     },
 
     _onTokenReconnected: function()
@@ -507,4 +525,26 @@ module.exports.prototype = {
         //console.log('Sender: Token reconnected');
     },
 
+    /**
+     * Check is the current device is the output device
+     * @returns {boolean}
+     * @private
+     */
+    _isOutputDevice: function()
+    {
+        // 1. verify
+        if (this._sDirection !== ToggleDirection.prototype.SWAPPED)
+        {
+            // a. verify and send
+            if (this._bIsPrimaryDevice) return true;
+        }
+        else
+        {
+            // a. verify and send
+            if (!this._bIsPrimaryDevice) return true;
+        }
+
+        // 2. send default
+        return false;
+    }
 };

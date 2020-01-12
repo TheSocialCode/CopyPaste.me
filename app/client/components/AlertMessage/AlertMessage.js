@@ -47,7 +47,7 @@ module.exports.prototype = {
     show: function(sMessage, bDisableInterface)
     {
         // 1. output
-        this._elRoot.innerText = sMessage;
+        this._elRoot.innerHTML = sMessage;
 
         // 2. show
         this._elRoot.classList.add('show');
