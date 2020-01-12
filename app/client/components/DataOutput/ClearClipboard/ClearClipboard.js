@@ -58,7 +58,7 @@ module.exports.prototype = {
 
     show: function()
     {
-        console.log('Show DataOutput');
+        console.log('Show ClearClipboard');
 
         this._elRoot.classList.add('show');
 
@@ -68,7 +68,7 @@ module.exports.prototype = {
 
     hide: function()
     {
-        console.log('Hide DataOutput');
+        console.log('Hide ClearClipbard');
 
         this._elRoot.classList.remove('show');
     }

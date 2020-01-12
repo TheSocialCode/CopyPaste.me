@@ -194,8 +194,6 @@ module.exports.prototype = {
                 // focus
                 this._focusTab(sDataType);
 
-                console.log('TAB click', sDataType);
-
                 // toggle
                 this._focusDataInput(sDataType);
 
