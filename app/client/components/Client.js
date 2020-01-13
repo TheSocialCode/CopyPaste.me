@@ -422,7 +422,7 @@ module.exports.prototype = {
         this._toggleDirection.hide();
 
         // 2. output
-        this._alertMessage.show('This session expired. <a href="/" target="_blank">Reload</a> this page to make a new connection.', true);
+        this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to make a new connection.', true);
     },
 
     /**
