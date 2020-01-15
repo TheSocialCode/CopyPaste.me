@@ -64,7 +64,7 @@ module.exports.prototype = {
         this._elRoot = document.querySelector('[data-mimoto-id="component_Client"]');
 
         // 3. setup
-        this._socket = new SocketIO(sGateway, {secure: true });
+        this._socket = new SocketIO(sGateway, {secure: true});
 
         // 4. configure
         this._socket.on('connect', this._onSocketConnect.bind(this));

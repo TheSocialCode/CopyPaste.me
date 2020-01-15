@@ -338,7 +338,7 @@ module.exports = {
         if (!this._aConnectedPairs[sToken]) this._aConnectedPairs[sToken] = true;
 
         // 11. output
-        this._logUsers('Secondary device connects to token (socket.id = ' + secondaryDeviceSocket.id + ')');
+        this._logUsers('Secondary device ' + ((bReconnect) ? 're' : '' ) + 'connects to token (socket.id = ' + secondaryDeviceSocket.id + ')');
     },
 
     _onUserDisconnect: function(socket)
@@ -355,11 +355,11 @@ module.exports = {
         // 3. register
         let sToken = registeredSocket.sToken;
 
-        // 4. validate
-        if (!sToken) return;
-
-        // 5. cleanup
+        // 4. cleanup
         delete this._aSockets['' + socket.id];
+
+        // 5. validate
+        if (!sToken) return;
 
         // 6. load
         let pair = this._getPair(sToken);
