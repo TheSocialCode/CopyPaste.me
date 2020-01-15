@@ -173,7 +173,7 @@ module.exports = {
         socket.on(ToggleDirection.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
 
         // 5. debug
-        this._log('New user connected - ' + socket.id);
+        this._logUsers('User connected (socket.id = ' + socket.id + ')');
     },
 
     _onPrimaryDeviceRequestToken: function(primaryDeviceSocket, sPrimaryDevicePublicKey)
@@ -213,7 +213,7 @@ module.exports = {
         primaryDeviceSocket.emit('token', sToken);
 
         // 8. output
-        this._logUsers('After Initial Device requests token (socket.id = ' + primaryDeviceSocket.id + ')');
+        this._logUsers('Initial Device requested token (socket.id = ' + primaryDeviceSocket.id + ')');
     },
 
     _onPrimaryDeviceReconnectToToken: function(primaryDeviceSocket, sToken)
@@ -269,7 +269,7 @@ module.exports = {
         if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_reconnected');
 
         // 9. output
-        this._logUsers('After primary device reconnects to token (socket.id = ' + primaryDeviceSocket.id + ')');
+        this._logUsers('Primary device reconnects to token (socket.id = ' + primaryDeviceSocket.id + ')');
     },
 
     _onSecondaryDeviceConnectToToken: function(secondaryDeviceSocket, bReconnect, sToken, sSecondaryDevicePublicKey)
@@ -338,7 +338,7 @@ module.exports = {
         if (!this._aConnectedPairs[sToken]) this._aConnectedPairs[sToken] = true;
 
         // 11. output
-        this._logUsers('After secondary device connects to token (socket.id = ' + secondaryDeviceSocket.id + ')');
+        this._logUsers('Secondary device connects to token (socket.id = ' + secondaryDeviceSocket.id + ')');
     },
 
     _onUserDisconnect: function(socket)
@@ -401,7 +401,7 @@ module.exports = {
         }
 
         // 11. output
-        this._logUsers('After user disconnected');
+        this._logUsers('User disconnected (socket.id = ' + socket.id + ')');
     },
 
     _onData: function(socket, encryptedData)
@@ -460,6 +460,9 @@ module.exports = {
 
         // 11. store
         if (!this._aUsedPairs[sToken]) this._aUsedPairs[sToken] = true;
+
+        // 12. output
+        this._logUsers('Data shared (socket.id = ' + socket.id + ')');
     },
 
     _onRequestToggleDirection: function(socket)
