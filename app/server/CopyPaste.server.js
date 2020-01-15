@@ -28,11 +28,13 @@ module.exports = {
         https: true,    // options: 'true' (runs on https)  | 'false' (runs on http)
     },
 
-
     // services
     _app: null,
     _server: null,
     _io: null,
+
+    // utils
+    _timerLog: null,
 
     // data
     _aActivePairs: [],
@@ -145,6 +147,9 @@ module.exports = {
 
             // e. output extra line
             console.log();
+
+            // f. output
+            this._timerLog = setInterval(this._logUsers.bind(this, 'Automated log'), 60 * 1000);
 
         }.bind(this));
     },
