@@ -322,7 +322,7 @@ module.exports = {
         pair.secondaryDevicePublicKey = sSecondaryDevicePublicKey;
 
         // 7. broadcast
-        secondaryDeviceSocket.emit((bReconnect) ? 'token_reconnected' : 'token_connected', pair.primaryDevicePublicKey);
+        secondaryDeviceSocket.emit((bReconnect) ? 'token_reconnected' : 'token_connected', pair.primaryDevicePublicKey, pair.direction);
 
         // 8. broadcast
         if (pair.primaryDevice) pair.primaryDevice.emit((bReconnect) ? 'secondarydevice_reconnected' : 'secondarydevice_connected', pair.secondaryDevicePublicKey);

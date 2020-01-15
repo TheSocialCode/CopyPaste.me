@@ -444,10 +444,10 @@ module.exports.prototype = {
      * @param sSenderPublicKey
      * @private
      */
-    _onSecondaryDeviceConnected: function(sSenderPublicKey)
+    _onSecondaryDeviceConnected: function(sSecondaryPublicKey)
     {
         // 1. store
-        this._sTheirPublicKey = sSenderPublicKey;
+        this._sTheirPublicKey = sSecondaryPublicKey;
 
         // 2. toggle visibility
         this._alertMessage.hide();
@@ -510,14 +510,24 @@ module.exports.prototype = {
         this._alertMessage.show('The link you are trying to use is not working. Please try again.', true);
     },
 
-    _onSecondaryDeviceConnectedToToken: function(sPrimaryDevicePublicKey)
+    _onSecondaryDeviceConnectedToToken: function(sPrimaryDevicePublicKey, sDirection)
     {
+        console.log('_onSecondaryDeviceConnectedToToken', 'sDirection = ' + sDirection);
+
         // 1. store
         this._sTheirPublicKey = sPrimaryDevicePublicKey;
+        this._sDirection = sDirection;
 
         // 2. toggle visibility
-        this._dataInput.show();
-        if (this._isOutputDevice()) this._toggleDirection.show();
+        if (this._isOutputDevice())
+        {
+            this._dataOutput.show();
+            this._toggleDirection.show();
+        }
+        else
+        {
+            this._dataInput.show();
+        }
     },
 
     _onTokenReconnected: function()
