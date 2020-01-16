@@ -19,6 +19,7 @@
 
     <h2 class="faq_question">So just to be clear, my data is never stored?</h2>
     <p class="faq_answer">Exactly! Your data is yours and yours alone and this tool is designed to work without the need to store your data. Which is good, because your data shouldn't be stored all over the internet just because you're using online tools.</p>
+    <p class="faq_answer">For full transparancy I've published the code I'm running on copypaste.me on Github. Please check it out for yourself: <a href="https://github.com/TheSocialCode/CopyPaste.me" target="_blank">CopyPaste.me on Github</a></p>
 
     <h2 class="faq_question">What happens when another person is trying to connect to the same link?</h2>
     <p class="faq_answer">Don't worry. A connection only allows two devices. If another person would try to connect, your screen will show a warning about your security being compromised and the connection will immediately be terminated and no data will be sent. Your data is safe!</p>

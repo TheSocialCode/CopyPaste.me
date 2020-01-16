@@ -604,8 +604,8 @@ module.exports = {
         console.log('Inactive pairs');
         console.log('-------------------------');
         console.log(CoreModule_Util.inspect(this._aInactivePairs, false, null, true));
-        console.log(' ');
-        console.log(' ');
+        console.log('');
+        console.log('');
     }
 
 };
