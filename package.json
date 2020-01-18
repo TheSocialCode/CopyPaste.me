@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "Frictionless sharing between devices",
     "repository": "https://github.com/SebastianKersten/CopyPaste.me",
-    "license": "GPL",
+    "license": "GPLv3",
     "dependencies": {
         "asymmetric-crypto": "^1.0.2",
         "css-loader": "^3.4.1",
