@@ -5,18 +5,45 @@ div.component_QR {
     &.show {
         display: inline-block;
     }
+
+    perspective: 1000px;
+}
+
+div.component_QR_inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
+
+    .flip & {
+        transform: rotateX(-180deg);
+    }
 }
 
 div.component_QR_card {
-    position: center;
-    border-radius: 5px;
     background: $background-light;
-    padding: 15px 5px 5px 5px;
-
-    box-shadow: 1px 3px 10px $support-color-dark;
-    min-height: 210px;
-    width: 210px;
+    border-radius: 5px;
 }
+
+div.component_QR_card_front, div.component_QR_card_back {
+    position: absolute;
+    backface-visibility: hidden;
+}
+
+div.component_QR_card_front {
+    padding: 15px 5px 5px 5px;
+    box-shadow: 1px 3px 10px $support-color-dark;
+}
+
+div.component_QR_card_back {
+    padding: 15px 10px 10px 10px;
+    transform: rotateX(180deg);
+    box-shadow: 1px 3px 10px $support-color-dark;
+    background-color: $background-light;
+}
+
 div.component_QR_card_label {
     text-align: center;
     font-weight: bold;
@@ -25,4 +52,33 @@ div.component_QR_card_label {
 div.component_QR_card_sublabel {
     text-align: center;
     font-size: smaller;
+}
+
+div.component_QR_manualurl {
+    border-radius: 3px;
+    background-color: $background-lightestgray;
+    border: $background-lightgray 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 10px;
+    padding: 15px;
+
+    & div.component_QR_manualurl_url {
+        font-weight: bold;
+    }
+
+    & div.component_QR_manualurl_guidance {
+        margin: 10px 0 20px 0;
+    }
+
+    & div.component_QR_manualurl_code {
+        font-size: x-large;
+        font-weight: bold;
+    }
+}
+
+div.component_QR_manualurl_inner {
+
 }

@@ -3,10 +3,23 @@
     <!-- QR code -->
 
     <div data-mimoto-id="component_QR" class="component_QR">
-        <div class="component_QR_card">
-            <div class="component_QR_card_label">Scan me</div>
-            <div class="component_QR_card_sublabel">to connect your phone</div>
-            <div data-mimoto-id="component_QR_container"></div>
+        <div class="component_QR_inner">
+            <div data-mimoto-id="component_QR_front" class="component_QR_card component_QR_card_front">
+                <div class="component_QR_card_label">Scan me</div>
+                <div class="component_QR_card_sublabel">to connect your phone</div>
+                <div data-mimoto-id="component_QR_container"></div>
+            </div>
+            <div data-mimoto-id="component_QR_back" class="component_QR_card component_QR_card_back">
+                <div class="component_QR_card_label">Use this URL</div>
+                <div class="component_QR_card_sublabel">to manually connect another device</div>
+                <div data-mimoto-id="component_QR_manualurl" class="component_QR_manualurl show">
+                    <div class="component_QR_manualurl_inner">
+                        <div class="component_QR_manualurl_url">https://copypaste.me/connect</div>
+                        <div class="component_QR_manualurl_guidance">and enter<br>the following code:</div>
+                        <div class="component_QR_manualurl_code">AFE-GTF</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -96,8 +109,15 @@
 
     <!-- Toggle direction -->
 
-    <div data-mimoto-id="component_ToggleDirection" class="component_DataOutput">
-        <div data-mimoto-id="component_ToggleDirection_button" class="component_ToggleDirection_button">Share from here</div>
+    <div data-mimoto-id="component_ToggleDirection" class="component_ToggleDirection">
+        <div data-mimoto-id="component_ToggleDirection_button" class="module_ToggleButton">Share from here</div>
+    </div>
+
+
+    <!-- Manual connect -->
+
+    <div data-mimoto-id="component_ManualConnect" class="component_ManualConnect">
+        <div data-mimoto-id="component_ManualConnect_button" class="module_ToggleButton">Connect manually</div>
     </div>
 </div>
 

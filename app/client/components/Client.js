@@ -14,6 +14,7 @@ const DataOutput = require('./DataOutput/DataOutput');
 const DataInput = require('./DataInput/DataInput');
 const Module_Crypto = require('asymmetric-crypto');
 const ToggleDirection = require('./ToggleDirection/ToggleDirection');
+const ManualConnect = require('./ManualConnect/ManualConnect');
 const AlertMessage = require('./AlertMessage/AlertMessage');
 
 
@@ -37,6 +38,7 @@ module.exports.prototype = {
     _dataInput: null,
     _alertMessage: null,
     _toggleDirection: null,
+    _manualConnect: null,
 
     // security
     _myKeyPair: null,
@@ -264,6 +266,17 @@ module.exports.prototype = {
     },
 
     /**
+     * Handle event `request_toggle_manualconnect`
+     * @private
+     */
+    _onRequestToggleManualConnect: function()
+    {
+        // 1. broadcast
+        this._qrcode.flip();
+    },
+
+
+    /**
      * Handle event `toggle_direction`
      * @param sDirection
      * @private
@@ -385,6 +398,15 @@ module.exports.prototype = {
 
         // 11. configure
         this._toggleDirection.addEventListener(ToggleDirection.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this));
+
+
+        // --- manual connect
+
+        // 12. init
+        this._manualConnect = new ManualConnect();
+
+        // 13. configure
+        this._manualConnect.addEventListener(ManualConnect.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
     },
 
 

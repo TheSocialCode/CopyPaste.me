@@ -23,12 +23,7 @@ module.exports.prototype = {
     _aEvents: [],
 
     // events
-    REQUEST_TOGGLE_DIRECTION: 'onRequestToggleDirection',
-    TOGGLE_DIRECTION: 'onToggleDirection',
-
-    // states
-    DEFAULT: 'default',
-    SWAPPED: 'swapped',
+    REQUEST_TOGGLE_MANUALCONNECT: 'onRequestToggleManualConnect',
 
 
 
@@ -43,8 +38,8 @@ module.exports.prototype = {
     __construct: function ()
     {
         // 1. register
-        this._elRoot = document.querySelector('[data-mimoto-id="component_ToggleDirection"]');
-        this._elButton = this._elRoot.querySelector('[data-mimoto-id="component_ToggleDirection_button"]');
+        this._elRoot = document.querySelector('[data-mimoto-id="component_ManualConnect"]');
+        this._elButton = this._elRoot.querySelector('[data-mimoto-id="component_ManualConnect_button"]');
 
         // 2. configure
         this._elButton.addEventListener('click', this._onButtonClick.bind(this));
@@ -124,7 +119,7 @@ module.exports.prototype = {
     _onButtonClick: function(e)
     {
         // 1. broadcast
-        this.dispatchEvent(this.REQUEST_TOGGLE_DIRECTION);
+        this.dispatchEvent(this.REQUEST_TOGGLE_MANUALCONNECT);
     }
 
 };

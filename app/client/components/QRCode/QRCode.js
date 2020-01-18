@@ -25,6 +25,9 @@ module.exports.prototype = {
     // views
     _elRoot: null,
     _elContainer: null,
+    _elFront: null,
+    _elBack: null,
+    _elManualURL: null,
 
 
 
@@ -41,6 +44,9 @@ module.exports.prototype = {
         // 1. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_QR"]');
         this._elContainer = document.querySelector('[data-mimoto-id="component_QR_container"]');
+        this._elFront = document.querySelector('[data-mimoto-id="component_QR_front"]');
+        this._elBack = document.querySelector('[data-mimoto-id="component_QR_back"]');
+        this._elManualURL = document.querySelector('[data-mimoto-id="component_QR_manualurl"]');
 
         // 2. configure
         var typeNumber = 4;
@@ -81,6 +87,20 @@ module.exports.prototype = {
     {
         // 1. toggle
         this._elRoot.classList.add('show');
+
+        // 2. apply dimensions to main component
+        this._elRoot.style.width = this._elFront.offsetWidth + 'px';
+        this._elRoot.style.height = this._elFront.offsetHeight + 'px';
+
+        // 3. register
+        let nInitialBackHeight = this._elBack.offsetHeight;
+
+        // 4. resize
+        this._elBack.style.height = this._elFront.offsetHeight + 'px';
+        this._elManualURL.style.height = (this._elManualURL.offsetHeight + this._elFront.offsetHeight - nInitialBackHeight) + 'px';
+
+        // 5. position
+        this._elBack.style.left = (-Math.floor(Math.abs(this._elBack.offsetWidth - this._elFront.offsetWidth) / 2)) + 'px';
     },
 
     /**
@@ -90,6 +110,15 @@ module.exports.prototype = {
     {
         // 1. toggle
         this._elRoot.classList.remove('show');
+    },
+
+    /**
+     * Flip from QR-code to manual connect and back
+     */
+    flip: function()
+    {
+        // 1. toggle
+        this._elRoot.classList.toggle('flip');
     }
 
 };
