@@ -118,7 +118,10 @@ module.exports.prototype = {
      */
     _onButtonClick: function(e)
     {
-        // 1. broadcast
+        // 1, toggle label
+        this._elRoot.classList.toggle('flip');
+
+        // 2. broadcast
         this.dispatchEvent(this.REQUEST_TOGGLE_MANUALCONNECT);
     }
 

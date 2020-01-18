@@ -431,6 +431,7 @@ module.exports.prototype = {
 
         // 3. show
         this._qrcode.show();
+        this._manualConnect.show();
     },
 
     /**
@@ -474,6 +475,7 @@ module.exports.prototype = {
         // 2. toggle visibility
         this._alertMessage.hide();
         this._qrcode.hide();
+        this._manualConnect.hide();
         this._dataOutput.show();
         if (this._isOutputDevice()) this._toggleDirection.show();
     },

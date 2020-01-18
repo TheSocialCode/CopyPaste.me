@@ -117,7 +117,10 @@
     <!-- Manual connect -->
 
     <div data-mimoto-id="component_ManualConnect" class="component_ManualConnect">
-        <div data-mimoto-id="component_ManualConnect_button" class="module_ToggleButton">Connect manually</div>
+        <div data-mimoto-id="component_ManualConnect_button" class="module_ToggleButton">
+            <span class="module_ToggleButton_manually">Connect manually</span>
+            <span class="module_ToggleButton_qr">Connect by QR</span>
+        </div>
     </div>
 </div>
 

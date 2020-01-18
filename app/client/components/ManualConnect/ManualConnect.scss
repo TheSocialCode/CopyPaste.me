@@ -6,3 +6,19 @@ div.component_ManualConnect {
         display: block;
     }
 }
+
+span.module_ToggleButton_manually {
+    display: inline-block;
+
+    .flip & {
+        display: none;
+    }
+}
+
+span.module_ToggleButton_qr {
+    display: none;
+
+    .flip & {
+        display: inline-block;
+    }
+}
