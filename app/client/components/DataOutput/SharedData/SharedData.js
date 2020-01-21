@@ -265,10 +265,10 @@ module.exports.prototype = {
 
     _updateTimer: function()
     {
-        // 1. calculate
+        // 1. init
         let nDifference = this._nTimeToAutoDestruct - new Date().getTime();
 
-        // 2.
+        // 2. convert
         let nMinutes = Math.floor((nDifference % (1000 * 60 * 60)) / (1000 * 60));
         let nSeconds = Math.floor((nDifference % (1000 * 60)) / 1000);
 

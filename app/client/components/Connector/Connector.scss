@@ -23,7 +23,7 @@ div.component_QR_inner {
 }
 
 div.component_QR_card {
-    background: $background-light;
+    background-color: $background-light;
     border-radius: 5px;
 }
 
@@ -41,7 +41,6 @@ div.component_QR_card_back {
     padding: 15px 10px 10px 10px;
     transform: rotateX(180deg);
     box-shadow: 1px 3px 10px $support-color-dark;
-    background-color: $background-light;
 }
 
 div.component_QR_card_label {
@@ -77,6 +76,15 @@ div.component_QR_manualurl {
     & div.component_QR_manualurl_code {
         font-size: x-large;
         font-weight: bold;
+    }
+
+    & div.component_QR_manualurl_validity {
+        margin-top: 5px;
+        font-size: smaller;
+
+        &.almostexpired {
+            color: $textcolor-alert;
+        }
     }
 }
 

@@ -1,0 +1,50 @@
+div.component_ManualConnectInput {
+
+    display: none;
+
+    &.show {
+        display: inline-block;
+    }
+
+    background-color: $background-light;
+    border-radius: 5px;
+    padding: 15px 10px 10px 10px;
+    box-shadow: 1px 3px 10px $support-color-dark;
+}
+
+
+div.component_ManualConnectInput_label {
+    text-align: center;
+    font-weight: bold;
+    font-size: large;
+}
+div.component_ManualConnectInput_sublabel {
+    text-align: center;
+    font-size: smaller;
+}
+
+div.component_QR_manualurl {
+    border-radius: 3px;
+    background-color: $background-lightestgray;
+    border: $background-lightgray 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 10px;
+    padding: 15px;
+
+    & div.component_QR_manualurl_url {
+        font-weight: bold;
+    }
+
+    & div.component_QR_manualurl_guidance {
+        margin: 20px 0 20px 0;
+        font-size: smaller;
+    }
+
+    & div.component_QR_manualurl_code {
+        font-size: x-large;
+        font-weight: bold;
+    }
+}

@@ -3,23 +3,25 @@
     "version": "1.0.0",
     "description": "Frictionless sharing between devices",
     "repository": "https://github.com/SebastianKersten/CopyPaste.me",
-    "license": "GPLv3",
+    "license": "AGPL-3.0-only",
     "dependencies": {
         "asymmetric-crypto": "^1.0.2",
-        "css-loader": "^3.4.1",
+        "css-loader": "^3.4.2",
         "express": "^4.17.1",
         "fs": "0.0.1-security",
+        "generate-password": "^1.5.0",
         "generate-unique-id": "^2.0.0",
         "http": "0.0.0",
         "https": "^1.0.0",
+        "mongodb": "^3.5.2",
         "qrcode-generator": "^1.4.4",
         "socket.io": "^2.3.0",
         "socket.io-client": "^2.3.0",
-        "style-loader": "^1.1.2"
+        "style-loader": "^1.1.3"
     },
     "devDependencies": {
-        "node-sass": "^4.13.0",
-        "sass-loader": "^8.0.0",
+        "node-sass": "^4.13.1",
+        "sass-loader": "^8.0.2",
         "webpack": "^4.41.5"
     }
 }

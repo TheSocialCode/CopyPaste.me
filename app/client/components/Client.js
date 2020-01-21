@@ -9,12 +9,15 @@
 
 // import
 const SocketIO = require('socket.io-client');
-const QRCode = require('./QRCode/QRCode');
+const Connector = require('./Connector/Connector');
 const DataOutput = require('./DataOutput/DataOutput');
 const DataInput = require('./DataInput/DataInput');
 const Module_Crypto = require('asymmetric-crypto');
-const ToggleDirection = require('./ToggleDirection/ToggleDirection');
-const ManualConnect = require('./ManualConnect/ManualConnect');
+const ToggleDirectionButton = require('./ToggleDirectionButton/ToggleDirectionButton');
+const ToggleDirectionEvents = require('./ToggleDirectionButton/ToggleDirectionEvents');
+const ToggleDirectionStates = require('./ToggleDirectionButton/ToggleDirectionStates');
+const ManualConnectInput = require('./ManualConnectInput/ManualConnectInput');
+const ManualConnectEvents = require('./ManualConnectButton/ManualConnectEvents');
 const AlertMessage = require('./AlertMessage/AlertMessage');
 
 
@@ -29,16 +32,17 @@ module.exports.prototype = {
     // connection
     _socket: null,
     _sToken: '',
+    _sManualCode: '',
     _bIsPrimaryDevice: null,
-    _sDirection: ToggleDirection.prototype.DEFAULT,
+    _bIsManualConnect: false,
+    _sDirection: ToggleDirectionStates.prototype.DEFAULT,
 
     // components
-    _qrcode: null,
+    _connector: null,
     _dataOutput: null,
     _dataInput: null,
     _alertMessage: null,
-    _toggleDirection: null,
-    _manualConnect: null,
+    _toggleDirectionButton: null,
 
     // security
     _myKeyPair: null,
@@ -73,33 +77,50 @@ module.exports.prototype = {
         this._socket.on('connect_failed', this._socketConnectFailed.bind(this));
         this._socket.on('connect_error', this._onSocketConnectError.bind(this));
         this._socket.on('disconnect', this._onSocketDisconnect.bind(this));
+        this._socket.on('manualcode', this._onManualCode.bind(this));
         this._socket.on('security_compromised', this._onSecurityCompromised.bind(this));
         this._socket.on('data', this._onData.bind(this));
 
-        // 5. register
-        this._sToken = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
+        // 5. verify
+        let sConnectPath = 'connect';
+        if (window.location.pathname.substr(1, sConnectPath.length) === sConnectPath)
+        {
+            console.log('CONNECT');
 
-        // 6. init
-        if (!this._sToken || this._sToken.length === 0)
-        {
-            // a. setup
-            this._setupDevice(true);
-        }
-        else
-        {
-            // a. validate
-            if (!new RegExp(/^[0-9a-z]{32}$/g).test(this._sToken))
-            {
-                // I. open
-                window.open('/', '_self');
-                return;
-            }
+
+            // a. configure
+            this._bIsManualConnect = true;
 
             // b. setup
             this._setupDevice(false);
         }
+        else
+        {
+            // a. register
+            this._sToken = window.location.pathname.substr(1);
 
-        // 7. run
+            // b. init
+            if (!this._sToken || this._sToken.length === 0)
+            {
+                // I. setup
+                this._setupDevice(true);
+            }
+            else
+            {
+                // I. validate
+                if (!new RegExp(/^[0-9a-z]{32}$/g).test(this._sToken))
+                {
+                    // 1. open
+                    window.open('/', '_self');
+                    return;
+                }
+
+                // II. setup
+                this._setupDevice(false);
+            }
+        }
+
+        // 6. run
         this._socket.connect();
     },
 
@@ -136,8 +157,16 @@ module.exports.prototype = {
         }
         else
         {
-            // a. broadcast
-            this._socket.emit('secondarydevice_connect_to_token', this._sToken, this._myKeyPair.publicKey);
+            // a. verify
+            if (this._bIsManualConnect)
+            {
+                console.log('MANUAL CONNECT');
+            }
+            else
+            {
+                // I. broadcast
+                this._socket.emit('secondarydevice_connect_to_token', this._sToken, this._myKeyPair.publicKey);
+            }
         }
     },
 
@@ -252,9 +281,6 @@ module.exports.prototype = {
         this._dataOutput.showData(data);
     },
 
-
-
-
     /**
      * Handle event `request_toggle_direction`
      * @private
@@ -262,7 +288,7 @@ module.exports.prototype = {
     _onRequestToggleDirection: function()
     {
         // 1. broadcast
-        this._socket.emit(ToggleDirection.prototype.REQUEST_TOGGLE_DIRECTION);
+        this._socket.emit(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION);
     },
 
     /**
@@ -271,10 +297,20 @@ module.exports.prototype = {
      */
     _onRequestToggleManualConnect: function()
     {
-        // 1. broadcast
-        this._qrcode.flip();
+        // 1. verify and request
+        if (!this._sManualCode) this._socket.emit(ManualConnectEvents.prototype.REQUEST_MANUALCODE);
     },
 
+    /**
+     * Handle event `manualcode`
+     * @param sManualCode
+     * @private
+     */
+    _onManualCode: function(sManualCode)
+    {
+        // 1. update
+        this._connector.setManualCode(sManualCode)
+    },
 
     /**
      * Handle event `toggle_direction`
@@ -287,19 +323,19 @@ module.exports.prototype = {
         this._sDirection = sDirection;
 
         // 2. verify
-        if (sDirection !== ToggleDirection.prototype.SWAPPED)
+        if (sDirection !== ToggleDirectionStates.prototype.SWAPPED)
         {
             // a. toggle visibility
             if (this._bIsPrimaryDevice)
             {
-                this._toggleDirection.show();
+                this._toggleDirectionButton.show();
                 this._dataInput.hide();
                 this._dataOutput.unmute();
                 this._dataOutput.show();
             }
             else
             {
-                this._toggleDirection.hide();
+                this._toggleDirectionButton.hide();
                 this._dataInput.show();
                 this._dataOutput.mute();
                 this._dataOutput.hide();
@@ -310,14 +346,14 @@ module.exports.prototype = {
             // a. toggle visibility
             if (this._bIsPrimaryDevice)
             {
-                this._toggleDirection.hide();
+                this._toggleDirectionButton.hide();
                 this._dataInput.show();
                 this._dataOutput.mute();
                 this._dataOutput.hide();
             }
             else
             {
-                this._toggleDirection.show();
+                this._toggleDirectionButton.show();
                 this._dataInput.hide();
                 this._dataOutput.unmute();
                 this._dataOutput.show();
@@ -391,22 +427,26 @@ module.exports.prototype = {
         // --- toggle direction
 
         // 9. init
-        this._toggleDirection = new ToggleDirection();
+        this._toggleDirectionButton = new ToggleDirectionButton();
 
         // 10. configure
-        this._socket.on(ToggleDirection.prototype.TOGGLE_DIRECTION, this._onToggleDirection.bind(this));
+        this._socket.on(ToggleDirectionEvents.prototype.TOGGLE_DIRECTION, this._onToggleDirection.bind(this));
 
         // 11. configure
-        this._toggleDirection.addEventListener(ToggleDirection.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this));
+        this._toggleDirectionButton.addEventListener(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this));
 
 
-        // --- manual connect
+        if (this._bIsManualConnect)
+        {
+            // 12. init
+            this._manualConnectInput = new ManualConnectInput(); // ### toggle conection type
 
-        // 12. init
-        this._manualConnect = new ManualConnect();
+            // 13. configure
+            //this._manualConnect.addEventListener(ManualConnect.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
 
-        // 13. configure
-        this._manualConnect.addEventListener(ManualConnect.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
+            this._manualConnectInput.show();
+        }
+
     },
 
 
@@ -427,11 +467,13 @@ module.exports.prototype = {
         this._sToken = sToken;
 
         // 2. create
-        this._qrcode = new QRCode(window.location.protocol + '//' + window.location.hostname + '/' + this._sToken);
+        this._connector = new Connector(window.location.protocol + '//' + window.location.hostname + '/' + this._sToken);
 
-        // 3. show
-        this._qrcode.show();
-        this._manualConnect.show();
+        // 3. configure
+        this._connector.addEventListener(ManualConnectEvents.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
+
+        // 4. show
+        this._connector.show();
     },
 
     /**
@@ -442,7 +484,7 @@ module.exports.prototype = {
     {
         // 1. hide
         this._dataInput.hide();
-        this._toggleDirection.hide();
+        this._toggleDirectionButton.hide();
 
         // 2. output
         this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to make a new connection.', true);
@@ -456,7 +498,7 @@ module.exports.prototype = {
     {
         // 1. toggle visibility
         this._dataInput.hide();
-        this._toggleDirection.hide();
+        this._toggleDirectionButton.hide();
 
         // 2. output
         this._alertMessage.show('The link you are trying to use is not working. Please try again.', true);
@@ -474,10 +516,9 @@ module.exports.prototype = {
 
         // 2. toggle visibility
         this._alertMessage.hide();
-        this._qrcode.hide();
-        this._manualConnect.hide();
+        this._connector.hide();
         this._dataOutput.show();
-        if (this._isOutputDevice()) this._toggleDirection.show();
+        if (this._isOutputDevice()) this._toggleDirectionButton.show();
     },
 
     /**
@@ -488,7 +529,7 @@ module.exports.prototype = {
     {
         // 1. toggle visibility
         this._dataOutput.hide();
-        this._toggleDirection.hide();
+        this._toggleDirectionButton.hide();
 
         // 2. output
         this._alertMessage.show("The other device has been disconnected. Is it still online?");
@@ -503,14 +544,14 @@ module.exports.prototype = {
         // 1. toggle visibility
         this._alertMessage.hide();
         this._dataOutput.show();
-        if (this._isOutputDevice()) this._toggleDirection.show();
+        if (this._isOutputDevice()) this._toggleDirectionButton.show();
     },
 
     _onPrimaryDeviceDisconnected: function()
     {
         // 1. toggle visibility
         this._dataOutput.hide();
-        this._toggleDirection.hide();
+        this._toggleDirectionButton.hide();
 
         // 2. output
         this._alertMessage.show('The other device has been disconnected. Is it still online?');
@@ -521,14 +562,14 @@ module.exports.prototype = {
         // 1. toggle visibility
         this._alertMessage.hide();
         this._dataOutput.show();
-        if (this._isOutputDevice()) this._toggleDirection.show();
+        if (this._isOutputDevice()) this._toggleDirectionButton.show();
     },
 
     _onTokenNotFound: function()
     {
         // 1. toggle visibility
         this._dataOutput.hide();
-        this._toggleDirection.hide();
+        this._toggleDirectionButton.hide();
 
         // 2. output
         this._alertMessage.show('The link you are trying to use is not working. Please try again.', true);
@@ -546,7 +587,7 @@ module.exports.prototype = {
         if (this._isOutputDevice())
         {
             this._dataOutput.show();
-            this._toggleDirection.show();
+            this._toggleDirectionButton.show();
         }
         else
         {
@@ -567,7 +608,7 @@ module.exports.prototype = {
     _isOutputDevice: function()
     {
         // 1. verify
-        if (this._sDirection !== ToggleDirection.prototype.SWAPPED)
+        if (this._sDirection !== ToggleDirectionStates.prototype.SWAPPED)
         {
             // a. verify and send
             if (this._bIsPrimaryDevice) return true;

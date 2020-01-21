@@ -7,39 +7,50 @@
 'use strict';
 
 
-// import
+// import external classes
 const Module_HTTP = require('http');
 const Module_FS = require('fs');
 const Module_HTTPS = require('https');
 const Module_SocketIO = require('socket.io');
 const Module_Express = require('express');
 const Module_GenerateUniqueID = require('generate-unique-id');
+const Module_GeneratePassword = require("generate-password");
+const Module_MongoDB = require("mongodb");
+
+// import core module
+const CoreModule_Assert = require('assert');
 const CoreModule_Util = require('util');
 
-// clint classes
-const ToggleDirection = require('./../client/components/ToggleDirection/ToggleDirection');
+// import project classes
+const ToggleDirectionStates = require('./../client/components/ToggleDirectionButton/ToggleDirectionStates');
+const ToggleDirectionEvents = require('./../client/components/ToggleDirectionButton/ToggleDirectionEvents');
+const ManualConnectEvents = require('./../client/components/ManualConnectButton/ManualConnectEvents');
 
 
 module.exports = {
 
-    // sonfig
+    // config
     _config: {
         mode: 'prod',   // options: "prod" (no output)  | "dev" (output debugging comments)
         https: true,    // options: 'true' (runs on https)  | 'false' (runs on http)
     },
+    _configFile: null,
 
     // services
     _app: null,
     _server: null,
     _io: null,
+    _mongo: null,
 
     // utils
     _timerLog: null,
+    _timerManualCodes: null,
 
     // data
     _aActivePairs: [],
     _aInactivePairs: [],
     _aSockets: [],
+    _aManualCodes: [],
 
     // logs
     _aConnectedPairs: [],       // which pairs actually had two devices connected at one point
@@ -67,19 +78,34 @@ module.exports = {
         if (config.mode && config.mode === 'prod' || config.mode === 'dev') this._config.mode = config.mode;
         if (config.https === true || config.https === false) this._config.https = config.https;
 
-        // 2. init
+        // 2. load
+        let jsonConfigFile = Module_FS.readFileSync('CopyPaste.config.json');
+
+        // 3. convert
+        this._configFile = JSON.parse(jsonConfigFile);
+
+
+        // --- Mongo DB
+
+        // 4. inti
+        this._mongo = Module_MongoDB.MongoClient;
+
+        // 5. configure
+        const sMongoURL = 'mongodb://' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
+
+        // 6. connect
+        this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
+
+
+        // --- Socket.IO
+
+        // 7. init
         if (this._config.https)
         {
-            // a. load
-            let jsonConfigFile = Module_FS.readFileSync('CopyPaste.config.json');
-
-            // b. convert
-            let configFile = JSON.parse(jsonConfigFile);
-
             // c. setup
             this._server = new Module_HTTPS.createServer({
-                key: Module_FS.readFileSync(configFile.ssl.key.toString(), 'utf8'),
-                cert: Module_FS.readFileSync(configFile.ssl.certificate.toString(), 'utf8')
+                key: Module_FS.readFileSync(this._configFile.ssl.key.toString(), 'utf8'),
+                cert: Module_FS.readFileSync(this._configFile.ssl.certificate.toString(), 'utf8')
             });
         }
         else
@@ -91,67 +117,113 @@ module.exports = {
             this._server = new Module_HTTP.createServer(this.app);
         }
 
-        // 3. setup
+        // 8. setup
         this._io = Module_SocketIO(this._server);
 
-        // 4. configure
+        // 9. configure
         this._io.on('connection', this._onUserConnect.bind(this));
 
-        // 5. listen
-        this._server.listen(3000, function()
+        // 10. listen
+        this._server.listen(3000, this._onSocketIOConnect.bind(this));
+    },
+
+    /**
+     * Handle MongoDB connect
+     * @param err
+     * @param client
+     * @private
+     */
+    _onMongoDBConnect: function(err, client)
+    {
+        // 1. init
+        const sMongoDBName = this._configFile.mongodb.dbname.toString();
+
+        // 2. validate
+        CoreModule_Assert.equal(null, err);
+
+        // 3. output
+        console.log("MongoDB connected on " + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString());
+        console.log();
+
+        // 4. setup
+        const db = client.db(sMongoDBName);
+
+
+        this._collection_MongoDB_pairs = db.collection('pairs');
+        this._collection_MongoDB_manualcode = db.collection('manualcodes');
+
+        // 5. Do we need this?
+        //client.close();
+
+
+        //
+        // const collection = db.collection('pairs');
+        // // Insert some documents
+        // collection.insertMany([
+        //     {a : 1}, {a : 2}, {a : 3}
+        // ]);
+        //
+        // collection.find({'a': 3}).toArray(function(err, docs) {
+        //     CoreModule_Assert.equal(err, null);
+        //
+        //     console.log('Result of find', docs);
+        // });
+
+
+    },
+
+    _onSocketIOConnect: function()
+    {
+        // 1. cleanup
+        console.clear();
+
+        // 2. prepare
+        let aLines = [
+            '',
+            'CopyPaste.me - Frictionless sharing between devices',
+            'Created by The Social Code',
+            ' ',
+            '@author  Sebastian Kersten',
+            '@license MIT',
+            ' ',
+            'Please help keeping this service free by donating: https://paypal.me/thesocialcode',
+            ' ',
+            'listening on *:3000 ' + JSON.stringify(this._config),
+            ''
+        ];
+
+        // 3. find max length
+        let nMaxLength = 0;
+        for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
         {
-            // a. cleanup
-            console.clear();
+            // a. calculate
+            if (aLines[nLineIndex].length > nMaxLength) nMaxLength = aLines[nLineIndex].length;
+        }
 
-            // b. prepare
-            let aLines = [
-                '',
-                'CopyPaste.me - Frictionless sharing between devices',
-                'Created by The Social Code',
-                ' ',
-                '@author  Sebastian Kersten',
-                '@license MIT',
-                ' ',
-                'Please help keeping this service free by donating: https://paypal.me/thesocialcode',
-                ' ',
-                'listening on *:3000 ' + JSON.stringify(this._config),
-                ''
-            ];
-
-            // c. find max length
-            let nMaxLength = 0;
-            for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
+        // 4. build and output lines
+        for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
+        {
+            // a. build
+            if (aLines[nLineIndex].length === 0)
             {
-                // I. calculate
-                if (aLines[nLineIndex].length > nMaxLength) nMaxLength = aLines[nLineIndex].length;
+                while(aLines[nLineIndex].length < nMaxLength) aLines[nLineIndex] += '-';
+                aLines[nLineIndex] = '----' + aLines[nLineIndex] + '----';
+            }
+            else
+            {
+                while(aLines[nLineIndex].length < nMaxLength) aLines[nLineIndex] += ' ';
+                aLines[nLineIndex] = '--- ' + aLines[nLineIndex] + ' ---';
             }
 
-            // d. build and output lines
-            for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
-            {
-                // I. build
-                if (aLines[nLineIndex].length === 0)
-                {
-                    while(aLines[nLineIndex].length < nMaxLength) aLines[nLineIndex] += '-';
-                    aLines[nLineIndex] = '----' + aLines[nLineIndex] + '----';
-                }
-                else
-                {
-                    while(aLines[nLineIndex].length < nMaxLength) aLines[nLineIndex] += ' ';
-                    aLines[nLineIndex] = '--- ' + aLines[nLineIndex] + ' ---';
-                }
+            // b. output
+            console.log(aLines[nLineIndex]);
+        }
 
-                // III. output
-                console.log(aLines[nLineIndex]);
-            }
+        // 5. output extra line
+        console.log();
 
-            // e. output extra line
-            console.log();
-
-            // f. output
-            this._timerLog = setInterval(this._logUsers.bind(this, 'Automated log'), 60 * 1000);
-
-        }.bind(this));
+        // 6. output
+        this._timerLog = setInterval(this._logUsers.bind(this, 'Automated log'), 60 * 1000);
     },
 
     _onUserConnect: function(socket)
@@ -175,7 +247,8 @@ module.exports = {
         socket.on('secondarydevice_connect_to_token', this._onSecondaryDeviceConnectToToken.bind(this, socket, false));
         socket.on('secondarydevice_reconnect_to_token', this._onSecondaryDeviceConnectToToken.bind(this, socket, true));
         socket.on('data', this._onData.bind(this, socket));
-        socket.on(ToggleDirection.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
+        socket.on(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
+        socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE, this._onRequestManualCode.bind(this, socket));
 
         // 5. debug
         this._logUsers('User connected (socket.id = ' + socket.id + ')');
@@ -198,7 +271,8 @@ module.exports = {
             primaryDevicePublicKey: sPrimaryDevicePublicKey,
             secondaryDevice: null,
             secondaryDevicePublicKey: '',
-            direction: ToggleDirection.prototype.DEFAULT,
+            manualCode: '',
+            direction: ToggleDirectionStates.prototype.DEFAULT,
             states: {
                 connectionEstablished: false,
                 dataSent: false,
@@ -431,7 +505,7 @@ module.exports = {
 
         // 6. validate
         if (pair === false) return;
-        if (pair.direction === ToggleDirection.prototype.SWAPPED)
+        if (pair.direction === ToggleDirectionStates.prototype.SWAPPED)
         {
             if (!pair.secondaryDevice) return;
         }
@@ -441,7 +515,7 @@ module.exports = {
         }
 
         // 7. register
-        let receivingSocket = (pair.direction === ToggleDirection.prototype.SWAPPED) ? pair.secondaryDevice : pair.primaryDevice;
+        let receivingSocket = (pair.direction === ToggleDirectionStates.prototype.SWAPPED) ? pair.secondaryDevice : pair.primaryDevice;
 
         // 8. broadcast
         receivingSocket.emit('data', { sType:encryptedData.sType, value:encryptedData.value });
@@ -492,11 +566,142 @@ module.exports = {
 
 
         // 6. toggle
-        pair.direction = (pair.direction === ToggleDirection.prototype.DEFAULT) ? ToggleDirection.prototype.SWAPPED : ToggleDirection.prototype.DEFAULT;
+        pair.direction = (pair.direction === ToggleDirectionStates.prototype.DEFAULT) ? ToggleDirectionStates.prototype.SWAPPED : ToggleDirectionStates.prototype.DEFAULT;
 
         // 7. broadcast
-        pair.primaryDevice.emit(ToggleDirection.prototype.TOGGLE_DIRECTION, pair.direction);
-        pair.secondaryDevice.emit(ToggleDirection.prototype.TOGGLE_DIRECTION, pair.direction);
+        pair.primaryDevice.emit(ToggleDirectionEvents.prototype.TOGGLE_DIRECTION, pair.direction);
+        pair.secondaryDevice.emit(ToggleDirectionEvents.prototype.TOGGLE_DIRECTION, pair.direction);
+    },
+
+    _onRequestManualCode: function(primaryDeviceSocket)
+    {
+        // 0. output
+        this._log('Socket.id = ' + primaryDeviceSocket.id + ' has requested manual code');
+
+        // 1. validate
+        if (!this._aSockets['' + primaryDeviceSocket.id]) return;
+
+        // 2. load
+        let registeredSocket = this._aSockets['' + primaryDeviceSocket.id];
+
+        // 3. register
+        let sToken = registeredSocket.sToken;
+
+        // 4. validate
+        if (!sToken) return;
+
+        // 5. load
+        let pair = this._getPair(sToken);
+
+        // 6. validate
+        if (pair === false) return;
+
+
+
+        // 8. create
+
+
+        pair.manualCode = this._createManualCode();
+
+
+        console.log('Manual code = ' + pair.manualCode);
+
+        // const publicManualCode = {
+        //
+        // }
+
+
+        primaryDeviceSocket.emit('manualcode', pair.manualCode);
+
+
+        pair.manualCode.sToken = sToken;
+    },
+
+    /**
+     * Create manual code
+     * @private
+     */
+    _createManualCode: function()
+    {
+        // 1. init
+        let manualCode = null;
+        let sManualCode = null;
+        let bManualCodeFound = false;
+
+        // 2. run
+        while(!bManualCodeFound)
+        {
+            // a. create
+            sManualCode = Module_GeneratePassword.generate({
+                length: 6,
+                numbers: false,
+                lowercase: false,
+                uppercase: true,
+                excludeSimilarCharacters: true
+            });
+
+            // b. validate
+            if (!this._aManualCodes[sManualCode])
+            {
+                // I. setup
+                let nCreated = new Date().getTime();
+
+                // II. build
+                manualCode = {                      // ### ManualConnect
+                    created: nCreated,
+                    expires: nCreated + 5 * 60 * 1000,
+                    code: sManualCode
+                };
+
+                // III. store
+                this._aManualCodes[sManualCode] = manualCode;
+
+                // IV. toggle
+                bManualCodeFound = true;
+            }
+        }
+
+        console.log('----> aManualCodes: ', CoreModule_Util.inspect(this._aManualCodes, false, null, true));
+
+
+        // 3. verify or start
+        if (!this._timerManualCodes) this._timerManualCodes = setInterval(this._cleanupManualCodes.bind(this), 1000);
+
+        // 4. send
+        return manualCode;
+    },
+
+    /**
+     * Cleanup manual code
+     * @private
+     */
+    _cleanupManualCodes: function()
+    {
+        // 1. register
+        let nNow = new Date().getTime();
+
+        // 2. verify all
+        for (let sManualCode in this._aManualCodes)
+        {
+            console.log('sManualCode', sManualCode, 'still active?');
+            console.log(this._aManualCodes[sManualCode].expires);
+            console.log(new Date().getTime());
+            console.log(new Date().getTime() - this._aManualCodes[sManualCode].expires);
+
+            // a. validate
+            if (this._aManualCodes[sManualCode].expires > nNow) continue;
+
+
+            console.log('sManualCode', sManualCode, 'EXPIRED');
+
+            // b. remove
+            delete this._aManualCodes[sManualCode];
+        }
+
+        // 3. verify or cleanup
+        if (Object.keys(this._aManualCodes).length === 0) clearInterval(this._timerManualCodes);
+
+        console.log('TIMER - this._aManualCodes', this._aManualCodes);
     },
 
     _broadcastSecurityWarning: function(requestingSocket, pair, sToken)

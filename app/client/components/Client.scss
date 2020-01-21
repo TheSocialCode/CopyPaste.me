@@ -1,10 +1,11 @@
 // imports
-@import 'QRCode/QRCode';
+@import 'Connector/Connector';
 @import 'Waiting/Waiting';
 @import 'DataInput/DataInput';
 @import 'DataOutput/DataOutput';
-@import 'ToggleDirection/ToggleDirection';
-@import 'ManualConnect/ManualConnect';
+@import 'ToggleDirectionButton/ToggleDirectionButton';
+@import 'ManualConnectButton/ManualConnectButton';
+@import 'ManualConnectInput/ManualConnectInput';
 @import 'AlertMessage/AlertMessage';
 @import 'SecurityWarning/SecurityWarning';
 @import 'Templates/Templates';

@@ -65,6 +65,7 @@
             include(dirname(dirname(__FILE__)).'/src/pages/faq.php');
             break;
 
+        case '/connect':
         default:
 
             include(dirname(dirname(__FILE__)).'/src/pages/app.php');

@@ -7,6 +7,11 @@
 'use strict';
 
 
+// import
+const ToggleDirectionStates = require('./ToggleDirectionStates');
+const ToggleDirectionEvents = require('./ToggleDirectionEvents');
+
+
 module.exports = function()
 {
     // start
@@ -22,9 +27,6 @@ module.exports.prototype = {
     // utils
     _aEvents: [],
 
-    // events
-    REQUEST_TOGGLE_MANUALCONNECT: 'onRequestToggleManualConnect',
-
 
 
     // ----------------------------------------------------------------------------
@@ -38,8 +40,8 @@ module.exports.prototype = {
     __construct: function ()
     {
         // 1. register
-        this._elRoot = document.querySelector('[data-mimoto-id="component_ManualConnect"]');
-        this._elButton = this._elRoot.querySelector('[data-mimoto-id="component_ManualConnect_button"]');
+        this._elRoot = document.querySelector('[data-mimoto-id="component_ToggleDirectionButton"]');
+        this._elButton = this._elRoot.querySelector('[data-mimoto-id="button"]');
 
         // 2. configure
         this._elButton.addEventListener('click', this._onButtonClick.bind(this));
@@ -118,11 +120,8 @@ module.exports.prototype = {
      */
     _onButtonClick: function(e)
     {
-        // 1, toggle label
-        this._elRoot.classList.toggle('flip');
-
-        // 2. broadcast
-        this.dispatchEvent(this.REQUEST_TOGGLE_MANUALCONNECT);
+        // 1. broadcast
+        this.dispatchEvent(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION);
     }
 
 };
