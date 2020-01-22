@@ -23,28 +23,34 @@ div.component_ManualConnectInput_sublabel {
     font-size: smaller;
 }
 
-div.component_QR_manualurl {
+div.component_ManualConnectInput_input {
     border-radius: 3px;
     background-color: $background-lightestgray;
     border: $background-lightgray 1px solid;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
     margin-top: 10px;
     padding: 15px;
 
-    & div.component_QR_manualurl_url {
-        font-weight: bold;
+    div.component_ManualConnectInput_code {
+        margin-bottom: 20px;
     }
 
-    & div.component_QR_manualurl_guidance {
-        margin: 20px 0 20px 0;
-        font-size: smaller;
+    input.component_ManualConnectInput_character {
+        font-size: 30px;
+        padding: 7px 9px 7px 9px;
+        background-color: $background-light;
+        border: 1px solid $background-lightgray;
+        border-radius: 3px;
+        outline: none;
+        width: 27px;
+        text-align: center;
     }
 
-    & div.component_QR_manualurl_code {
-        font-size: x-large;
-        font-weight: bold;
+    @media only screen and (max-width: 380px) {
+        input.component_ManualConnectInput_character {
+            font-size: 24px;
+            padding: 4px 6px 4px 6px;
+            width: 16px;
+        }
     }
 }

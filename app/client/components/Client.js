@@ -85,9 +85,6 @@ module.exports.prototype = {
         let sConnectPath = 'connect';
         if (window.location.pathname.substr(1, sConnectPath.length) === sConnectPath)
         {
-            console.log('CONNECT');
-
-
             // a. configure
             this._bIsManualConnect = true;
 
@@ -158,11 +155,7 @@ module.exports.prototype = {
         else
         {
             // a. verify
-            if (this._bIsManualConnect)
-            {
-                console.log('MANUAL CONNECT');
-            }
-            else
+            if (!this._bIsManualConnect)
             {
                 // I. broadcast
                 this._socket.emit('secondarydevice_connect_to_token', this._sToken, this._myKeyPair.publicKey);
@@ -439,7 +432,7 @@ module.exports.prototype = {
         if (this._bIsManualConnect)
         {
             // 12. init
-            this._manualConnectInput = new ManualConnectInput(); // ### toggle conection type
+            this._manualConnectInput = new ManualConnectInput(); // ### toggle connection type
 
             // 13. configure
             //this._manualConnect.addEventListener(ManualConnect.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));

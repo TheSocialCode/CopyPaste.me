@@ -41,7 +41,7 @@
             <div class="interface-header">
 
                 <div class="logo">
-                    <a href="/"><img data-mimoto-id="logo" src="static/images/copypaste-logo-regular.png" width="200" alt="CopyPaste.me logo"></a>
+                    <a href="/"><img data-mimoto-id="logo" src="/static/images/copypaste-logo-regular.png" width="200" alt="CopyPaste.me logo"></a>
                 </div>
                 <div class="description">Frictionless sharing between devices</div>
 

@@ -38,6 +38,11 @@ module.exports.prototype = {
     _aEvents: [],
     _timerManualCodeCountdown: null,
 
+    // states
+    _sCurrentState: '',
+    STATE_QR: 'qr',
+    STATE_MANUAL: 'manual',
+
     // data
     _manualCode: null,
 
@@ -53,7 +58,10 @@ module.exports.prototype = {
      */
     __construct: function (sTokenURL)
     {
-        // 1. register
+        // 1. init
+        this._sCurrentState = this.STATE_QR;
+
+        // 2. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_QR"]');
         this._elContainer = document.querySelector('[data-mimoto-id="component_QR_container"]');
         this._elFront = document.querySelector('[data-mimoto-id="component_QR_front"]');
@@ -62,7 +70,7 @@ module.exports.prototype = {
         this._elManualCode = this._elRoot.querySelector('[data-mimoto-id="manualcode"]');
         this._elManualCodeCountdown = this._elRoot.querySelector('[data-mimoto-id="countdown"]');
 
-        // 2. configure
+        // 3. configure
         var typeNumber = 4;
         var errorCorrectionLevel = 'L';
         var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
@@ -70,7 +78,7 @@ module.exports.prototype = {
         qr.make();
         this._elContainer.innerHTML = qr.createImgTag(5);
 
-        // 3. configure
+        // 4. configure
         this._elContainer.addEventListener(
             'click',
             function(e)
@@ -86,10 +94,10 @@ module.exports.prototype = {
             }.bind(this, sTokenURL)
         );
 
-        // 4. init
+        // 5. init
         this._manualConnectButton = new ManualConnectButton();
 
-        // 5. configure
+        // 6. configure
         this._manualConnectButton.addEventListener(ManualConnectEvents.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
     },
 
@@ -211,10 +219,13 @@ module.exports.prototype = {
     _onRequestToggleManualConnect: function()
     {
         // 1. forward
-        this._requestNewManualCode();
+        if (!this._manualCode) this._requestNewManualCode();
 
-        // 2. toggle
-        this._flip();
+        // 2. store new state
+        this._sCurrentState = (this._sCurrentState === this.STATE_QR) ? this.STATE_MANUAL : this.STATE_QR;
+
+        // 3. toggle
+        this._elRoot.classList.toggle('flip');
     },
 
 
@@ -231,15 +242,6 @@ module.exports.prototype = {
     _requestNewManualCode: function()
     {
         this.dispatchEvent(ManualConnectEvents.prototype.REQUEST_TOGGLE_MANUALCONNECT);
-    },
-
-    /**
-     * Flip from QR-code to manual connect and back
-     */
-    _flip: function()
-    {
-        // 1. toggle
-        this._elRoot.classList.toggle('flip');
     },
 
     /**
@@ -286,14 +288,18 @@ module.exports.prototype = {
         // 6. verify and stop countdown
         if (nDifference <= 0)
         {
-            // a. clear
-            clearInterval(this._timerManualCodeCountdown);
+            // a. cleanup
+            this._manualCode = null;
 
-            // b. output
+            // b. clear
+            clearInterval(this._timerManualCodeCountdown);
+            this._timerManualCodeCountdown = null;
+
+            // c. output
             this._elManualCodeCountdown.innerText = '(expired)';
 
-            // c. request new
-            this._requestNewManualCode();
+            // d. request new
+            if (this._sCurrentState === this.STATE_MANUAL) this._requestNewManualCode();
         }
     }
 

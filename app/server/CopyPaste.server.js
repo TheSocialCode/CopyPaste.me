@@ -634,10 +634,11 @@ module.exports = {
             // a. create
             sManualCode = Module_GeneratePassword.generate({
                 length: 6,
-                numbers: false,
+                numbers: true,
                 lowercase: false,
                 uppercase: true,
-                excludeSimilarCharacters: true
+                excludeSimilarCharacters: true,
+                exclude: 'i'
             });
 
             // b. validate
@@ -683,10 +684,7 @@ module.exports = {
         // 2. verify all
         for (let sManualCode in this._aManualCodes)
         {
-            console.log('sManualCode', sManualCode, 'still active?');
-            console.log(this._aManualCodes[sManualCode].expires);
-            console.log(new Date().getTime());
-            console.log(new Date().getTime() - this._aManualCodes[sManualCode].expires);
+            console.log(this._aManualCodes[sManualCode].expires - new Date().getTime());
 
             // a. validate
             if (this._aManualCodes[sManualCode].expires > nNow) continue;
@@ -699,7 +697,11 @@ module.exports = {
         }
 
         // 3. verify or cleanup
-        if (Object.keys(this._aManualCodes).length === 0) clearInterval(this._timerManualCodes);
+        if (Object.keys(this._aManualCodes).length === 0)
+        {
+            clearInterval(this._timerManualCodes);
+            this._timerManualCodes = null;
+        }
 
         console.log('TIMER - this._aManualCodes', this._aManualCodes);
     },

@@ -37,13 +37,19 @@
     <!-- Manual connect -->
 
     <div data-mimoto-id="component_ManualConnectInput" class="component_ManualConnectInput">
-        <div class="component_QR_card_label">Enter your code</div>
-        <div class="component_QR_card_sublabel">to manually connect</div>
-        <div data-mimoto-id="component_QR_manualurl" class="component_QR_manualurl show">
-            <div class="component_QR_manualurl_inner">
-                <div class="component_QR_manualurl_code">AFE-GTF</div>
-                <div class="button">Connect</div>
+        <div class="component_ManualConnectInput_label">Enter your code</div>
+        <div class="component_ManualConnectInput_sublabel">to manually connect</div>
+        <div class="component_ManualConnectInput_input">
+            <div class="component_ManualConnectInput_code">
+                <input data-mimoto-id="char1" type="text" class="component_ManualConnectInput_character">
+                <input data-mimoto-id="char2" type="text" class="component_ManualConnectInput_character">
+                <input data-mimoto-id="char3" type="text" class="component_ManualConnectInput_character">
+                -
+                <input data-mimoto-id="char4" type="text" class="component_ManualConnectInput_character">
+                <input data-mimoto-id="char5" type="text" class="component_ManualConnectInput_character">
+                <input data-mimoto-id="char6" type="text" class="component_ManualConnectInput_character">
             </div>
+            <div class="button">Connect</div>
         </div>
     </div>
 
