@@ -92,13 +92,13 @@ module.exports = {
         // --- Mongo DB
 
         // 4. inti
-        this._mongo = Module_MongoDB.MongoClient;
+        //this._mongo = Module_MongoDB.MongoClient;
 
         // 5. configure
-        const sMongoURL = 'mongodb://' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
+        //const sMongoURL = 'mongodb://' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
 
         // 6. connect
-        this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
+        //this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
 
 
         // --- Socket.IO
