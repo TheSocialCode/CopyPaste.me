@@ -453,13 +453,28 @@ module.exports = {
         // 1. output
         this._log('Socket.id = ' + socket.id + ' has disconnected');
 
-        // 2. load
-        let pair = this._getPairBySocket(socket);
+        // 2. validate
+        if (!this._aSockets['' + socket.id]) return;
 
-        // 3. validate
+        // 3. load
+        let registeredSocket = this._aSockets['' + socket.id];
+
+        // 4. register
+        let sToken = registeredSocket.sToken;
+
+        // 5. cleanup
+        delete this._aSockets['' + socket.id];
+
+        // 6. validate
+        if (!sToken) return;
+
+        // 7. load
+        let pair = this._getPairByToken(sToken);
+
+        // 8. validate
         if (pair === false) return;
 
-        // 4. validate
+        // 9. validate
         if (pair.primaryDevice && pair.primaryDevice.id === socket.id)
         {
             // a. cleanup
@@ -469,7 +484,7 @@ module.exports = {
             if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_disconnected');
         }
 
-        // 5. validate
+        // 10. validate
         if (pair.secondaryDevice && pair.secondaryDevice.id === socket.id)
         {
             // a. cleanup
@@ -479,20 +494,20 @@ module.exports = {
             if (pair.primaryDevice) pair.primaryDevice.emit('secondarydevice_disconnected');
         }
 
-        // 6. validate
+        // 11. validate
         if (!pair.primaryDevice && !pair.secondaryDevice)
         {
             // a. move
-            this._aInactivePairs[pair.sToken] = pair;
+            this._aInactivePairs[sToken] = pair;
 
             // b. clear
-            delete this._aActivePairs[pair.sToken];
+            delete this._aActivePairs[sToken];
 
             // c. store
             pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
         }
 
-        // 7. output
+        // 12. output
         this._logUsers('User disconnected (socket.id = ' + socket.id + ')');
     },
 
