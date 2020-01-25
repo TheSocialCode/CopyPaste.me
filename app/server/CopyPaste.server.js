@@ -56,6 +56,10 @@ module.exports = {
     _aConnectedPairs: [],       // which pairs actually had two devices connected at one point
     _aUsedPairs: [],            // which pairs where actually used to share data
 
+    // connection types
+    CONNECTIONTYPE_QR: 'qr',
+    CONNECTIONTYPE_MANUAL: 'manual',
+
     // action types
     _ACTIONTYPE_CREATED: 'created',
     _ACTIONTYPE_ARCHIVED: 'archived',
@@ -149,8 +153,8 @@ module.exports = {
         const db = client.db(sMongoDBName);
 
 
-        this._collection_MongoDB_pairs = db.collection('pairs');
-        this._collection_MongoDB_manualcode = db.collection('manualcodes');
+        //this._collection_MongoDB_pairs = db.collection('pairs');
+        //this._collection_MongoDB_manualcode = db.collection('manualcodes');
 
         // 5. Do we need this?
         //client.close();
@@ -274,6 +278,7 @@ module.exports = {
             secondaryDevicePublicKey: '',
             manualCode: '',
             direction: ToggleDirectionStates.prototype.DEFAULT,
+            connectiontype: null,
             states: {
                 connectionEstablished: false,
                 dataSent: false,
@@ -373,10 +378,6 @@ module.exports = {
             return;
         }
 
-
-        // ---
-
-
         // 4. validate
         if (pair.secondaryDevice)
         {
@@ -388,39 +389,65 @@ module.exports = {
             return;
         }
 
+        // 5. connect
+        this._connectSecondaryDeviceToPair(this.CONNECTIONTYPE_QR, pair, secondaryDeviceSocket, sSecondaryDevicePublicKey, sToken, bReconnect);
+    },
 
-        // ---
 
-
-        // 5. store
+    _connectSecondaryDeviceToPair: function(sConnectionType, pair, secondaryDeviceSocket, sSecondaryDevicePublicKey, sToken, bReconnect)
+    {
+        // 1. store
         this._aActivePairs[sToken].secondaryDevice = secondaryDeviceSocket;
 
-        // 6. store
+        // 2. store
         this._aSockets['' + secondaryDeviceSocket.id].sToken = sToken;
 
-        // 7. store
+        // 3. store
         pair.secondaryDevicePublicKey = sSecondaryDevicePublicKey;
+        pair.connectiontype = sConnectionType;
 
-        // 7. broadcast
-        secondaryDeviceSocket.emit((bReconnect) ? 'token_reconnected' : 'token_connected', pair.primaryDevicePublicKey, pair.direction);
 
-        // 8. broadcast
+        // --- communicate
+
+
+        // 4. broadcast
+        switch(sConnectionType)
+        {
+            case this.CONNECTIONTYPE_QR:
+
+                secondaryDeviceSocket.emit('token_connected', pair.primaryDevicePublicKey, pair.direction);
+                break;
+
+            case this.CONNECTIONTYPE_MANUAL:
+
+                secondaryDeviceSocket.emit(ManualConnectEvents.prototype.MANUALCODE_CONNECTED, pair.primaryDevicePublicKey, pair.direction);
+                break;
+
+        }
+
+
+        // 5. broadcast
         if (pair.primaryDevice) pair.primaryDevice.emit((bReconnect) ? 'secondarydevice_reconnected' : 'secondarydevice_connected', pair.secondaryDevicePublicKey);
 
 
-        // --- logging
+        // --- log
 
 
-        // 9. update
+        // 6. update
         pair.states.connectionEstablished = true;
 
-        // 10. store
+        // 7. store
         if (!this._aConnectedPairs[sToken]) this._aConnectedPairs[sToken] = true;
 
-        // 11. output
-        this._logUsers('Secondary device ' + ((bReconnect) ? 're' : '' ) + 'connects to token (socket.id = ' + secondaryDeviceSocket.id + ')');
+        // 8. output
+        this._logUsers('Secondary device ' + ((bReconnect) ? 're' : '' ) + ' connects `' + sConnectionType + '` (socket.id = ' + secondaryDeviceSocket.id + ')');
     },
 
+    /**
+     * Handle socket `disconnect`
+     * @param socket
+     * @private
+     */
     _onUserDisconnect: function(socket)
     {
         // 1. output
@@ -475,9 +502,15 @@ module.exports = {
         this._log('Socket.id = ' + socket.id + ' has shared data');
 
         // 2. load
-        let pair = this._getPairBySocket(socket);
+        let sToken = this._getTokenBySocket(socket);
 
         // 3. validate
+        if (sToken === false) return;
+
+        // 4. load
+        let pair = this._getPairByToken(sToken);
+
+        // 5. validate
         if (pair === false) return;
         if (pair.direction === ToggleDirectionStates.prototype.SWAPPED)
         {
@@ -488,13 +521,13 @@ module.exports = {
             if (!pair.primaryDevice) return;
         }
 
-        // 4. register
+        // 6. register
         let receivingSocket = (pair.direction === ToggleDirectionStates.prototype.SWAPPED) ? pair.secondaryDevice : pair.primaryDevice;
 
-        // 5. broadcast
+        // 7. broadcast
         receivingSocket.emit('data', { sType:encryptedData.sType, value:encryptedData.value });
 
-        // 6. store
+        // 8. store
         pair.log.push(
             {
                 type: this._ACTIONTYPE_DATA,
@@ -505,16 +538,16 @@ module.exports = {
         );
 
 
-        // --- logging
+        // --- log
 
 
-        // 7. update
+        // 9. update
         pair.states.dataSent = true;
 
-        // 8. store
+        // 10. store
         if (!this._aUsedPairs[sToken]) this._aUsedPairs[sToken] = true;
 
-        // 9. output
+        // 11. output
         this._logUsers('Data shared (socket.id = ' + socket.id + ')');
     },
 
@@ -564,19 +597,14 @@ module.exports = {
 
         // 6. store
         pair.manualCode.sToken = sToken;
-
-        console.log('pair', pair);
-        console.log('manualCode', pair.manualCode);
     },
 
     /**
      * Handle event 'onRequestConnectionByManualCode'
      * @private
      */
-    _onRequestConnectionByManualCode: function(secondaryDeviceSocket, sManualCode)
+    _onRequestConnectionByManualCode: function(secondaryDeviceSocket, sManualCode, sSecondaryDevicePublicKey)
     {
-        console.log('Requesting connection by:', sManualCode);
-
         // 1. validate
         if (!this._aManualCodes[sManualCode])
         {
@@ -600,34 +628,21 @@ module.exports = {
             return;
         }
 
+        // 4. invalidate
+        delete this._aManualCodes[sManualCode];
 
 
-        throw new Error('ManualCode found!');
-
-        // invalidate
+        // --- connect
 
 
-        // b. validate
-        if (!this._aManualCodes[sManualCode])
-        {
-            // I. setup
-            let nCreated = new Date().getTime();
+        // 5. load
+        let pair = this._getPairByToken(manualCode.sToken);
 
-            // II. build
-            manualCode = {                      // ### ManualConnect
-                created: nCreated,
-                expires: nCreated + 5 * 60 * 1000,
-                code: sManualCode
-            };
+        // 6. validate
+        if (pair === false) return;
 
-            // III. store
-            this._aManualCodes[sManualCode] = manualCode;
-
-            // IV. toggle
-            bManualCodeFound = true;
-        }
-
-
+        // 7. connect
+        this._connectSecondaryDeviceToPair(this.CONNECTIONTYPE_MANUAL, pair, secondaryDeviceSocket, sSecondaryDevicePublicKey, manualCode.sToken);
     },
 
     /**
@@ -675,9 +690,6 @@ module.exports = {
             }
         }
 
-        console.log('----> aManualCodes: ', CoreModule_Util.inspect(this._aManualCodes, false, null, true));
-
-
         // 3. verify or start
         if (!this._timerManualCodes) this._timerManualCodes = setInterval(this._cleanupManualCodes.bind(this), 1000);
 
@@ -697,13 +709,8 @@ module.exports = {
         // 2. verify all
         for (let sManualCode in this._aManualCodes)
         {
-            console.log(this._aManualCodes[sManualCode].expires - new Date().getTime());
-
             // a. validate
             if (this._aManualCodes[sManualCode].expires > nNow) continue;
-
-
-            console.log('sManualCode', sManualCode, 'EXPIRED');
 
             // b. remove
             delete this._aManualCodes[sManualCode];
@@ -715,8 +722,6 @@ module.exports = {
             clearInterval(this._timerManualCodes);
             this._timerManualCodes = null;
         }
-
-        console.log('TIMER - this._aManualCodes', this._aManualCodes);
     },
 
     _broadcastSecurityWarning: function(requestingSocket, pair, sToken)
@@ -853,7 +858,8 @@ module.exports = {
         console.log('');
         console.log('Inactive pairs');
         console.log('-------------------------');
-        console.log(CoreModule_Util.inspect(this._aInactivePairs, false, null, true));
+        console.log(this._aInactivePairs);
+        //console.log(CoreModule_Util.inspect(this._aInactivePairs, false, null, true));
         console.log('');
         console.log('');
     }

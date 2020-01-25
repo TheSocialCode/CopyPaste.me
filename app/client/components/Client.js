@@ -308,7 +308,7 @@ module.exports.prototype = {
     _onRequestConnectUsingManualCode: function(sManualCode)
     {
         // 1. request
-        this._socket.emit(ManualConnectEvents.prototype.REQUEST_CONNECTION_BY_MANUALCODE, sManualCode);
+        this._socket.emit(ManualConnectEvents.prototype.REQUEST_CONNECTION_BY_MANUALCODE, sManualCode, this._myKeyPair.publicKey);
     },
 
     _onManualCodeNotFound: function()
@@ -321,6 +321,15 @@ module.exports.prototype = {
     {
         // 1. toggle
         this._manualConnectInput.enable('The code you are trying to use has expired.<br>Please try again.');
+    },
+
+    _onSecondaryDeviceConnectedManually: function(sPrimaryDevicePublicKey, sDirection)
+    {
+        // 1. hide
+        this._manualConnectInput.hide();
+
+        // 2. forward
+        this._onSecondaryDeviceConnectedToToken(sPrimaryDevicePublicKey, sDirection)
     },
 
     /**
@@ -411,6 +420,7 @@ module.exports.prototype = {
 
         // 4. configure secondary device
         this._socket.on('token_connected', this._onSecondaryDeviceConnectedToToken.bind(this));
+        this._socket.on(ManualConnectEvents.prototype.MANUALCODE_CONNECTED, this._onSecondaryDeviceConnectedManually.bind(this));
         this._socket.on('primarydevice_disconnected', this._onPrimaryDeviceDisconnected.bind(this));
         this._socket.on('primarydevice_reconnected', this._onPrimaryDeviceReconnected.bind(this));
 
@@ -591,8 +601,6 @@ module.exports.prototype = {
 
     _onSecondaryDeviceConnectedToToken: function(sPrimaryDevicePublicKey, sDirection)
     {
-        console.log('_onSecondaryDeviceConnectedToToken', 'sDirection = ' + sDirection);
-
         // 1. store
         this._sTheirPublicKey = sPrimaryDevicePublicKey;
         this._sDirection = sDirection;
@@ -607,11 +615,6 @@ module.exports.prototype = {
         {
             this._dataInput.show();
         }
-    },
-
-    _onTokenReconnected: function()
-    {
-        //console.log('Sender: Token reconnected');
     },
 
     /**
