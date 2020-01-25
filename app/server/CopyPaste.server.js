@@ -249,6 +249,7 @@ module.exports = {
         socket.on('data', this._onData.bind(this, socket));
         socket.on(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
         socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE, this._onRequestManualCode.bind(this, socket));
+        socket.on(ManualConnectEvents.prototype.REQUEST_CONNECTION_BY_MANUALCODE, this._onRequestConnectionByManualCode.bind(this, socket));
 
         // 5. debug
         this._logUsers('User connected (socket.id = ' + socket.id + ')');
@@ -301,7 +302,7 @@ module.exports = {
         this._log('Primary device wants to reconnect to token ' + sToken);
 
         // 2. load
-        let pair = this._getPair(sToken);
+        let pair = this._getPairByToken(sToken);
 
         // 3. validate
         if (pair === false)
@@ -360,7 +361,7 @@ module.exports = {
         this._log('Secondary device wants to connect to token ' + sToken);
 
         // 2. load
-        let pair = this._getPair(sToken);
+        let pair = this._getPairByToken(sToken);
 
         // 3. validate
         if (pair === false)
@@ -422,31 +423,16 @@ module.exports = {
 
     _onUserDisconnect: function(socket)
     {
-        // 0. output
+        // 1. output
         this._log('Socket.id = ' + socket.id + ' has disconnected');
 
-        // 1. validate
-        if (!this._aSockets['' + socket.id]) return;
-
         // 2. load
-        let registeredSocket = this._aSockets['' + socket.id];
+        let pair = this._getPairBySocket(socket);
 
-        // 3. register
-        let sToken = registeredSocket.sToken;
-
-        // 4. cleanup
-        delete this._aSockets['' + socket.id];
-
-        // 5. validate
-        if (!sToken) return;
-
-        // 6. load
-        let pair = this._getPair(sToken);
-
-        // 7. validate
+        // 3. validate
         if (pair === false) return;
 
-        // 8. validate
+        // 4. validate
         if (pair.primaryDevice && pair.primaryDevice.id === socket.id)
         {
             // a. cleanup
@@ -456,7 +442,7 @@ module.exports = {
             if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_disconnected');
         }
 
-        // 9. validate
+        // 5. validate
         if (pair.secondaryDevice && pair.secondaryDevice.id === socket.id)
         {
             // a. cleanup
@@ -466,44 +452,32 @@ module.exports = {
             if (pair.primaryDevice) pair.primaryDevice.emit('secondarydevice_disconnected');
         }
 
-        // 10. validate
+        // 6. validate
         if (!pair.primaryDevice && !pair.secondaryDevice)
         {
             // a. move
-            this._aInactivePairs[sToken] = pair;
+            this._aInactivePairs[pair.sToken] = pair;
 
             // b. clear
-            delete this._aActivePairs[sToken];
+            delete this._aActivePairs[pair.sToken];
 
             // c. store
             pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
         }
 
-        // 11. output
+        // 7. output
         this._logUsers('User disconnected (socket.id = ' + socket.id + ')');
     },
 
     _onData: function(socket, encryptedData)
     {
-        // 0. output
+        // 1. output
         this._log('Socket.id = ' + socket.id + ' has shared data');
 
-        // 1. validate
-        if (!this._aSockets['' + socket.id]) return;
-
         // 2. load
-        let registeredSocket = this._aSockets['' + socket.id];
+        let pair = this._getPairBySocket(socket);
 
-        // 3. register
-        let sToken = registeredSocket.sToken;
-
-        // 4. validate
-        if (!sToken) return;
-
-        // 5. load
-        let pair = this._getPair(sToken);
-
-        // 6. validate
+        // 3. validate
         if (pair === false) return;
         if (pair.direction === ToggleDirectionStates.prototype.SWAPPED)
         {
@@ -514,13 +488,13 @@ module.exports = {
             if (!pair.primaryDevice) return;
         }
 
-        // 7. register
+        // 4. register
         let receivingSocket = (pair.direction === ToggleDirectionStates.prototype.SWAPPED) ? pair.secondaryDevice : pair.primaryDevice;
 
-        // 8. broadcast
+        // 5. broadcast
         receivingSocket.emit('data', { sType:encryptedData.sType, value:encryptedData.value });
 
-        // 9. store
+        // 6. store
         pair.log.push(
             {
                 type: this._ACTIONTYPE_DATA,
@@ -534,87 +508,126 @@ module.exports = {
         // --- logging
 
 
-        // 10. update
+        // 7. update
         pair.states.dataSent = true;
 
-        // 11. store
+        // 8. store
         if (!this._aUsedPairs[sToken]) this._aUsedPairs[sToken] = true;
 
-        // 12. output
+        // 9. output
         this._logUsers('Data shared (socket.id = ' + socket.id + ')');
     },
 
     _onRequestToggleDirection: function(socket)
     {
-        // 1. validate
-        if (!this._aSockets['' + socket.id]) return;
+        // 1. load
+        let pair = this._getPairBySocket(socket);
 
-        // 2. load
-        let registeredSocket = this._aSockets['' + socket.id];
-
-        // 3. register
-        let sToken = registeredSocket.sToken;
-
-        // 4. load
-        let pair = this._getPair(sToken);
-
-        // 5. validate
+        // 2. validate
         if (pair === false || !pair.primaryDevice || !pair.secondaryDevice) return;
 
-
-        // ---
-
-
-        // 6. toggle
+        // 3. toggle
         pair.direction = (pair.direction === ToggleDirectionStates.prototype.DEFAULT) ? ToggleDirectionStates.prototype.SWAPPED : ToggleDirectionStates.prototype.DEFAULT;
 
-        // 7. broadcast
+        // 4. broadcast
         pair.primaryDevice.emit(ToggleDirectionEvents.prototype.TOGGLE_DIRECTION, pair.direction);
         pair.secondaryDevice.emit(ToggleDirectionEvents.prototype.TOGGLE_DIRECTION, pair.direction);
     },
 
+    /**
+     * Handle request event 'REQUEST_MANUALCODE'
+     * @param primaryDeviceSocket
+     * @private
+     */
     _onRequestManualCode: function(primaryDeviceSocket)
     {
-        // 0. output
+        // 1. output
         this._log('Socket.id = ' + primaryDeviceSocket.id + ' has requested manual code');
 
-        // 1. validate
-        if (!this._aSockets['' + primaryDeviceSocket.id]) return;
-
         // 2. load
-        let registeredSocket = this._aSockets['' + primaryDeviceSocket.id];
+        let sToken = this._getTokenBySocket(primaryDeviceSocket);
 
-        // 3. register
-        let sToken = registeredSocket.sToken;
+        // 3. validate
+        if (sToken === false) return;
 
-        // 4. validate
-        if (!sToken) return;
+        // 4. load
+        let pair = this._getPairByToken(sToken);
 
-        // 5. load
-        let pair = this._getPair(sToken);
-
-        // 6. validate
+        // 5. validate
         if (pair === false) return;
 
-
-
-        // 8. create
-
-
+        // 4. create and store
         pair.manualCode = this._createManualCode();
 
-
-        console.log('Manual code = ' + pair.manualCode);
-
-        // const publicManualCode = {
-        //
-        // }
-
-
+        // 5. broadcast
         primaryDeviceSocket.emit('manualcode', pair.manualCode);
 
-
+        // 6. store
         pair.manualCode.sToken = sToken;
+
+        console.log('pair', pair);
+        console.log('manualCode', pair.manualCode);
+    },
+
+    /**
+     * Handle event 'onRequestConnectionByManualCode'
+     * @private
+     */
+    _onRequestConnectionByManualCode: function(secondaryDeviceSocket, sManualCode)
+    {
+        console.log('Requesting connection by:', sManualCode);
+
+        // 1. validate
+        if (!this._aManualCodes[sManualCode])
+        {
+            // a. broadcast
+            secondaryDeviceSocket.emit(ManualConnectEvents.prototype.MANUALCODE_NOT_FOUND);
+
+            // b. exit
+            return;
+        }
+
+        // 2. register
+        let manualCode = this._aManualCodes[sManualCode];
+
+        // 3. validate
+        if (manualCode.expires < new Date().getTime())
+        {
+            // a. broadcast
+            secondaryDeviceSocket.emit(ManualConnectEvents.prototype.MANUALCODE_EXPIRED);
+
+            // b. exit
+            return;
+        }
+
+
+
+        throw new Error('ManualCode found!');
+
+        // invalidate
+
+
+        // b. validate
+        if (!this._aManualCodes[sManualCode])
+        {
+            // I. setup
+            let nCreated = new Date().getTime();
+
+            // II. build
+            manualCode = {                      // ### ManualConnect
+                created: nCreated,
+                expires: nCreated + 5 * 60 * 1000,
+                code: sManualCode
+            };
+
+            // III. store
+            this._aManualCodes[sManualCode] = manualCode;
+
+            // IV. toggle
+            bManualCodeFound = true;
+        }
+
+
     },
 
     /**
@@ -738,7 +751,37 @@ module.exports = {
         delete this._aActivePairs['' + sToken];
     },
 
-    _getPair: function(sToken)
+    _getPairBySocket: function(socket)
+    {
+        // 1. load
+        let sToken = this._getTokenBySocket(socket);
+
+        // 2. validate
+        if (sToken === false) return false;
+
+        // 3. load and send
+        return this._getPairByToken(sToken);
+    },
+
+    _getTokenBySocket: function(socket)
+    {
+        // 1. validate
+        if (!this._aSockets['' + socket.id]) return;
+
+        // 2. load
+        let registeredSocket = this._aSockets['' + socket.id];
+
+        // 3. register
+        let sToken = registeredSocket.sToken;
+
+        // 4. validate
+        if (!sToken) return false;
+
+        // 5. load and send
+        return sToken;
+    },
+
+    _getPairByToken: function(sToken)
     {
         // 1. prepare
         sToken = '' + sToken;

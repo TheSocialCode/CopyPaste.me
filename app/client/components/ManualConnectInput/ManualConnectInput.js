@@ -27,12 +27,24 @@ module.exports.prototype = {
     _elChar4: null,
     _elChar5: null,
     _elChar6: null,
+    _elMessage: null,
+    _elButtonConnect: null,
+
+    // data
+    _sCode: '',
+    _bCodeValidated: false,
 
     // utils
+    _aEvents: [],
     _aInputs: [],
+    _bIsInitialInput: true,
+    _bIsDisabled: false,
 
     // helpers
     _sAllowedCharacters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789',
+
+    // events
+    REQUEST_CONNECTION_USING_MANUALCODE: 'onRequestConnectionUsingManualCode',
 
 
 
@@ -48,6 +60,8 @@ module.exports.prototype = {
     {
         // 1. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_ManualConnectInput"]');
+        this._elMessage = this._elRoot.querySelector('[data-mimoto-id="message"]');
+        this._elButtonConnect = this._elRoot.querySelector('[data-mimoto-id="button"]');
 
         // 2. setup
         for (let nIndex = 0; nIndex < 6; nIndex++)
@@ -59,11 +73,13 @@ module.exports.prototype = {
             this._aInputs.push(elInput);
 
             // c. configure
-            //elInput.addEventListener('change', this._handleInput.bind(this, 'change'));
+            elInput.addEventListener('focus', this._onInputFocus.bind(this));
             elInput.addEventListener('keyup', this._handleInput.bind(this, 'keyup'));
-            //elInput.addEventListener('paste', this._handleInput.bind(this, 'paste'));
             elInput.addEventListener('input', this._handleInput.bind(this, 'input'));
         }
+
+        // 3. configure
+        this._elButtonConnect.addEventListener('click', this._onButtonConnectClick.bind(this));
     },
 
 
@@ -94,6 +110,69 @@ module.exports.prototype = {
         this._elRoot.classList.remove('show');
     },
 
+    /**
+     * Disable input
+     */
+    disable: function()
+    {
+        // 1. toggle state
+        this._bIsDisabled = true;
+
+        // 2. toggle interface
+        //this._elButtonConnect.classList.add('muted');
+    },
+
+    /**
+     * Enable input
+     */
+    enable: function(sMessage)
+    {
+        // 1. toggle state
+        this._bIsDisabled = false;
+
+        // 2. output
+        this._showMessage(sMessage);
+
+        // 3. toggle interface
+        this._elButtonConnect.classList.remove('muted');
+    },
+
+    /**
+     * Add event listener
+     * @param sEvent
+     * @param fMethod
+     */
+    addEventListener: function(sEvent, fMethod)
+    {
+        // 1. verify or init
+        if (!this._aEvents[sEvent]) this._aEvents[sEvent] = [];
+
+        // 2. store
+        this._aEvents[sEvent].push(fMethod);
+    },
+
+    /**
+     * dispatch event
+     * @param sEvent
+     */
+    dispatchEvent: function(sEvent)
+    {
+        // 1. validate
+        if (this._aEvents[sEvent])
+        {
+            // a. find
+            let nMethodCount = this._aEvents[sEvent].length;
+            for (let nIndex = 0; nIndex < nMethodCount; nIndex++)
+            {
+                // I. register
+                let fMethod = this._aEvents[sEvent][nIndex];
+
+                // II. execute
+                fMethod.apply(this, Array.prototype.slice.call(arguments, 1));
+            }
+        }
+    },
+
 
 
     // ----------------------------------------------------------------------------
@@ -122,15 +201,37 @@ module.exports.prototype = {
         }
     },
 
-    _handleInput: function(sEventType, e)
+    /**
+     * Handle input `focus`
+     * @private
+     */
+    _onInputFocus: function(e)
     {
         // 1. register
         let elInput = e.target;
 
-        // 2. init
+        // 2. select
+        elInput.select();
+    },
+
+    /**
+     * Handle input
+     * @param sEventType
+     * @param e
+     * @private
+     */
+    _handleInput: function(sEventType, e)
+    {
+        // 1. block if setting up connection
+        if (this._bIsDisabled) return;
+
+        // 2. register
+        let elInput = e.target;
+
+        // 3. init
         let nCurrentInputIndex = 0;
 
-        // 3. process
+        // 4. process
         switch(sEventType)
         {
             case 'keyup':
@@ -157,7 +258,6 @@ module.exports.prototype = {
                                 {
                                     let elPreviousInput = this._aInputs[nIndex - 1];
                                     elPreviousInput.focus();
-                                    elPreviousInput.select();
                                 }
                                 break;
                             }
@@ -180,7 +280,6 @@ module.exports.prototype = {
                                 {
                                     let elPreviousInput = this._aInputs[nIndex - 1];
                                     elPreviousInput.focus();
-                                    elPreviousInput.select();
                                 }
                                 break;
                             }
@@ -203,7 +302,6 @@ module.exports.prototype = {
                                 {
                                     let elPreviousInput = this._aInputs[nIndex + 1];
                                     elPreviousInput.focus();
-                                    elPreviousInput.select();
                                 }
                                 break;
                             }
@@ -214,32 +312,43 @@ module.exports.prototype = {
 
             case 'input':
 
-                // 1. register
+                // a. hide
+                this._hideMessage();
+                this._elButtonConnect.classList.add('muted');
+
+                // b. register
                 let sCurrentValue = elInput.value.toUpperCase();
 
-                // 2. correct
+                // c. correct
                 let sNewValue = '';
                 let nCharCount = sCurrentValue.length;
                 for (let nCharIndex = 0; nCharIndex < nCharCount; nCharIndex++)
                 {
-                    // a. register
+                    // I. register
                     let sCurrentChar = sCurrentValue.substr(nCharIndex, 1);
 
-                    // b. verify and build
+                    // II. verify and build
                     if (this._sAllowedCharacters.indexOf(sCurrentChar) !== -1) sNewValue += sCurrentValue;
                 }
 
-                // 3. validate
-                if (sNewValue === '') break;
+                // d. validate
+                if (sNewValue === '')
+                {
+                    // I. clear
+                    if (sCurrentValue !== sNewValue) elInput.value = '';
 
-                // 4. find
+                    // II. exit
+                    break;
+                }
+
+                // e. find
                 let nInputCount = this._aInputs.length;
                 for (let nIndex = 0; nIndex < nInputCount; nIndex++)
                 {
-                    // a. validate
+                    // I. validate
                     if (elInput === this._aInputs[nIndex])
                     {
-                        // I. store
+                        // 1. store
                         nCurrentInputIndex = nIndex;
 
                         // 2. exit
@@ -247,40 +356,103 @@ module.exports.prototype = {
                     }
                 }
 
-                // 5. output
+                // f. output
                 let nCharIndex = 0;
                 let nStartIndex = Math.max(0, nCurrentInputIndex - Math.min(sNewValue.length - 1, nInputCount));
                 for (let nIndex = nStartIndex; nIndex < nInputCount; nIndex++)
                 {
-                    // a. register
+                    // I. register
                     let elInput = this._aInputs[nIndex];
 
-                    // b. output
+                    // II. output
                     elInput.value = sNewValue.substr(nCharIndex, 1);
 
-                    // c. update
+                    // III. update
                     nCharIndex++;
 
-                    // d. is next not last, focus and select
+                    // IV. is next not last, focus and select
                     if (nIndex < nInputCount - 1)
                     {
                         this._aInputs[nIndex + 1].focus();
-                        this._aInputs[nIndex + 1].select();
                     }
 
-                    // e. if last, select
+                    // V. if last, select
                     if (nIndex === nInputCount - 1) this._aInputs[nIndex].select();
 
-                    // f. exit if no more characters
+                    // VI. exit if no more characters
                     if (nCharIndex > sNewValue.length - 1) break;
                 }
 
                 break;
-
-            default:
-
-                //console.log('Skipped ' + sEventType);
         }
+
+        // 5. build
+        this._sCode = '';
+        for (let nIndex = 0; nIndex < this._aInputs.length; nIndex++)
+        {
+            this._sCode += this._aInputs[nIndex].value;
+        }
+
+        // 6. validate
+        this._bCodeValidated = this._sCode.match(/^[a-zA-Z0-9]{6}$/g);
+
+        // 7. toggle button
+        if (this._bCodeValidated)
+        {
+            this._elButtonConnect.classList.remove('muted');
+        }
+        else
+        {
+            this._elButtonConnect.classList.add('muted');
+        }
+
+        // 8. verify and auto-connect
+        if (this._bCodeValidated && this._bIsInitialInput) this._onButtonConnectClick();
+    },
+
+    /**
+     * Handle button connect `click`
+     * @private
+     */
+    _onButtonConnectClick: function()
+    {
+        // 1. validate
+        if (this._bCodeValidated)
+        {
+            // a. toggle
+            this.disable();
+            this._bIsInitialInput = false;
+
+            // b. broadcast
+            this.dispatchEvent(this.REQUEST_CONNECTION_USING_MANUALCODE, this._sCode);
+        }
+        else
+        {
+            this._showMessage("The code you entered isn't complete yet");
+        }
+    },
+
+    /**
+     * Show message
+     * @private
+     */
+    _showMessage: function(sMessage)
+    {
+        // 1. output
+        this._elMessage.innerHTML = sMessage;
+
+        // 2. show
+        this._elMessage.classList.add('show');
+    },
+
+    /**
+     * Hide message
+     * @private
+     */
+    _hideMessage: function()
+    {
+        // 1. hide
+        this._elMessage.classList.remove('show');
     }
 
 };

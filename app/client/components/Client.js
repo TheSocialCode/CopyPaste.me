@@ -83,7 +83,7 @@ module.exports.prototype = {
 
         // 5. verify
         let sConnectPath = 'connect';
-        if (window.location.pathname.substr(1, sConnectPath.length) === sConnectPath)
+        if (window.location.pathname.substr(1, sConnectPath.length).toLowerCase() === sConnectPath)
         {
             // a. configure
             this._bIsManualConnect = true;
@@ -305,6 +305,24 @@ module.exports.prototype = {
         this._connector.setManualCode(sManualCode)
     },
 
+    _onRequestConnectUsingManualCode: function(sManualCode)
+    {
+        // 1. request
+        this._socket.emit(ManualConnectEvents.prototype.REQUEST_CONNECTION_BY_MANUALCODE, sManualCode);
+    },
+
+    _onManualCodeNotFound: function()
+    {
+        // 1. toggle
+        this._manualConnectInput.enable('The code you are trying to use is not working.<br>Please try again.');
+    },
+
+    _onManualCodeExpired: function()
+    {
+        // 1. toggle
+        this._manualConnectInput.enable('The code you are trying to use has expired.<br>Please try again.');
+    },
+
     /**
      * Handle event `toggle_direction`
      * @param sDirection
@@ -382,6 +400,8 @@ module.exports.prototype = {
         {
             // a. configure
             this._socket.on('token_not_found', this._onSecondaryDeviceTokenNotFound.bind(this));
+            this._socket.on(ManualConnectEvents.prototype.MANUALCODE_NOT_FOUND, this._onManualCodeNotFound.bind(this));
+            this._socket.on(ManualConnectEvents.prototype.MANUALCODE_EXPIRED, this._onManualCodeExpired.bind(this));
         }
 
         // 3. configure primary device
@@ -435,8 +455,9 @@ module.exports.prototype = {
             this._manualConnectInput = new ManualConnectInput(); // ### toggle connection type
 
             // 13. configure
-            //this._manualConnect.addEventListener(ManualConnect.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
+            this._manualConnectInput.addEventListener(ManualConnectInput.prototype.REQUEST_CONNECTION_USING_MANUALCODE, this._onRequestConnectUsingManualCode.bind(this));
 
+            // 14. toggle
             this._manualConnectInput.show();
         }
 

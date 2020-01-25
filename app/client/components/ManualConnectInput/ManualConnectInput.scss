@@ -31,10 +31,6 @@ div.component_ManualConnectInput_input {
     margin-top: 10px;
     padding: 15px;
 
-    div.component_ManualConnectInput_code {
-        margin-bottom: 20px;
-    }
-
     input.component_ManualConnectInput_character {
         font-size: 30px;
         padding: 7px 9px 7px 9px;
@@ -52,5 +48,24 @@ div.component_ManualConnectInput_input {
             padding: 4px 6px 4px 6px;
             width: 16px;
         }
+    }
+
+    & .component_ManualConnectInput_message {
+        font-size: smaller;
+        color: $textcolor-alert;
+        margin-top: 20px;
+        display: none;
+
+        &.show {
+            display: block;
+        }
+    }
+
+    & .component_ManualConnectInput_button {
+        margin-top: 20px;
+    }
+
+    & .component_ManualConnectInput_button.muted {
+        display: none;
     }
 }

@@ -49,7 +49,8 @@
                 <input data-mimoto-id="char5" type="text" class="component_ManualConnectInput_character">
                 <input data-mimoto-id="char6" type="text" class="component_ManualConnectInput_character">
             </div>
-            <div class="button">Connect</div>
+            <div data-mimoto-id="message" class="component_ManualConnectInput_message">Message</div>
+            <div data-mimoto-id="button" class="button component_ManualConnectInput_button muted">Connect</div>
         </div>
     </div>
 
