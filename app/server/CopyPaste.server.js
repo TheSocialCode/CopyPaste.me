@@ -540,7 +540,7 @@ module.exports = {
         let receivingSocket = (pair.direction === ToggleDirectionStates.prototype.SWAPPED) ? pair.secondaryDevice : pair.primaryDevice;
 
         // 7. broadcast
-        receivingSocket.emit('data', { sType:encryptedData.sType, value:encryptedData.value });
+        receivingSocket.emit('data', encryptedData);
 
         // 8. store
         pair.log.push(

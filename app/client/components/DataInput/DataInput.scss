@@ -278,23 +278,19 @@ div.data_input_image_preview_label {
 
 div.data_input_document
 {
-    display: flex;
+
 }
 
 div.data_input_document_menu {
-    flex: content;
-    margin-right: 12px;
+
 }
 
 div.data_input_document_preview {
-    display: block;
-    width: 100%;
-    height: 125px;
-    visibility: hidden;
+    display: none;
 }
 
 div.data_input_document_preview-visible {
-    visibility: visible;
+    display: block;
 }
 
 div.data_input_document_preview_label {

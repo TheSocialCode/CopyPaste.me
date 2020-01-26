@@ -57,16 +57,12 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (socket, sToken)
+    __construct: function()
     {
-        // 1. store
-        this._socket = socket;
-        this._data.sToken = sToken;
-
-        // 2. register
+        // 1. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_DataInput"]');
 
-        // 3. register
+        // 2. register
         this._elInputPassword = this._elRoot.querySelector('[data-mimoto-id="data_input_password"]');
         this._elInputURL = this._elRoot.querySelector('[data-mimoto-id="data_input_url"]');
         this._elInputText = this._elRoot.querySelector('[data-mimoto-id="data_input_text"]');
@@ -74,7 +70,7 @@ module.exports.prototype = {
         this._elInputDocument = this._elRoot.querySelector('[data-mimoto-id="data_input_document"]');
         this._elButtonSend = this._elRoot.querySelector('[data-mimoto-id="button_input_send"]');
 
-        // 4. setup
+        // 3. setup
         this._setupInput();
         this._setupTabMenu();
     },

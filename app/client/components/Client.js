@@ -13,6 +13,7 @@ const Connector = require('./Connector/Connector');
 const DataOutput = require('./DataOutput/DataOutput');
 const DataInput = require('./DataInput/DataInput');
 const Module_Crypto = require('asymmetric-crypto');
+const Module_GenerateUniqueID = require('generate-unique-id');
 const ToggleDirectionButton = require('./ToggleDirectionButton/ToggleDirectionButton');
 const ToggleDirectionEvents = require('./ToggleDirectionButton/ToggleDirectionEvents');
 const ToggleDirectionStates = require('./ToggleDirectionButton/ToggleDirectionStates');
@@ -50,6 +51,9 @@ module.exports.prototype = {
 
     // views
     _elRoot: null,
+
+    // data
+    _aReceivedDataPackages: [],
 
 
 
@@ -231,47 +235,122 @@ module.exports.prototype = {
      */
     _onRequestDataBroadcast: function(data)
     {
-        // 3. verify
-        if (data.sType === DataInput.prototype.DATATYPE_PASSWORD || data.sType === DataInput.prototype.DATATYPE_TEXT)
-        {
-            // a. clone
-            let encryptedData = JSON.parse(JSON.stringify(data));
+        // 1. preset
+        const nSizePerPackage = 200000;
 
-            // b. encrypt
-            encryptedData.value = Module_Crypto.encrypt(data.value, this._sTheirPublicKey, this._myKeyPair.secretKey);
 
-            // c. broadcast
-            this._socket.emit('data', encryptedData);
-        }
-        else
+        // ---
+
+
+        // 2. clone
+        let dataToTransfer = JSON.parse(JSON.stringify(data));
+
+        // 3. prepare
+        dataToTransfer.value = JSON.stringify(dataToTransfer.value);
+
+        // 4. encrypt
+        dataToTransfer.value = Module_Crypto.encrypt(dataToTransfer.value, this._sTheirPublicKey, this._myKeyPair.secretKey);
+
+        // 3. prepare
+        dataToTransfer.value = JSON.stringify(dataToTransfer.value);
+
+        // 5. setup
+        dataToTransfer.id = Module_GenerateUniqueID({ length: 32 });
+        dataToTransfer.packageCount = Math.ceil(dataToTransfer.value.length / nSizePerPackage);
+
+        // 6. split and transfer
+        for (let nPackageIndex = 0; nPackageIndex < dataToTransfer.packageCount; nPackageIndex++)
         {
-            // a. broadcast
-            this._socket.emit('data', data);
+            console.log('Package #' + (nPackageIndex + 1) + ' of ' + dataToTransfer.packageCount);
+
+
+
+            // update interface -> _dataInput.setProgress(nPackageIndex / dataToTransfer.packageCount)
+
+
+
+            // a. setup
+            dataToTransfer.packageNumber = nPackageIndex;
+
+            // b. clone
+            let packageToTransfer = JSON.parse(JSON.stringify(dataToTransfer));
+
+            // c. split
+            packageToTransfer.value = dataToTransfer.value.substr(nPackageIndex * nSizePerPackage, nSizePerPackage);
+
+            // d. store
+            dataToTransfer.packageSize = packageToTransfer.value.length;
+
+            // e. broadcast
+            this._socket.emit('data', packageToTransfer);
         }
     },
 
     /**
      * Handle event `data`
-     * @param data
+     * @param receivedData
      * @private
      */
-    _onData: function(encryptedData)
+    _onData: function(receivedData)
     {
-        // 1. copy
-        let data = encryptedData;
-
-        // 2. verify
-        if (encryptedData.sType === DataInput.prototype.DATATYPE_PASSWORD || encryptedData.sType === DataInput.prototype.DATATYPE_TEXT)
+        // 1. verify or init
+        if (!this._aReceivedDataPackages[receivedData.id])
         {
-            // a. clone
-            data = JSON.parse(JSON.stringify(encryptedData));
-
-            // d. decrypt
-            data.value = Module_Crypto.decrypt(encryptedData.value.data, encryptedData.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
+            // a. init and store
+            this._aReceivedDataPackages[receivedData.id] = {
+                id: receivedData.id,
+                sType: receivedData.sType,
+                packageCount: receivedData.packageCount,
+                receivedCount: 0,
+                packages: []
+            };
         }
 
-        // 3. forward
-        this._dataOutput.showData(data);
+        // 2. store
+        this._aReceivedDataPackages[receivedData.id].packages[receivedData.packageNumber] = receivedData;
+
+        // 3. update
+        this._aReceivedDataPackages[receivedData.id].receivedCount++;
+
+        // 4. validate
+        if (this._aReceivedDataPackages[receivedData.id].receivedCount === this._aReceivedDataPackages[receivedData.id].packageCount)
+        {
+            // a. compose
+            let sValue = '';
+            for (let nPackageIndex = 0; nPackageIndex < this._aReceivedDataPackages[receivedData.id].packageCount; nPackageIndex++)
+            {
+                // I. register
+                let receivedPackage = this._aReceivedDataPackages[receivedData.id].packages[nPackageIndex];
+
+                // II. build
+                sValue += receivedPackage.value;
+            }
+
+
+            // ---
+
+
+            // b. init
+            let data = {
+                sType: this._aReceivedDataPackages[receivedData.id].sType,
+                value: sValue
+            };
+
+            // c. restore
+            data.value = JSON.parse(data.value);
+
+            // d. decrypt
+            data.value = Module_Crypto.decrypt(data.value.data, data.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
+
+            // e. restore
+            data.value = JSON.parse(data.value);
+
+            // f. forward
+            this._dataOutput.showData(data);
+
+            // g. cleanup
+            delete this._aReceivedDataPackages[receivedData.id];
+        }
     },
 
     /**

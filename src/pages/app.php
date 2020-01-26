@@ -100,8 +100,6 @@
                                             Select document
                                         </div>
                                         <input id="data_input_document_file" type="file" style="display:none;" name="data_input_document_file"/>
-                                        <br>
-                                        <p style="color:#C25B56;font-size:smaller;font-style:italic">Warning - Screenshots and images taken with your camera might not work properly yet. (working on it!)</p>
                                     </div>
                                     <div data-mimoto-id="data_input_document_preview" class="data_input_document_preview">
                                         <div data-mimoto-id="data_input_document_preview_label" class="data_input_document_preview_label"></div>
