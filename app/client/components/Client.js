@@ -261,14 +261,6 @@ module.exports.prototype = {
         // 6. split and transfer
         for (let nPackageIndex = 0; nPackageIndex < dataToTransfer.packageCount; nPackageIndex++)
         {
-            console.log('Package #' + (nPackageIndex + 1) + ' of ' + dataToTransfer.packageCount);
-
-
-
-            // update interface -> _dataInput.setProgress(nPackageIndex / dataToTransfer.packageCount)
-
-
-
             // a. setup
             dataToTransfer.packageNumber = nPackageIndex;
 
@@ -283,6 +275,9 @@ module.exports.prototype = {
 
             // e. broadcast
             this._socket.emit('data', packageToTransfer);
+
+            // f. update
+            this._dataInput.showTransferProgress((nPackageIndex + 1) / dataToTransfer.packageCount);
         }
     },
 

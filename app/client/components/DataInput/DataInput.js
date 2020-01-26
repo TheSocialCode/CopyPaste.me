@@ -28,6 +28,8 @@ module.exports.prototype = {
     _elInputText: null,
     _elInputImage: null,
     _elInputDocumnent: null,
+    _elInputDocumentProgress: null,
+    _elInputDocumentProgressBar: null,
 
     // utils
     _aEvents: [],
@@ -68,7 +70,10 @@ module.exports.prototype = {
         this._elInputText = this._elRoot.querySelector('[data-mimoto-id="data_input_text"]');
         this._elInputImage = this._elRoot.querySelector('[data-mimoto-id="data_input_image"]');
         this._elInputDocument = this._elRoot.querySelector('[data-mimoto-id="data_input_document"]');
+        this._elInputDocumentProgress = this._elInputDocument.querySelector('[data-mimoto-id="progress"]');
+        this._elInputDocumentProgressBar = this._elInputDocumentProgress.querySelector('[data-mimoto-id="progressbar"]');
         this._elButtonSend = this._elRoot.querySelector('[data-mimoto-id="button_input_send"]');
+
 
         // 3. setup
         this._setupInput();
@@ -133,6 +138,28 @@ module.exports.prototype = {
                 // II. execute
                 fMethod.apply(this, Array.prototype.slice.call(arguments, 1));
             }
+        }
+    },
+
+    /**
+     * Show progress of data transfer
+     * @param nProgress
+     */
+    showTransferProgress: function(nProgress)
+    {
+        // 1. verify
+        if (nProgress > 0 && nProgress < 1)
+        {
+            // a. update
+            this._elInputDocumentProgressBar.style.width = Math.ceil(100 * nProgress) + '%';
+
+            // b. show
+            this._elInputDocumentProgress.classList.add('show');
+        }
+        else
+        {
+            // a. hide
+            this._elInputDocumentProgress.classList.remove('show')
         }
     },
 

@@ -301,3 +301,19 @@ div.data_input_document_preview_label {
     overflow: hidden;
     word-break: break-word;
 }
+
+div.component_DataInput_document_progress {
+
+    display: none;
+    margin-top: 10px;
+
+    &.show {
+        display: block;
+    }
+
+    & div.component_DataInput_document_progressbar {
+        height: 10px;
+        background-color: $background-footer;
+        width: 0;
+    }
+}

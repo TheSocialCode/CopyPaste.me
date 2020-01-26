@@ -104,6 +104,9 @@
                                     <div data-mimoto-id="data_input_document_preview" class="data_input_document_preview">
                                         <div data-mimoto-id="data_input_document_preview_label" class="data_input_document_preview_label"></div>
                                     </div>
+                                    <div data-mimoto-id="progress" class="component_DataInput_document_progress">
+                                        <div data-mimoto-id="progressbar" class="component_DataInput_document_progressbar"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
