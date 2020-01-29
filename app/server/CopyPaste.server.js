@@ -188,7 +188,7 @@ module.exports = {
             'Created by The Social Code',
             ' ',
             '@author  Sebastian Kersten',
-            '@license MIT',
+            '@license AGPL-3.0-only',
             ' ',
             'Please help keeping this service free by donating: https://paypal.me/thesocialcode',
             ' ',

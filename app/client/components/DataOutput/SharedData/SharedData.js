@@ -7,6 +7,14 @@
 'use strict';
 
 
+// import extenders
+const EventDispatcherExtender = require('./../../../extenders/EventDispatcherExtender');
+
+// import helpers
+const Module_FileSaver = require('file-saver');
+const Module_ClipboardCopy = require('clipboard-copy');
+
+
 module.exports = function(elDataContainer, data)
 {
     // start
@@ -41,46 +49,15 @@ module.exports.prototype = {
      */
     __construct: function (elDataContainer, data)
     {
-        // 1. store
+        // 1. extend
+        new EventDispatcherExtender(this);
+
+        // 2. store
         this._elDataContainer = elDataContainer;
         this._data = data;
 
-        // 2. setup
+        // 3. setup
         this._setup();
-    },
-
-
-
-    // ----------------------------------------------------------------------------
-    // --- Public methods ---------------------------------------------------------
-    // ----------------------------------------------------------------------------
-
-
-    addEventListener: function(sEvent, fMethod)
-    {
-        // 1. verify or init
-        if (!this._aEvents[sEvent]) this._aEvents[sEvent] = [];
-
-        // 2. store
-        this._aEvents[sEvent].push(fMethod);
-    },
-
-    dispatchEvent: function(sEvent)
-    {
-        // 1. validate
-        if (this._aEvents[sEvent])
-        {
-            // a. find
-            let nMethodCount = this._aEvents[sEvent].length;
-            for (let nIndex = 0; nIndex < nMethodCount; nIndex++)
-            {
-                // I. register
-                let fMethod = this._aEvents[sEvent][nIndex];
-
-                // II. execute
-                fMethod.apply(this, Array.prototype.slice.call(arguments, 1));
-            }
-        }
     },
 
 
@@ -90,6 +67,10 @@ module.exports.prototype = {
     // ----------------------------------------------------------------------------
 
 
+    /**
+     * Setup
+     * @private
+     */
     _setup: function()
     {
         // 1. init
@@ -165,7 +146,7 @@ module.exports.prototype = {
         // 9. configure
         this._elData.querySelector('[data-mimoto-id=receiver_data_option_extend]').addEventListener('click', function() {
 
-            this._setExtendAutoDestructionDelay()
+            this._extendAutoDestructionDelay()
 
         }.bind(this));
 
@@ -194,6 +175,11 @@ module.exports.prototype = {
         }
     },
 
+    /**
+     * Show
+     * @param elContent
+     * @private
+     */
     _show: function(elContent)
     {
         // 5. register
@@ -228,6 +214,10 @@ module.exports.prototype = {
         }.bind(this, elPlaceholder, elContent), 310);
     },
 
+    /**
+     * Hide
+     * @private
+     */
     _hide: function()
     {
         // 1. register
@@ -263,6 +253,11 @@ module.exports.prototype = {
         }.bind(this), 310);
     },
 
+    /**
+     * Update auto desctruction timer
+     * @returns {boolean}
+     * @private
+     */
     _updateTimer: function()
     {
         // 1. init
@@ -284,7 +279,11 @@ module.exports.prototype = {
         return (nDifference <= 0);
     },
 
-    _setExtendAutoDestructionDelay: function()
+    /**
+     * Extend auto destruction delay
+     * @private
+     */
+    _extendAutoDestructionDelay: function()
     {
         // 1. define
         let nExtendedDuration = 60 * 1000;
@@ -296,6 +295,10 @@ module.exports.prototype = {
         this._nTimeToAutoDestruct = new Date().getTime() + nNewTime;
     },
 
+    /**
+     * Clear data
+     * @private
+     */
     _clearData: function()
     {
         // 1. cleanup
@@ -305,63 +308,58 @@ module.exports.prototype = {
         this._hide();
     },
 
+    /**
+     * Handle button event `click`
+     * @private
+     */
     _onButtonClick: function()
     {
+        // 1. select
         switch(this._data.sType)
         {
             case 'password':
 
+                // a. copy
                 this._copyToClipboard(this._data.value);
                 break;
 
             case 'url':
 
+                // a. open
                 window.open(this._data.value, '_blank');
                 break;
 
             case 'text':
 
+                // a. copy
                 this._copyToClipboard(this._data.value);
                 break;
 
             case 'image':
 
-
-                var link = document.createElement("a");
-
-                link.setAttribute("href", this._data.value.base64);
-                link.setAttribute("download", this._data.value.fileName);
-                link.click();
-
+                // a. download
+                Module_FileSaver.saveAs(this._data.value.base64, this._data.value.fileName);
                 break;
 
             case 'document':
 
-                var link = document.createElement("a");
-
-                link.setAttribute("href", this._data.value.base64);
-                link.setAttribute("download", this._data.value.fileName);
-                link.click();
-
+                // a. download
+                Module_FileSaver.saveAs(this._data.value.base64, this._data.value.fileName);
                 break;
         }
     },
 
+    /**
+     * Copy to clipboard
+     * @param sValue
+     * @private
+     */
     _copyToClipboard: function(sValue)
     {
-        // copy to clipboard
-        const el = document.createElement('textarea');
-        el.value = sValue;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
+        // 1. copy
+        Module_ClipboardCopy(this._data.value);
 
-
-        // ---
-
-
-        // 1. prepare
+        // 2. prepare
         this._elData.classList.add('clear');
 
         // 3. time clearing of animation
@@ -371,33 +369,6 @@ module.exports.prototype = {
             this._elData.classList.remove('clear');
 
         }.bind(this), 1200);
-    },
-
-
-
-
-    _b64toBlob: function(b64Data, contentType, sliceSize) {
-        contentType = contentType || '';
-        sliceSize = sliceSize || 512;
-
-        var byteCharacters = atob(b64Data);
-        var byteArrays = [];
-
-        for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-            var slice = byteCharacters.slice(offset, offset + sliceSize);
-
-            var byteNumbers = new Array(slice.length);
-            for (var i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-
-            var byteArray = new Uint8Array(byteNumbers);
-
-            byteArrays.push(byteArray);
-        }
-
-        var blob = new Blob(byteArrays, {type: contentType});
-        return blob;
     }
 
 };

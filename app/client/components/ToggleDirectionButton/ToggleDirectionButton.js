@@ -11,6 +11,9 @@
 const ToggleDirectionStates = require('./ToggleDirectionStates');
 const ToggleDirectionEvents = require('./ToggleDirectionEvents');
 
+// import extenders
+const EventDispatcherExtender = require('./../../extenders/EventDispatcherExtender');
+
 
 module.exports = function()
 {
@@ -24,9 +27,6 @@ module.exports.prototype = {
     _elRoot: null,
     _elButton: null,
 
-    // utils
-    _aEvents: [],
-
 
 
     // ----------------------------------------------------------------------------
@@ -39,11 +39,14 @@ module.exports.prototype = {
      */
     __construct: function ()
     {
-        // 1. register
+        // 1. extend
+        new EventDispatcherExtender(this);
+
+        // 2. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_ToggleDirectionButton"]');
         this._elButton = this._elRoot.querySelector('[data-mimoto-id="button"]');
 
-        // 2. configure
+        // 3. configure
         this._elButton.addEventListener('click', this._onButtonClick.bind(this));
     },
 
@@ -68,42 +71,6 @@ module.exports.prototype = {
     hide: function()
     {
         this._elRoot.classList.remove('show');
-    },
-
-    /**
-     * Add event listener
-     * @param sEvent
-     * @param fMethod
-     */
-    addEventListener: function(sEvent, fMethod)
-    {
-        // 1. verify or init
-        if (!this._aEvents[sEvent]) this._aEvents[sEvent] = [];
-
-        // 2. store
-        this._aEvents[sEvent].push(fMethod);
-    },
-
-    /**
-     * dispatch event
-     * @param sEvent
-     */
-    dispatchEvent: function(sEvent)
-    {
-        // 1. validate
-        if (this._aEvents[sEvent])
-        {
-            // a. find
-            let nMethodCount = this._aEvents[sEvent].length;
-            for (let nIndex = 0; nIndex < nMethodCount; nIndex++)
-            {
-                // I. register
-                let fMethod = this._aEvents[sEvent][nIndex];
-
-                // II. execute
-                fMethod.apply(this, Array.prototype.slice.call(arguments, 1));
-            }
-        }
     },
 
 

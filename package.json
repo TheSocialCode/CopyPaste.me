@@ -6,8 +6,10 @@
     "license": "AGPL-3.0-only",
     "dependencies": {
         "asymmetric-crypto": "^1.0.2",
+        "clipboard-copy": "^3.1.0",
         "css-loader": "^3.4.2",
         "express": "^4.17.1",
+        "file-saver": "^2.0.2",
         "fs": "0.0.1-security",
         "generate-password": "^1.5.0",
         "generate-unique-id": "^2.0.0",

@@ -8,18 +8,21 @@
 
 
 // import
-const SocketIO = require('socket.io-client');
 const Connector = require('./Connector/Connector');
-const DataOutput = require('./DataOutput/DataOutput');
 const DataInput = require('./DataInput/DataInput');
-const Module_Crypto = require('asymmetric-crypto');
-const Module_GenerateUniqueID = require('generate-unique-id');
+const DataOutput = require('./DataOutput/DataOutput');
 const ToggleDirectionButton = require('./ToggleDirectionButton/ToggleDirectionButton');
 const ToggleDirectionEvents = require('./ToggleDirectionButton/ToggleDirectionEvents');
 const ToggleDirectionStates = require('./ToggleDirectionButton/ToggleDirectionStates');
 const ManualConnectInput = require('./ManualConnectInput/ManualConnectInput');
 const ManualConnectEvents = require('./ManualConnectButton/ManualConnectEvents');
 const AlertMessage = require('./AlertMessage/AlertMessage');
+
+// import managers
+const DataManager = require('./../managers/DataManager');
+
+// import utils
+const SocketIO = require('socket.io-client');
 
 
 module.exports = function(sGateway)
@@ -52,8 +55,8 @@ module.exports.prototype = {
     // views
     _elRoot: null,
 
-    // data
-    _aReceivedDataPackages: [],
+    // utils
+    _packageManager: null,
 
 
 
@@ -65,18 +68,15 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (sGateway)
+    __construct: function(sGateway)
     {
-        // 1. create
-        this._myKeyPair = Module_Crypto.keyPair();
-
-        // 2. register
+        // 1. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_Client"]');
 
-        // 3. setup
+        // 2. setup
         this._socket = new SocketIO(sGateway, {secure: true});
 
-        // 4. configure
+        // 3. configure
         this._socket.on('connect', this._onSocketConnect.bind(this));
         this._socket.on('connect_failed', this._socketConnectFailed.bind(this));
         this._socket.on('connect_error', this._onSocketConnectError.bind(this));
@@ -85,7 +85,14 @@ module.exports.prototype = {
         this._socket.on('security_compromised', this._onSecurityCompromised.bind(this));
         this._socket.on('data', this._onData.bind(this));
 
-        // 5. verify
+        // 4. init
+        this._dataManager = new DataManager();
+
+        // 5. configure
+        this._dataManager.addEventListener(DataManager.prototype.DATA_READY_FOR_TRANSFER, this._onDataManagerDataReadyForTransfer.bind(this));
+        this._dataManager.addEventListener(DataManager.prototype.DATA_READY_FOR_DISPLAY, this._onDataManagerDataReadyForDisplay.bind(this));
+
+        // 6. verify
         let sConnectPath = 'connect';
         if (window.location.pathname.substr(1, sConnectPath.length).toLowerCase() === sConnectPath)
         {
@@ -121,7 +128,7 @@ module.exports.prototype = {
             }
         }
 
-        // 6. run
+        // 7. run
         this._socket.connect();
     },
 
@@ -148,7 +155,7 @@ module.exports.prototype = {
             if (!this._sToken)
             {
                 // I. request
-                this._socket.emit('primarydevice_request_token', this._myKeyPair.publicKey);
+                this._socket.emit('primarydevice_request_token', this._dataManager.getMyPublicKey());
             }
             else
             {
@@ -162,7 +169,7 @@ module.exports.prototype = {
             if (!this._bIsManualConnect)
             {
                 // I. broadcast
-                this._socket.emit('secondarydevice_connect_to_token', this._sToken, this._myKeyPair.publicKey);
+                this._socket.emit('secondarydevice_connect_to_token', this._sToken, this._dataManager.getMyPublicKey());
             }
         }
     },
@@ -235,50 +242,8 @@ module.exports.prototype = {
      */
     _onRequestDataBroadcast: function(data)
     {
-        // 1. preset
-        const nSizePerPackage = 200000;
-
-
-        // ---
-
-
-        // 2. clone
-        let dataToTransfer = JSON.parse(JSON.stringify(data));
-
-        // 3. prepare
-        dataToTransfer.value = JSON.stringify(dataToTransfer.value);
-
-        // 4. encrypt
-        dataToTransfer.value = Module_Crypto.encrypt(dataToTransfer.value, this._sTheirPublicKey, this._myKeyPair.secretKey);
-
-        // 3. prepare
-        dataToTransfer.value = JSON.stringify(dataToTransfer.value);
-
-        // 5. setup
-        dataToTransfer.id = Module_GenerateUniqueID({ length: 32 });
-        dataToTransfer.packageCount = Math.ceil(dataToTransfer.value.length / nSizePerPackage);
-
-        // 6. split and transfer
-        for (let nPackageIndex = 0; nPackageIndex < dataToTransfer.packageCount; nPackageIndex++)
-        {
-            // a. setup
-            dataToTransfer.packageNumber = nPackageIndex;
-
-            // b. clone
-            let packageToTransfer = JSON.parse(JSON.stringify(dataToTransfer));
-
-            // c. split
-            packageToTransfer.value = dataToTransfer.value.substr(nPackageIndex * nSizePerPackage, nSizePerPackage);
-
-            // d. store
-            dataToTransfer.packageSize = packageToTransfer.value.length;
-
-            // e. broadcast
-            this._socket.emit('data', packageToTransfer);
-
-            // f. update
-            this._dataInput.showTransferProgress((nPackageIndex + 1) / dataToTransfer.packageCount);
-        }
+        // 1. forward
+        this._dataManager.prepareDataForTransfer(data);
     },
 
     /**
@@ -288,64 +253,8 @@ module.exports.prototype = {
      */
     _onData: function(receivedData)
     {
-        // 1. verify or init
-        if (!this._aReceivedDataPackages[receivedData.id])
-        {
-            // a. init and store
-            this._aReceivedDataPackages[receivedData.id] = {
-                id: receivedData.id,
-                sType: receivedData.sType,
-                packageCount: receivedData.packageCount,
-                receivedCount: 0,
-                packages: []
-            };
-        }
-
-        // 2. store
-        this._aReceivedDataPackages[receivedData.id].packages[receivedData.packageNumber] = receivedData;
-
-        // 3. update
-        this._aReceivedDataPackages[receivedData.id].receivedCount++;
-
-        // 4. validate
-        if (this._aReceivedDataPackages[receivedData.id].receivedCount === this._aReceivedDataPackages[receivedData.id].packageCount)
-        {
-            // a. compose
-            let sValue = '';
-            for (let nPackageIndex = 0; nPackageIndex < this._aReceivedDataPackages[receivedData.id].packageCount; nPackageIndex++)
-            {
-                // I. register
-                let receivedPackage = this._aReceivedDataPackages[receivedData.id].packages[nPackageIndex];
-
-                // II. build
-                sValue += receivedPackage.value;
-            }
-
-
-            // ---
-
-
-            // b. init
-            let data = {
-                sType: this._aReceivedDataPackages[receivedData.id].sType,
-                value: sValue
-            };
-
-            // c. restore
-            data.value = JSON.parse(data.value);
-
-            // d. decrypt
-            data.value = Module_Crypto.decrypt(data.value.data, data.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
-
-            // e. restore
-            data.value = JSON.parse(data.value);
-
-            // f. forward
-            this._dataOutput.showData(data);
-
-            // g. cleanup
-            delete this._aReceivedDataPackages[receivedData.id];
-        }
+        // 1. store
+        this._dataManager.addPackage(receivedData);
     },
 
     /**
@@ -382,7 +291,7 @@ module.exports.prototype = {
     _onRequestConnectUsingManualCode: function(sManualCode)
     {
         // 1. request
-        this._socket.emit(ManualConnectEvents.prototype.REQUEST_CONNECTION_BY_MANUALCODE, sManualCode, this._myKeyPair.publicKey);
+        this._socket.emit(ManualConnectEvents.prototype.REQUEST_CONNECTION_BY_MANUALCODE, sManualCode, this._dataManager.getMyPublicKey());
     },
 
     _onManualCodeNotFound: function()
@@ -533,18 +442,20 @@ module.exports.prototype = {
         this._toggleDirectionButton.addEventListener(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this));
 
 
+        // --- manual connect
+
+        // 12. verify
         if (this._bIsManualConnect)
         {
-            // 12. init
+            // a. init
             this._manualConnectInput = new ManualConnectInput(); // ### toggle connection type
 
-            // 13. configure
+            // b. configure
             this._manualConnectInput.addEventListener(ManualConnectInput.prototype.REQUEST_CONNECTION_USING_MANUALCODE, this._onRequestConnectUsingManualCode.bind(this));
 
-            // 14. toggle
+            // c. toggle
             this._manualConnectInput.show();
         }
-
     },
 
 
@@ -610,7 +521,7 @@ module.exports.prototype = {
     _onSecondaryDeviceConnected: function(sSecondaryPublicKey)
     {
         // 1. store
-        this._sTheirPublicKey = sSecondaryPublicKey;
+        this._dataManager.setTheirPublicKey(sSecondaryPublicKey);
 
         // 2. toggle visibility
         this._alertMessage.hide();
@@ -676,7 +587,7 @@ module.exports.prototype = {
     _onSecondaryDeviceConnectedToToken: function(sPrimaryDevicePublicKey, sDirection)
     {
         // 1. store
-        this._sTheirPublicKey = sPrimaryDevicePublicKey;
+        this._dataManager.setTheirPublicKey(sPrimaryDevicePublicKey);
         this._sDirection = sDirection;
 
         // 2. toggle visibility
@@ -689,6 +600,31 @@ module.exports.prototype = {
         {
             this._dataInput.show();
         }
+    },
+
+    /**
+     * Handle PackageManager event `DATA_READY_FOR TRANSFER`
+     * @param packageToTransfer
+     * @private
+     */
+    _onDataManagerDataReadyForTransfer: function(packageToTransfer)
+    {
+        // 1. broadcast
+        this._socket.emit('data', packageToTransfer);
+
+        // 2. update
+        this._dataInput.showTransferProgress((packageToTransfer.packageNumber + 1) / packageToTransfer.packageCount);
+    },
+
+    /**
+     * Handle PackageManager event `DATA_READY_FOR DISPLAY`
+     * @param data
+     * @private
+     */
+    _onDataManagerDataReadyForDisplay: function(data)
+    {
+        // 1. forward
+        this._dataOutput.showData(data);
     },
 
     /**

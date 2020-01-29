@@ -12,6 +12,9 @@ const QRCodeGenerator = require('qrcode-generator');
 const ManualConnectButton = require('./../ManualConnectButton/ManualConnectButton');
 const ManualConnectEvents = require('./../ManualConnectButton/ManualConnectEvents');
 
+// import extenders
+const EventDispatcherExtender = require('./../../extenders/EventDispatcherExtender');
+
 
 module.exports = function(sTokenURL)
 {
@@ -35,7 +38,6 @@ module.exports.prototype = {
     _manualConnectButton: null,
 
     // utils
-    _aEvents: [],
     _timerManualCodeCountdown: null,
 
     // states
@@ -58,10 +60,13 @@ module.exports.prototype = {
      */
     __construct: function (sTokenURL)
     {
-        // 1. init
+        // 1. extend
+        new EventDispatcherExtender(this);
+
+        // 2. init
         this._sCurrentState = this.STATE_QR;
 
-        // 2. register
+        // 3. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_QR"]');
         this._elContainer = document.querySelector('[data-mimoto-id="component_QR_container"]');
         this._elFront = document.querySelector('[data-mimoto-id="component_QR_front"]');
@@ -70,7 +75,7 @@ module.exports.prototype = {
         this._elManualCode = this._elRoot.querySelector('[data-mimoto-id="manualcode"]');
         this._elManualCodeCountdown = this._elRoot.querySelector('[data-mimoto-id="countdown"]');
 
-        // 3. configure
+        // 4. configure
         var typeNumber = 4;
         var errorCorrectionLevel = 'L';
         var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
@@ -78,7 +83,7 @@ module.exports.prototype = {
         qr.make();
         this._elContainer.innerHTML = qr.createImgTag(5);
 
-        // 4. configure
+        // 5. configure
         this._elContainer.addEventListener(
             'click',
             function(e)
@@ -94,10 +99,10 @@ module.exports.prototype = {
             }.bind(this, sTokenURL)
         );
 
-        // 5. init
+        // 6. init
         this._manualConnectButton = new ManualConnectButton();
 
-        // 6. configure
+        // 7. configure
         this._manualConnectButton.addEventListener(ManualConnectEvents.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
     },
 
@@ -167,42 +172,6 @@ module.exports.prototype = {
 
         // 2. toggle visibility
         this._manualConnectButton.hide();
-    },
-
-    /**
-     * Add event listener
-     * @param sEvent
-     * @param fMethod
-     */
-    addEventListener: function(sEvent, fMethod)
-    {
-        // 1. verify or init
-        if (!this._aEvents[sEvent]) this._aEvents[sEvent] = [];
-
-        // 2. store
-        this._aEvents[sEvent].push(fMethod);
-    },
-
-    /**
-     * dispatch event
-     * @param sEvent
-     */
-    dispatchEvent: function(sEvent)
-    {
-        // 1. validate
-        if (this._aEvents[sEvent])
-        {
-            // a. find
-            let nMethodCount = this._aEvents[sEvent].length;
-            for (let nIndex = 0; nIndex < nMethodCount; nIndex++)
-            {
-                // I. register
-                let fMethod = this._aEvents[sEvent][nIndex];
-
-                // II. execute
-                fMethod.apply(this, Array.prototype.slice.call(arguments, 1));
-            }
-        }
     },
 
 

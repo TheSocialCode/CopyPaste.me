@@ -11,6 +11,9 @@
 const SocketIO = require('socket.io-client');
 const Module_Crypto = require('asymmetric-crypto');
 
+// import extenders
+const EventDispatcherExtender = require('./../../extenders/EventDispatcherExtender');
+
 
 module.exports = function()
 {
@@ -27,9 +30,8 @@ module.exports.prototype = {
     _elInputURL: null,
     _elInputText: null,
     _elInputImage: null,
-    _elInputDocumnent: null,
-    _elInputDocumentProgress: null,
-    _elInputDocumentProgressBar: null,
+    _elInputDocument: null,
+    _elUploadProgress: null,
 
     // utils
     _aEvents: [],
@@ -61,21 +63,22 @@ module.exports.prototype = {
      */
     __construct: function()
     {
-        // 1. register
-        this._elRoot = document.querySelector('[data-mimoto-id="component_DataInput"]');
+        // 1. extend
+        new EventDispatcherExtender(this);
 
         // 2. register
+        this._elRoot = document.querySelector('[data-mimoto-id="component_DataInput"]');
+
+        // 3. register
         this._elInputPassword = this._elRoot.querySelector('[data-mimoto-id="data_input_password"]');
         this._elInputURL = this._elRoot.querySelector('[data-mimoto-id="data_input_url"]');
         this._elInputText = this._elRoot.querySelector('[data-mimoto-id="data_input_text"]');
         this._elInputImage = this._elRoot.querySelector('[data-mimoto-id="data_input_image"]');
         this._elInputDocument = this._elRoot.querySelector('[data-mimoto-id="data_input_document"]');
-        this._elInputDocumentProgress = this._elInputDocument.querySelector('[data-mimoto-id="progress"]');
-        this._elInputDocumentProgressBar = this._elInputDocumentProgress.querySelector('[data-mimoto-id="progressbar"]');
+        this._elUploadProgress = this._elRoot.querySelector('[data-mimoto-id="progress"]');
         this._elButtonSend = this._elRoot.querySelector('[data-mimoto-id="button_input_send"]');
 
-
-        // 3. setup
+        // 4. setup
         this._setupInput();
         this._setupTabMenu();
     },
@@ -106,42 +109,6 @@ module.exports.prototype = {
     },
 
     /**
-     * Add event listener
-     * @param sEvent
-     * @param fMethod
-     */
-    addEventListener: function(sEvent, fMethod)
-    {
-        // 1. verify or init
-        if (!this._aEvents[sEvent]) this._aEvents[sEvent] = [];
-
-        // 2. store
-        this._aEvents[sEvent].push(fMethod);
-    },
-
-    /**
-     * dispatch event
-     * @param sEvent
-     */
-    dispatchEvent: function(sEvent)
-    {
-        // 1. validate
-        if (this._aEvents[sEvent])
-        {
-            // a. find
-            let nMethodCount = this._aEvents[sEvent].length;
-            for (let nIndex = 0; nIndex < nMethodCount; nIndex++)
-            {
-                // I. register
-                let fMethod = this._aEvents[sEvent][nIndex];
-
-                // II. execute
-                fMethod.apply(this, Array.prototype.slice.call(arguments, 1));
-            }
-        }
-    },
-
-    /**
      * Show progress of data transfer
      * @param nProgress
      */
@@ -151,15 +118,12 @@ module.exports.prototype = {
         if (nProgress > 0 && nProgress < 1)
         {
             // a. update
-            this._elInputDocumentProgressBar.style.width = Math.ceil(100 * nProgress) + '%';
-
-            // b. show
-            this._elInputDocumentProgress.classList.add('show');
+            this._elUploadProgress.innerText = Math.ceil(100 * nProgress) + '%';
         }
         else
         {
             // a. hide
-            this._elInputDocumentProgress.classList.remove('show')
+            this._elUploadProgress.innerText = '';
         }
     },
 
