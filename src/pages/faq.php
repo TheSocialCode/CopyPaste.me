@@ -49,7 +49,7 @@
         <strong>Sebastian Kersten</strong><br>
         <br>
         <br>
-        P.S. - Don't share things that can't stand the day of light, hurt or exclude others. I'm not responsible for your misbehaviour. Thanks! ♥
+        P.S. - Don't share things that can't stand the day of light, hurt or exclude others. I'm not responsible for other people's misbehaviour. Thanks! ♥
     </p>
 
 </div>

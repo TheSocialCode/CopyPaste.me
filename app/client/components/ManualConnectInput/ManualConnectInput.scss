@@ -21,9 +21,11 @@ div.component_ManualConnectInput_label {
 div.component_ManualConnectInput_sublabel {
     text-align: center;
     font-size: smaller;
+    padding: 0 15px 0 15px;
 }
 
 div.component_ManualConnectInput_input {
+
     border-radius: 3px;
     background-color: $background-lightestgray;
     border: $background-lightgray 1px solid;

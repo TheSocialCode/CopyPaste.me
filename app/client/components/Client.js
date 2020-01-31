@@ -15,6 +15,7 @@ const ToggleDirectionButton = require('./ToggleDirectionButton/ToggleDirectionBu
 const ToggleDirectionEvents = require('./ToggleDirectionButton/ToggleDirectionEvents');
 const ToggleDirectionStates = require('./ToggleDirectionButton/ToggleDirectionStates');
 const ManualConnectInput = require('./ManualConnectInput/ManualConnectInput');
+const ManualConnectHandshake = require('./ManualConnectHandshake/ManualConnectHandshake');
 const ManualConnectEvents = require('./ManualConnectButton/ManualConnectEvents');
 const AlertMessage = require('./AlertMessage/AlertMessage');
 
@@ -43,6 +44,8 @@ module.exports.prototype = {
 
     // components
     _connector: null,
+    _manualConnectInput: null,
+    _manualConnectHandshake: null,
     _dataOutput: null,
     _dataInput: null,
     _alertMessage: null,
@@ -306,13 +309,79 @@ module.exports.prototype = {
         this._manualConnectInput.enable('The code you are trying to use has expired.<br>Please try again.');
     },
 
-    _onSecondaryDeviceConnectedManually: function(sPrimaryDevicePublicKey, sDirection)
+    /**
+     * Handle manualcode event `MANUALCODE_ACCEPTED`
+     * @private
+     */
+    _onSecondaryDeviceManualCodeAccepted: function()
     {
         // 1. hide
         this._manualConnectInput.hide();
 
-        // 2. forward
-        this._onSecondaryDeviceConnectedToToken(sPrimaryDevicePublicKey, sDirection)
+        // 2. create
+        let sCode = '';
+        for (let nCharIndex = 0; nCharIndex < 4; nCharIndex++) sCode += Math.floor(Math.random() * 10);
+
+        // 3. init
+        this._manualConnectHandshake = new ManualConnectHandshake();
+
+        // 4. show
+        this._manualConnectHandshake.show(sCode);
+
+        // 5. communicate
+        this._socket.emit(ManualConnectEvents.prototype.REQUEST_MANUALCODE_HANDSHAKE, sCode);
+    },
+
+
+    /**
+     * Handle primaryDeviceSocket event `REQUEST_MANUALCODE_CONFIRMATION`
+     * @private
+     */
+    _onRequestManualCodeConfirmation: function(sCode)
+    {
+        // 1. hide
+        this._connector.hide();
+
+        // 2. init
+        this._manualConnectHandshake = new ManualConnectHandshake();
+
+        // 3. show
+        this._manualConnectHandshake.show(sCode);
+
+        // 4. configure
+        this._manualConnectHandshake.addEventListener(ManualConnectHandshake.prototype.REQUEST_CONFIRM_HANDSHAKE, this._ManualConnectHandshakeRequestConfirmHandshake.bind(this));
+
+        // 5. enable
+        this._manualConnectHandshake.enableButton();
+    },
+
+    /**
+     * Handle manualCodeHandshake `REQUEST_CONFIRM_HANDSHAKE`
+     * @private
+     */
+    _ManualConnectHandshakeRequestConfirmHandshake: function()
+    {
+        // 1. request
+        this._socket.emit(ManualConnectEvents.prototype.CONFIRM_MANUALCODE);
+    },
+
+    /**
+     * Handle primaryDeviceSocket event `SECONDARYDEVICE_CONNECTED`
+     * @param sPrimaryDevicePublicKey
+     * @param sDirection
+     * @param sToken
+     * @private
+     */
+    _onSecondaryDeviceConnectedManually: function(sPrimaryDevicePublicKey, sDirection, sToken)
+    {
+        // 1. hide
+        this._manualConnectHandshake.hide();
+
+        // 2. update
+        if (window && window.history && window.history.pushState) window.history.pushState(null, document.getElementsByTagName("title")[0].innerHTML, '/' + sToken);
+
+        // 3. forward
+        this._onSecondaryDeviceConnectedToToken(sPrimaryDevicePublicKey, sDirection);
     },
 
     /**
@@ -400,9 +469,11 @@ module.exports.prototype = {
         this._socket.on('secondarydevice_connected', this._onSecondaryDeviceConnected.bind(this));
         this._socket.on('secondarydevice_disconnected', this._onSecondaryDeviceDisconnected.bind(this));
         this._socket.on('secondarydevice_reconnected', this._onSecondaryDeviceReconnected.bind(this));
+        this._socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE_CONFIRMATION, this._onRequestManualCodeConfirmation.bind(this));
 
         // 4. configure secondary device
         this._socket.on('token_connected', this._onSecondaryDeviceConnectedToToken.bind(this));
+        this._socket.on(ManualConnectEvents.prototype.MANUALCODE_ACCEPTED, this._onSecondaryDeviceManualCodeAccepted.bind(this));
         this._socket.on(ManualConnectEvents.prototype.MANUALCODE_CONNECTED, this._onSecondaryDeviceConnectedManually.bind(this));
         this._socket.on('primarydevice_disconnected', this._onPrimaryDeviceDisconnected.bind(this));
         this._socket.on('primarydevice_reconnected', this._onPrimaryDeviceReconnected.bind(this));
@@ -526,6 +597,7 @@ module.exports.prototype = {
         // 2. toggle visibility
         this._alertMessage.hide();
         this._connector.hide();
+        if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
         this._dataOutput.show();
         if (this._isOutputDevice()) this._toggleDirectionButton.show();
     },

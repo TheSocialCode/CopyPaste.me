@@ -37,6 +37,6 @@ module.exports = {
     // --- output
 
     plugins: [
-        new webpack.BannerPlugin('CopyPaste.me - Frictionless sharing between devices\nCreated by The Social Code\n\n@author  Sebastian Kersten\n@license MIT\n\nPlease help keeping the service free by donating: https://paypal.me/thesocialcode\n')
+        new webpack.BannerPlugin('CopyPaste.me - Frictionless sharing between devices\nCreated by The Social Code\n\n@author  Sebastian Kersten\n@license AGPL-3.0-only\n\nPlease help keeping the service free by donating: https://paypal.me/thesocialcode\n')
     ]
 };

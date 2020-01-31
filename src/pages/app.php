@@ -14,7 +14,7 @@
                 <div class="component_QR_card_sublabel">to manually connect another device</div>
                 <div data-mimoto-id="component_QR_manualurl" class="component_QR_manualurl show">
                     <div class="component_QR_manualurl_inner">
-                        <div class="component_QR_manualurl_url">https://copypaste.me/connect</div>
+                        <div class="component_QR_manualurl_url"><span data-mimoto-id="connect_url">https://copypaste.me</span>/connect</div>
                         <div class="component_QR_manualurl_guidance">and enter<br>the following code:</div>
                         <div data-mimoto-id="manualcode" class="component_QR_manualurl_code"></div>
                         <div data-mimoto-id="countdown" class="component_QR_manualurl_validity">(valid for 2:40 minutes)</div>
@@ -37,9 +37,9 @@
     <!-- Manual connect -->
 
     <div data-mimoto-id="component_ManualConnectInput" class="component_ManualConnectInput">
-        <div class="component_ManualConnectInput_label">Enter your code</div>
-        <div class="component_ManualConnectInput_sublabel">to manually connect</div>
-        <div class="component_ManualConnectInput_input">
+        <div data-mimoto-id="title" class="component_ManualConnectInput_label">Enter your code</div>
+        <div data-mimoto-id="subtitle" class="component_ManualConnectInput_sublabel">to manually connect</div>
+        <div data-mimoto-id="manualcodeinput" class="component_ManualConnectInput_input">
             <div class="component_ManualConnectInput_code">
                 <input data-mimoto-id="char1" type="text" class="component_ManualConnectInput_character">
                 <input data-mimoto-id="char2" type="text" class="component_ManualConnectInput_character">
@@ -49,9 +49,24 @@
                 <input data-mimoto-id="char5" type="text" class="component_ManualConnectInput_character">
                 <input data-mimoto-id="char6" type="text" class="component_ManualConnectInput_character">
             </div>
-            <div data-mimoto-id="message" class="component_ManualConnectInput_message">Message</div>
+            <div data-mimoto-id="message" class="component_ManualConnectInput_message"></div>
             <div data-mimoto-id="button" class="button component_ManualConnectInput_button muted">Connect</div>
         </div>
+    </div>
+
+
+    <!-- Manual connect - control code-->
+
+    <div data-mimoto-id="component_ManualConnectHandshake" class="component_ManualConnectHandshake">
+        <div data-mimoto-id="title" class="component_ManualConnectHandshake_label">Check this code</div>
+        <div data-mimoto-id="subtitle" class="component_ManualConnectHandshake_sublabel">it should be the same on the other device</div>
+        <div class="component_ManualConnectHandshake_characters">
+            <span data-mimoto-id="char1" class="component_ManualConnectHandshake_character">1</span>
+            <span data-mimoto-id="char2" class="component_ManualConnectHandshake_character">2</span>
+            <span data-mimoto-id="char3" class="component_ManualConnectHandshake_character">3</span>
+            <span data-mimoto-id="char4" class="component_ManualConnectHandshake_character">4</span>
+        </div>
+        <div data-mimoto-id="button" class="button component_ManualConnectHandshake_button">Connect now!</div>
     </div>
 
 

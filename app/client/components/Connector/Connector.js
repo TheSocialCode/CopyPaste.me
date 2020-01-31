@@ -26,6 +26,7 @@ module.exports.prototype = {
 
     // components
     _qrcode: null,
+    _manualConnectButton: null,
 
     // views
     _elRoot: null,
@@ -35,7 +36,7 @@ module.exports.prototype = {
     _elManualURL: null,
     _elManualCode: null,
     _elManualCodeCountdown: null,
-    _manualConnectButton: null,
+    _elConnectURL: null,
 
     // utils
     _timerManualCodeCountdown: null,
@@ -74,6 +75,7 @@ module.exports.prototype = {
         this._elManualURL = document.querySelector('[data-mimoto-id="component_QR_manualurl"]');
         this._elManualCode = this._elRoot.querySelector('[data-mimoto-id="manualcode"]');
         this._elManualCodeCountdown = this._elRoot.querySelector('[data-mimoto-id="countdown"]');
+        this._elConnectURL = this._elBack.querySelector('[data-mimoto-id="connect_url"]');
 
         // 4. configure
         var typeNumber = 4;
@@ -104,6 +106,9 @@ module.exports.prototype = {
 
         // 7. configure
         this._manualConnectButton.addEventListener(ManualConnectEvents.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
+
+        // 8. output
+        this._elConnectURL.innerText = window.location.protocol + '//' + window.location.hostname;
     },
 
 

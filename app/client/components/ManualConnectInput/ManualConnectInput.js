@@ -14,32 +14,30 @@ const ManualConnectEvents = require('./../ManualConnectButton/ManualConnectEvent
 const EventDispatcherExtender = require('./../../extenders/EventDispatcherExtender');
 
 
-module.exports = function(sTokenURL)
+module.exports = function()
 {
     // start
-    this.__construct(sTokenURL);
+    this.__construct();
 };
 
 module.exports.prototype = {
 
     // views
     _elRoot: null,
-    _elChar1: null,
-    _elChar2: null,
-    _elChar3: null,
-    _elChar4: null,
-    _elChar5: null,
-    _elChar6: null,
+    _elTitle: null,
+    _elSubtitle: null,
+    _elManualCodeInput: null,
     _elMessage: null,
     _elButtonConnect: null,
+    _elHandshakeCode: null,
 
     // data
     _sCode: '',
     _bCodeValidated: false,
 
     // utils
-    _aEvents: [],
     _aInputs: [],
+    _aHandshakeCodeChars: [],
     _bIsInitialInput: true,
     _bIsDisabled: false,
 
@@ -59,15 +57,19 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (sTokenURL)
+    __construct: function ()
     {
         // 1. extend
         new EventDispatcherExtender(this);
 
         // 2. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_ManualConnectInput"]');
+        this._elTitle = document.querySelector('[data-mimoto-id="title"]');
+        this._elSubtitle = document.querySelector('[data-mimoto-id="subtitle"]');
+        this._elManualCodeInput = this._elRoot.querySelector('[data-mimoto-id="manualcodeinput"]');
         this._elMessage = this._elRoot.querySelector('[data-mimoto-id="message"]');
         this._elButtonConnect = this._elRoot.querySelector('[data-mimoto-id="button"]');
+        this._elHandshakeCode = this._elRoot.querySelector('[data-mimoto-id="handshakecode"]');
 
         // 3. setup
         for (let nIndex = 0; nIndex < 6; nIndex++)
@@ -123,9 +125,6 @@ module.exports.prototype = {
     {
         // 1. toggle state
         this._bIsDisabled = true;
-
-        // 2. toggle interface
-        //this._elButtonConnect.classList.add('muted');
     },
 
     /**

@@ -254,6 +254,8 @@ module.exports = {
         socket.on(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
         socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE, this._onRequestManualCode.bind(this, socket));
         socket.on(ManualConnectEvents.prototype.REQUEST_CONNECTION_BY_MANUALCODE, this._onRequestConnectionByManualCode.bind(this, socket));
+        socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE_HANDSHAKE, this._onRequestManualCodeHandshake.bind(this, socket));
+        socket.on(ManualConnectEvents.prototype.CONFIRM_MANUALCODE, this._onConfirmManualCode.bind(this, socket));
 
         // 5. debug
         this._logUsers('User connected (socket.id = ' + socket.id + ')');
@@ -294,7 +296,7 @@ module.exports = {
         // 6. update
         this._aSockets['' + primaryDeviceSocket.id].sToken = sToken;
 
-        // 7. broadcast
+        // 7. send
         primaryDeviceSocket.emit('token', sToken);
 
         // 8. output
@@ -315,7 +317,7 @@ module.exports = {
             // a. output
             this._log('Token = ' + sToken + ' not found for reconnecting primary device');
 
-            // b. broadcast
+            // b. send
             primaryDeviceSocket.emit('token_not_found');
 
             // c. exit
@@ -347,10 +349,10 @@ module.exports = {
         // 6. store
         this._aSockets['' + primaryDeviceSocket.id].sToken = sToken;
 
-        // 7. broadcast
+        // 7. send
         primaryDeviceSocket.emit('token_reconnected');
 
-        // 8. broadcast
+        // 8. send
         if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_reconnected');
 
         // 9. output
@@ -371,7 +373,7 @@ module.exports = {
         // 3. validate
         if (pair === false)
         {
-            // a. broadcast
+            // a. send
             secondaryDeviceSocket.emit('token_not_found');
 
             // b. exit
@@ -393,16 +395,22 @@ module.exports = {
         this._connectSecondaryDeviceToPair(this.CONNECTIONTYPE_QR, pair, secondaryDeviceSocket, sSecondaryDevicePublicKey, sToken, bReconnect);
     },
 
-
+    /**
+     * Connect secondary device to pair
+     * @param sConnectionType
+     * @param pair
+     * @param secondaryDeviceSocket
+     * @param sSecondaryDevicePublicKey
+     * @param sToken
+     * @param bReconnect
+     * @private
+     */
     _connectSecondaryDeviceToPair: function(sConnectionType, pair, secondaryDeviceSocket, sSecondaryDevicePublicKey, sToken, bReconnect)
     {
         // 1. store
-        this._aActivePairs[sToken].secondaryDevice = secondaryDeviceSocket;
-
-        // 2. store
         this._aSockets['' + secondaryDeviceSocket.id].sToken = sToken;
 
-        // 3. store
+        // 2. store
         pair.secondaryDevicePublicKey = sSecondaryDevicePublicKey;
         pair.connectiontype = sConnectionType;
 
@@ -410,37 +418,106 @@ module.exports = {
         // --- communicate
 
 
-        // 4. broadcast
+        // 3. select
         switch(sConnectionType)
         {
             case this.CONNECTIONTYPE_QR:
 
+                // a. store
+                this._aActivePairs[sToken].secondaryDevice = secondaryDeviceSocket;
+
+                // b. send
                 secondaryDeviceSocket.emit('token_connected', pair.primaryDevicePublicKey, pair.direction);
+
+                // c. finish
+                this._finishConnection(sConnectionType, pair, sToken, bReconnect);
                 break;
 
             case this.CONNECTIONTYPE_MANUAL:
 
-                secondaryDeviceSocket.emit(ManualConnectEvents.prototype.MANUALCODE_CONNECTED, pair.primaryDevicePublicKey, pair.direction);
+                // a. validate
+                if (this._aActivePairs[sToken].unconfirmedSecondaryDevice)
+                {
+                    // I. send
+                    this._broadcastSecurityWarning(secondaryDeviceSocket, pair, sToken);
+                    return;
+                }
+
+                // b. store
+                this._aActivePairs[sToken].unconfirmedSecondaryDevice = secondaryDeviceSocket;
+
+                // c. validate and send
+                if (pair.primaryDevice)
+                {
+                    // I. send
+                    pair.unconfirmedSecondaryDevice.emit(ManualConnectEvents.prototype.MANUALCODE_ACCEPTED);
+                }
                 break;
-
         }
+    },
 
+    /**
+     * Handle manualcode event `REQUEST_MANUALCODE_HANDSHAKE`
+     * @private
+     */
+    _onRequestManualCodeHandshake: function(secondaryDeviceSocket, sCode)
+    {
+        // 1. load
+        let pair = this._getPairBySocket(secondaryDeviceSocket);
 
-        // 5. broadcast
+        // 2. validate
+        if (pair === false) return;
+
+        // 3. send
+        pair.primaryDevice.emit(ManualConnectEvents.prototype.REQUEST_MANUALCODE_CONFIRMATION, sCode);
+    },
+
+    /**
+     * Handle manualcode event `CONFIRM_MANUALCODE`
+     * @private
+     */
+    _onConfirmManualCode: function(primaryDeviceSocket)
+    {
+        // 1. load
+        let pair = this._getPairBySocket(primaryDeviceSocket);
+
+        // 2. validate
+        if (pair === false) return;
+
+        // 3. move
+        pair.secondaryDevice = pair.unconfirmedSecondaryDevice;
+
+        // 4. cleanup
+        delete pair.unconfirmedSecondaryDevice;
+
+        // 5. send
+        pair.secondaryDevice.emit(ManualConnectEvents.prototype.MANUALCODE_CONNECTED, pair.primaryDevicePublicKey, pair.direction, this._aSockets['' + primaryDeviceSocket.id].sToken);
+
+        // 6. finish
+        this._finishConnection(this.CONNECTIONTYPE_MANUAL, pair, this._aSockets['' + primaryDeviceSocket.id].sToken);
+    },
+
+    /**
+     * Finish connection
+     * @param sConnectionType
+     * @param pair
+     * @param sToken
+     * @param bReconnect
+     * @private
+     */
+    _finishConnection: function(sConnectionType, pair, sToken, bReconnect)
+    {
+        // 1. send
         if (pair.primaryDevice) pair.primaryDevice.emit((bReconnect) ? 'secondarydevice_reconnected' : 'secondarydevice_connected', pair.secondaryDevicePublicKey);
 
-
-        // --- log
-
-
-        // 6. update
+        // 2. update
         pair.states.connectionEstablished = true;
 
-        // 7. store
+        // 3. store
         if (!this._aConnectedPairs[sToken]) this._aConnectedPairs[sToken] = true;
 
-        // 8. output
-        this._logUsers('Secondary device ' + ((bReconnect) ? 're' : '' ) + ' connects `' + sConnectionType + '` (socket.id = ' + secondaryDeviceSocket.id + ')');
+        // 4. output
+        this._logUsers('Secondary device ' + ((bReconnect) ? 're' : '' ) + ' connects `' + sConnectionType + '` (socket.id = ' + pair.secondaryDevice.id + ')');
     },
 
     /**
@@ -480,7 +557,7 @@ module.exports = {
             // a. cleanup
             pair.primaryDevice = null;
 
-            // d. broadcast
+            // d. send
             if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_disconnected');
         }
 
@@ -490,7 +567,7 @@ module.exports = {
             // a. cleanup
             pair.secondaryDevice = null;
 
-            // b. broadcast
+            // b. send
             if (pair.primaryDevice) pair.primaryDevice.emit('secondarydevice_disconnected');
         }
 
@@ -539,7 +616,7 @@ module.exports = {
         // 6. register
         let receivingSocket = (pair.direction === ToggleDirectionStates.prototype.SWAPPED) ? pair.secondaryDevice : pair.primaryDevice;
 
-        // 7. broadcast
+        // 7. send
         receivingSocket.emit('data', encryptedData);
 
         // 8. store
@@ -577,7 +654,7 @@ module.exports = {
         // 3. toggle
         pair.direction = (pair.direction === ToggleDirectionStates.prototype.DEFAULT) ? ToggleDirectionStates.prototype.SWAPPED : ToggleDirectionStates.prototype.DEFAULT;
 
-        // 4. broadcast
+        // 4. send
         pair.primaryDevice.emit(ToggleDirectionEvents.prototype.TOGGLE_DIRECTION, pair.direction);
         pair.secondaryDevice.emit(ToggleDirectionEvents.prototype.TOGGLE_DIRECTION, pair.direction);
     },
@@ -607,7 +684,7 @@ module.exports = {
         // 4. create and store
         pair.manualCode = this._createManualCode();
 
-        // 5. broadcast
+        // 5. send
         primaryDeviceSocket.emit('manualcode', pair.manualCode);
 
         // 6. store
@@ -615,7 +692,7 @@ module.exports = {
     },
 
     /**
-     * Handle event 'onRequestConnectionByManualCode'
+     * Handle event 'REQUEST_CONNECTION_BY_MANUALCODE'
      * @private
      */
     _onRequestConnectionByManualCode: function(secondaryDeviceSocket, sManualCode, sSecondaryDevicePublicKey)
@@ -623,7 +700,7 @@ module.exports = {
         // 1. validate
         if (!this._aManualCodes[sManualCode])
         {
-            // a. broadcast
+            // a. send
             secondaryDeviceSocket.emit(ManualConnectEvents.prototype.MANUALCODE_NOT_FOUND);
 
             // b. exit
@@ -636,7 +713,7 @@ module.exports = {
         // 3. validate
         if (manualCode.expires < new Date().getTime())
         {
-            // a. broadcast
+            // a. send
             secondaryDeviceSocket.emit(ManualConnectEvents.prototype.MANUALCODE_EXPIRED);
 
             // b. exit
@@ -750,7 +827,7 @@ module.exports = {
         // 3. verify
         if (pair.primaryDevice)
         {
-            // a. broadcast
+            // a. send
             pair.primaryDevice.emit('security_compromised');
 
             // b. cleanup
@@ -760,7 +837,7 @@ module.exports = {
         // 4. verify
         if (pair.secondaryDevice)
         {
-            // a. broadcast
+            // a. send
             pair.secondaryDevice.emit('security_compromised');
 
             // b. cleanup
