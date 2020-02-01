@@ -8,7 +8,10 @@
 
     // 3. build
     $sURL = $sProtocol.$_SERVER['HTTP_HOST'];
-    
+
+    // 4. load (ensures use of latest JS build)
+    $manifest = json_decode(file_get_contents(dirname(__FILE__).'/static/js/manifest.json'), true);
+
 ?>
 <!doctype html>
 <html>
@@ -80,6 +83,6 @@
         </div>
     </div>
 
-    <script src="/static/js/CopyPaste.js"></script>
+    <script src="/static/js/<?php echo $manifest['main.js']; ?>"></script>
 </body>
 </html>
