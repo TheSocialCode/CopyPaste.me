@@ -15,50 +15,14 @@ div.component_QR_inner {
     height: 100%;
     text-align: center;
     transition: transform 0.5s;
+    -webkit-transition: transform 0.5s;
     transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
 
 
     .flip & {
+        -webkit-transform: rotateX(-180deg);
         transform: rotateX(-180deg);
-
-    }
-
-    .flip .component_QR_card_front {
-        animation: animation_qr_card_front 0.5s;
-    }
-
-    @keyframes animation_qr_card_front {
-        0% {
-            opacity: 1;
-        }
-        49% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0;
-        }
-        100% {
-            opacity: 0;
-        }
-    }
-
-    .flip .component_QR_card_back {
-        animation: animation_qr_card_back 0.5s;
-    }
-
-    @keyframes animation_qr_card_front {
-        0% {
-            opacity: 0;
-        }
-        49% {
-            opacity: 0;
-        }
-        50% {
-            opacity: 1;
-        }
-        100% {
-            opacity: 1;
-        }
     }
 }
 
