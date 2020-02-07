@@ -21,8 +21,8 @@ div.component_QR_inner {
 
 
     .flip & {
-        -webkit-transform: rotateX(-180deg);
         transform: rotateX(-180deg);
+        -webkit-transform: rotateX(-180deg);
     }
 }
 
@@ -44,6 +44,7 @@ div.component_QR_card_front {
 div.component_QR_card_back {
     padding: 15px 10px 10px 10px;
     transform: rotateX(180deg);
+    -webkit-transform: rotateX(180deg);
     box-shadow: 1px 3px 10px $support-color-dark;
 }
 
