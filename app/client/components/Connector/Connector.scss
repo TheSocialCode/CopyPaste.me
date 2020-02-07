@@ -15,14 +15,11 @@ div.component_QR_inner {
     height: 100%;
     text-align: center;
     transition: transform 0.5s;
-    -webkit-transition: transform 0.5s;
     transform-style: preserve-3d;
-    -webkit-transform-style: preserve-3d;
 
 
     .flip & {
         transform: rotateX(-180deg);
-        -webkit-transform: rotateX(-180deg);
     }
 }
 
@@ -33,6 +30,13 @@ div.component_QR_card {
 
 div.component_QR_card_front, div.component_QR_card_back {
     position: absolute;
+
+    //backface-visibility: hidden;
+
+    -webkit-perspective: 0;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translate3d(0,0,0);
+    visibility:visible;
     backface-visibility: hidden;
 }
 
@@ -44,7 +48,6 @@ div.component_QR_card_front {
 div.component_QR_card_back {
     padding: 15px 10px 10px 10px;
     transform: rotateX(180deg);
-    -webkit-transform: rotateX(180deg);
     box-shadow: 1px 3px 10px $support-color-dark;
 }
 
