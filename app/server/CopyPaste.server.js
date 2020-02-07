@@ -33,6 +33,7 @@ module.exports = {
     _config: {
         mode: 'prod',   // options: "prod" (no output)  | "dev" (output debugging comments)
         https: true,    // options: 'true' (runs on https)  | 'false' (runs on http)
+        mongo: true
     },
     _configFile: null,
 
@@ -41,6 +42,12 @@ module.exports = {
     _server: null,
     _io: null,
     _mongo: null,
+
+    // database
+    _db: null,
+    _dbCollection_sockets: null,
+    _dbCollection_pairs: null,
+    _dbCollection_manualcodes: null,
 
     // utils
     _timerLog: null,
@@ -62,9 +69,14 @@ module.exports = {
 
     // action types
     _ACTIONTYPE_CREATED: 'created',
+    _ACTIONTYPE_DISCONNECTED: 'disconnected',
+    _ACTIONTYPE_TERMINATED: 'terminated',
+    _ACTIONTYPE_TOKEN_REQUEST: 'token_requested',
     _ACTIONTYPE_ARCHIVED: 'archived',
     _ACTIONTYPE_UNARCHIVED: 'unarchived',
     _ACTIONTYPE_DATA: 'data',
+
+    _ACTIONTYPE_SECONDARYDEVICE_CONNECTED: 'secondarydevice_connected',
 
 
 
@@ -81,6 +93,7 @@ module.exports = {
         // 1. store
         if (config.mode && config.mode === 'prod' || config.mode === 'dev') this._config.mode = config.mode;
         if (config.https === true || config.https === false) this._config.https = config.https;
+        if (config.mongo === true || config.mongo === false) this._config.mongo = config.mongo;
 
         // 2. load
         let jsonConfigFile = Module_FS.readFileSync('CopyPaste.config.json');
@@ -91,14 +104,19 @@ module.exports = {
 
         // --- Mongo DB
 
-        // 4. inti
-        //this._mongo = Module_MongoDB.MongoClient;
 
-        // 5. configure
-        //const sMongoURL = 'mongodb://' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
+        if (this._config.mongo)
+        {
+            // 4. init
+            this._mongo = Module_MongoDB.MongoClient;
 
-        // 6. connect
-        //this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
+            // 5. configure
+            const sMongoURL = 'mongodb://' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
+
+            // 6. connect
+            this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
+        }
+
 
 
         // --- Socket.IO
@@ -118,7 +136,7 @@ module.exports = {
             this._app = Module_Express();
 
             // b. setup
-            this._server = new Module_HTTP.createServer(this.app);
+            this._server = new Module_HTTP.createServer(this.app, { pingTimeout: 60000 });
         }
 
         // 8. setup
@@ -150,11 +168,17 @@ module.exports = {
         console.log();
 
         // 4. setup
-        const db = client.db(sMongoDBName);
+        this._db = client.db(sMongoDBName);
 
 
-        //this._collection_MongoDB_pairs = db.collection('pairs');
-        //this._collection_MongoDB_manualcode = db.collection('manualcodes');
+        // 1. check if collections exist, otherwise create!
+
+
+
+        // 5. store
+        this._dbCollection_sockets = this._db.collection('sockets');
+        this._dbCollection_pairs = this._db.collection('pairs');
+        this._dbCollection_manualcodes = this._db.collection('manualcodes');
 
         // 5. Do we need this?
         //client.close();
@@ -257,8 +281,28 @@ module.exports = {
         socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE_HANDSHAKE, this._onRequestManualCodeHandshake.bind(this, socket));
         socket.on(ManualConnectEvents.prototype.CONFIRM_MANUALCODE, this._onConfirmManualCode.bind(this, socket));
 
+
+        // --- log ---
+
+
         // 5. debug
         this._logUsers('User connected (socket.id = ' + socket.id + ')');
+
+        // 6. compose
+        let actionLog = {
+            created: new Date().getTime(),
+            socketId: socket.id,
+            connected: true,
+            data: {
+                token: '',
+            },
+            logs: [
+                { action: this._ACTIONTYPE_CREATED, timestamp: new Date().getTime() }
+            ]
+        };
+
+        // 7. store
+        this._dbCollection_sockets.insertOne(actionLog);
     },
 
     _onPrimaryDeviceRequestToken: function(primaryDeviceSocket, sPrimaryDevicePublicKey)
@@ -293,20 +337,72 @@ module.exports = {
         // 5. store
         this._aActivePairs['' + sToken] = pair;
 
+
+
+
         // 6. update
         this._aSockets['' + primaryDeviceSocket.id].sToken = sToken;
 
         // 7. send
         primaryDeviceSocket.emit('token', sToken);
 
+
+        // --- log
+
+
         // 8. output
         this._logUsers('Initial Device requested token (socket.id = ' + primaryDeviceSocket.id + ')');
+
+
+        // 9. log
+        this._dbCollection_sockets.updateMany(
+            {
+                socketId: primaryDeviceSocket.id
+            },
+            {
+                $set: { "data.token" : sToken },
+                $push: { logs: { action: this._ACTIONTYPE_TOKEN_REQUEST, timestamp: new Date().getTime() } }
+            },
+            function(err, result)
+            {
+                CoreModule_Assert.equal(err, null);
+            }
+        );
+
+
+        // 10. compose
+        let actionLog = {
+            created: new Date().getTime(),
+            primaryDeviceSocketId: primaryDeviceSocket.id,
+            secondaryDeviceSocketId: null,
+            archived: false,
+            data: {
+                token: sToken,
+                connectiontype: null,
+                manualCode: null,
+                direction: pair.direction
+            },
+            states: {
+                connectionEstablished: pair.states.connectionEstablished,
+                dataSent: pair.states.dataSent
+            },
+            logs: [
+                { action: this._ACTIONTYPE_CREATED, timestamp: new Date().getTime() }
+            ]
+        };
+
+        // 11. store
+        this._dbCollection_pairs.insertOne(actionLog);
     },
 
     _onPrimaryDeviceReconnectToToken: function(primaryDeviceSocket, sToken)
     {
         // 1. output
         this._log('Primary device wants to reconnect to token ' + sToken);
+
+
+        // #todo - Exception
+
 
         // 2. load
         let pair = this._getPairByToken(sToken);
@@ -516,8 +612,28 @@ module.exports = {
         // 3. store
         if (!this._aConnectedPairs[sToken]) this._aConnectedPairs[sToken] = true;
 
+
+        // --- log ---
+
+
         // 4. output
         this._logUsers('Secondary device ' + ((bReconnect) ? 're' : '' ) + ' connects `' + sConnectionType + '` (socket.id = ' + pair.secondaryDevice.id + ')');
+
+
+        // 9. log
+        this._dbCollection_pairs.updateMany(
+            {
+                "data.token": sToken
+            },
+            {
+                $set: { "states.connectionEstablished" : true },
+                $push: { logs: { action: this._ACTIONTYPE_SECONDARYDEVICE_CONNECTED, timestamp: new Date().getTime() } }
+            },
+            function(err, result)
+            {
+                CoreModule_Assert.equal(err, null);
+            }
+        );
     },
 
     /**
@@ -531,7 +647,11 @@ module.exports = {
         this._log('Socket.id = ' + socket.id + ' has disconnected');
 
         // 2. validate
-        if (!this._aSockets['' + socket.id]) return;
+        if (!this._aSockets['' + socket.id])
+        {
+            // add exception to mongo
+            return;
+        }
 
         // 3. load
         let registeredSocket = this._aSockets['' + socket.id];
@@ -584,8 +704,62 @@ module.exports = {
             pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
         }
 
+
+        // --- log ---
+
+
         // 12. output
         this._logUsers('User disconnected (socket.id = ' + socket.id + ')');
+
+        // 13. update
+        this._dbCollection_sockets.updateMany(
+            {
+                socketId: socket.id
+            },
+            {
+                $set: { "connected" : false },
+                $push: { logs: { action: this._ACTIONTYPE_DISCONNECTED, timestamp: new Date().toUTCString() } }
+            },
+            function(err, result)
+            {
+                CoreModule_Assert.equal(err, null);
+                //console.log('result', result);
+                //CoreModule_Assert.equal(1, result.result.n);
+                //console.log("Updated the document ");
+                //callback(result);
+            }
+        );
+
+
+
+        // // 13. load
+        // let actionLog = this._dbCollection_sockets.find({ socketId: socket.id }).toArray(function(err, aDocs) {
+        //
+        //     // a. validate
+        //     CoreModule_Assert.equal(err, null);
+        //
+        //     console.log('aDocs', aDocs);
+        //
+        //     // b. process
+        //     for (let nIndex = 0; nIndex < aDocs.length; nIndex++)
+        //     {
+        //         // I. register
+        //         let actionLog = aDocs[nIndex];
+        //
+        //         // b. update
+        //         //actionLog.logs.push({ action: this._ACTIONTYPE_DISCONNECTED, timestamp: new Date().toUTCString() });
+        //         //actionLog.connected = false;
+        //
+        //
+        //
+        //         // c. store
+        //         //this._dbCollection_sockets.updateOne({ socketId:actionLog.socketId }, actionLog);
+        //     }
+        //
+        //     // c. store
+        //     //this._dbCollection_sockets.updateMany(aDocs);
+        //
+        // }.bind(this));
     },
 
     _onData: function(socket, encryptedData)
@@ -641,6 +815,28 @@ module.exports = {
 
         // 11. output
         this._logUsers('Data shared (socket.id = ' + socket.id + ')');
+
+
+
+        // 9. log
+        this._dbCollection_sockets.updateMany(
+            {
+                "data.token": sToken
+            },
+            {
+                $set: { "states.dataSent" : true },
+                $push: { logs: {
+                        type: this._ACTIONTYPE_DATA,
+                        timestamp: new Date().getTime(),
+                        contentType:encryptedData.sType,
+                        direction:pair.direction
+                    } }
+            },
+            function(err, result)
+            {
+                CoreModule_Assert.equal(err, null);
+            }
+        );
     },
 
     _onRequestToggleDirection: function(socket)

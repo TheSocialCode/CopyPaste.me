@@ -42,10 +42,7 @@ module.exports = {
         new webpack.BannerPlugin('CopyPaste.me - Frictionless sharing between devices\nCreated by The Social Code\n\n@author  Sebastian Kersten\n@license AGPL-3.0-only\n\nPlease help keeping the service free by donating: https://paypal.me/thesocialcode\n'),
         new ManifestPlugin(),
         new RemovePlugin({
-            /**
-             * Before compilation removes entire
-             * `./web/static/js` folder to trash.
-             */
+            // Before compilation removes entire `./web/static/js` folder to trash
             before: {
                 include: [
                     path.resolve(__dirname, 'web/static/js')
