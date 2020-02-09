@@ -50,20 +50,21 @@ module.exports.prototype = {
     // ----------------------------------------------------------------------------
 
 
+    /**
+     * Show
+     */
     show: function()
     {
-        console.log('Show ClearClipboard');
-
+        // 1. toggle visibility
         this._elRoot.classList.add('show');
-
-        this._waiting.show();
-        //if (!this._elContainer.hasItems()) this._waiting.show();
     },
 
+    /**
+     * Hide
+     */
     hide: function()
     {
-        console.log('Hide ClearClipbard');
-
+        // 1. toggle visibility
         this._elRoot.classList.remove('show');
     },
 
@@ -81,7 +82,7 @@ module.exports.prototype = {
     _onButtonClick: function()
     {
         // 1. copy
-        Module_ClipboardCopy('');
+        Module_ClipboardCopy(' ');
 
         // 2. hide
         this.hide();
