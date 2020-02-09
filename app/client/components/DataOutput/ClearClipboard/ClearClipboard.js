@@ -7,6 +7,10 @@
 'use strict';
 
 
+// import helpers
+const Module_ClipboardCopy = require('clipboard-copy');
+
+
 module.exports = function(socket)
 {
     // start
@@ -31,22 +35,12 @@ module.exports.prototype = {
      */
     __construct: function (socket)
     {
-        // 3. register
+        // 1. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_ClearClipboard"]');
-        this._elContainer = document.querySelector('[data-mimoto-id="component_DataOutput_container"]');
-        
+        this._elButton = this._elRoot.querySelector('[data-mimoto-id="button_clear"]');
 
-
-
-
-        //this._clearClipboard = new ClearClipboard();
-        
-        //this._elClearClipboard = document.querySelector('receiver_clipboard_clear');
-        //this._elClearClipboardButton = document.querySelector('receiver_clipboard_clear_button');
-
-
-        //if (this._dataOutput.hasItems()) this._elWaiting.style.display = 'block';
-        // elDataContainer.children.length === 0)
+        // 2. configure
+        this._elButton.addEventListener('click', this._onButtonClick.bind(this));
     },
 
 
@@ -71,6 +65,26 @@ module.exports.prototype = {
         console.log('Hide ClearClipbard');
 
         this._elRoot.classList.remove('show');
+    },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Private methods --------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
+     * Handle button event `click`
+     * @private
+     */
+    _onButtonClick: function()
+    {
+        // 1. copy
+        Module_ClipboardCopy('');
+
+        // 2. hide
+        this.hide();
     }
 
 };

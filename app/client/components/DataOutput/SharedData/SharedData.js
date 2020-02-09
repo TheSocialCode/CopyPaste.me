@@ -36,6 +36,7 @@ module.exports.prototype = {
 
     // events
     CLEARED: 'onCleared',
+    USED_CLIPBOARD: 'onUsedClipboard',
 
 
 
@@ -321,6 +322,9 @@ module.exports.prototype = {
 
                 // a. copy
                 this._copyToClipboard(this._data.value);
+
+                // b. broadcast
+                this.dispatchEvent(this.USED_CLIPBOARD);
                 break;
 
             case 'url':
@@ -333,6 +337,9 @@ module.exports.prototype = {
 
                 // a. copy
                 this._copyToClipboard(this._data.value);
+
+                // b. broadcast
+                this.dispatchEvent(this.USED_CLIPBOARD);
                 break;
 
             case 'image':

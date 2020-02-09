@@ -9,7 +9,7 @@
 
 // import
 const SharedData = require('./SharedData/SharedData');
-const DataInput = require('./../DataInput/DataInput');
+const ClearClipboard = require('./ClearClipboard/ClearClipboard');
 const Waiting = require('./../Waiting/Waiting');
 const Module_Crypto = require('asymmetric-crypto');
 
@@ -28,7 +28,7 @@ module.exports.prototype = {
 
     // components
     _waiting: null,
-    _clearCliopboard: null,
+    _clearClipboard: null,
 
     // data
     _aSharedData: [],
@@ -54,7 +54,7 @@ module.exports.prototype = {
         
         // 2. init
         this._waiting = new Waiting();
-        //this._clearClipboard = new ClearClipboard();
+        this._clearClipboard = new ClearClipboard();
     },
 
 
@@ -112,13 +112,14 @@ module.exports.prototype = {
 
         // 3. configure
         sharedData.addEventListener(SharedData.prototype.CLEARED, this._onSharedDataCleared.bind(this, sharedData));
+        sharedData.addEventListener(SharedData.prototype.USED_CLIPBOARD, this._onSharedDataUsedClipboard.bind(this, sharedData));
 
         // 4. store
         this._aSharedData.push(sharedData);
     },
 
     /**
-     * Handle sharedData event `cleared`
+     * Handle sharedData event `CLEARED`
      * @param sharedData
      */
     _onSharedDataCleared: function(sharedData)
@@ -134,6 +135,16 @@ module.exports.prototype = {
                 this._aSharedData.splice(nIndex, 1);
             }
         }
+    },
+
+    /**
+     * Handle sharedData event 'USED_CLIPBOARD'
+     * @private
+     */
+    _onSharedDataUsedClipboard: function()
+    {
+        // 1. toggle visibility
+        this._clearClipboard.show();
     }
 
 };

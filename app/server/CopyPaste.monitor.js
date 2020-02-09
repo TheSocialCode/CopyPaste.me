@@ -207,7 +207,7 @@ module.exports = {
         // 1. cleanup
         console.clear();
         console.log(this._sIntro);
-        
+
         // 2. setup
         this._setupOutput();
 

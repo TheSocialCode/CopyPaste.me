@@ -1,53 +1,4 @@
-// imports
-@import 'SharedData/SharedData';
-
-
-div.component_DataOutput {
-
-    display: none;
-
-    &.show {
-        display: inline-block;
-    }
-}
-
-
-
-
-div.receiver_data {
-    position: relative;
-}
-
-div.receiver_data_placeholder_container {
-    position: relative;
-    display: block;
-    width: 100%;
-}
-
-div.receiver_data_placeholder {
-    position: relative;
-    border-radius: 5px;
-    height: 0;
-    margin-top: 0;
-    width: 100%;
-    transition: height 0.3s ease-in-out;
-}
-
-div.receiver_data_content_container {
-    position: relative;
-    background-color: $background-light;
-    border-radius: 5px;
-    margin-bottom: 10px;
-
-    opacity: 0;
-    transition: opacity 0.3s ease-out;
-}
-
-div.receiver_data_content_container.show {
-    opacity: 1;
-}
-
-div.receiver_clipboard_clear {
+div.component_ClearClipboard {
 
     display: none;
 
@@ -55,9 +6,46 @@ div.receiver_clipboard_clear {
         display: block;
     }
 
-    background-color: $background-light;
+    background-color: $background-warning;
     border-radius: 5px;
     color: $textcolor-dark;
-    opacity: 0.5;
-    padding: 10px 20px 10px 20px;
+    padding: 15px 15px 15px 15px;
 }
+
+div.component_ClearClipboard_content {
+
+    display: flex;
+
+    & .component_ClearClipboard_content_message {
+        flex: auto;
+        text-align: left;
+        margin-right: 15px;
+    }
+
+    & .component_ClearClipboard_content_input {
+        flex: content;
+        text-align: right;
+    }
+}
+
+
+
+@media only screen and (max-width: 400px) {
+
+    div.component_ClearClipboard_content {
+
+        display: block;
+
+        & .component_ClearClipboard_content_message {
+            text-align: center;
+        }
+
+        & .component_ClearClipboard_content_input {
+            margin-top: 15px;
+            text-align: center;
+        }
+    }
+}
+
+
+

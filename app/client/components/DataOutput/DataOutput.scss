@@ -1,5 +1,6 @@
 // imports
 @import 'SharedData/SharedData';
+@import 'ClearClipboard/ClearClipboard';
 
 
 div.component_DataOutput {
@@ -10,9 +11,6 @@ div.component_DataOutput {
         display: block;
     }
 }
-
-
-
 
 div.receiver_data {
     position: relative;
@@ -45,19 +43,4 @@ div.receiver_data_content_container {
 
 div.receiver_data_content_container.show {
     opacity: 1;
-}
-
-div.receiver_clipboard_clear {
-
-    display: none;
-
-    &.show {
-        display: block;
-    }
-
-    background-color: $background-light;
-    border-radius: 5px;
-    color: $textcolor-dark;
-    opacity: 0.5;
-    padding: 10px 20px 10px 20px;
 }
