@@ -48,6 +48,7 @@ module.exports = {
     _dbCollection_sockets: null,
     _dbCollection_pairs: null,
     _dbCollection_manualcodes: null,
+    _dbCollection_exceptions: null,
 
     // utils
     _timerLog: null,
@@ -76,7 +77,10 @@ module.exports = {
     _ACTIONTYPE_UNARCHIVED: 'unarchived',
     _ACTIONTYPE_DATA: 'data',
 
+    _ACTIONTYPE_PRIMARYDEVICE_CONNECTED: 'primarydevice_connected',
+    _ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED: 'primarydevice_disconnected',
     _ACTIONTYPE_SECONDARYDEVICE_CONNECTED: 'secondarydevice_connected',
+    _ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED: 'secondarydevice_disconnected',
 
 
 
@@ -170,34 +174,11 @@ module.exports = {
         // 4. setup
         this._db = client.db(sMongoDBName);
 
-
-        // 1. check if collections exist, otherwise create!
-
-
-
         // 5. store
         this._dbCollection_sockets = this._db.collection('sockets');
         this._dbCollection_pairs = this._db.collection('pairs');
         this._dbCollection_manualcodes = this._db.collection('manualcodes');
-
-        // 5. Do we need this?
-        //client.close();
-
-
-        //
-        // const collection = db.collection('pairs');
-        // // Insert some documents
-        // collection.insertMany([
-        //     {a : 1}, {a : 2}, {a : 3}
-        // ]);
-        //
-        // collection.find({'a': 3}).toArray(function(err, docs) {
-        //     CoreModule_Assert.equal(err, null);
-        //
-        //     console.log('Result of find', docs);
-        // });
-
-
+        this._dbCollection_exceptions = this._db.collection('exceptions');
     },
 
     _onSocketIOConnect: function()
@@ -375,7 +356,6 @@ module.exports = {
             created: new Date().getTime(),
             primaryDeviceSocketId: primaryDeviceSocket.id,
             secondaryDeviceSocketId: null,
-            archived: false,
             data: {
                 token: sToken,
                 connectiontype: null,
@@ -384,7 +364,8 @@ module.exports = {
             },
             states: {
                 connectionEstablished: pair.states.connectionEstablished,
-                dataSent: pair.states.dataSent
+                dataSent: pair.states.dataSent,
+                archived: false
             },
             logs: [
                 { action: this._ACTIONTYPE_CREATED, timestamp: new Date().getTime() }
@@ -603,6 +584,19 @@ module.exports = {
      */
     _finishConnection: function(sConnectionType, pair, sToken, bReconnect)
     {
+        if (bReconnect)
+        {
+            // a. compose
+            let actionLog = {
+                created: new Date().getTime(),
+                context: '_finishConnection',
+                what: 'bReconnect was true'
+            };
+
+            // 11. store
+            this._dbCollection_exceptions.insertOne(actionLog);
+        }
+
         // 1. send
         if (pair.primaryDevice) pair.primaryDevice.emit((bReconnect) ? 'secondarydevice_reconnected' : 'secondarydevice_connected', pair.secondaryDevicePublicKey);
 
@@ -619,8 +613,7 @@ module.exports = {
         // 4. output
         this._logUsers('Secondary device ' + ((bReconnect) ? 're' : '' ) + ' connects `' + sConnectionType + '` (socket.id = ' + pair.secondaryDevice.id + ')');
 
-
-        // 9. log
+        // 5. log
         this._dbCollection_pairs.updateMany(
             {
                 "data.token": sToken
@@ -649,7 +642,16 @@ module.exports = {
         // 2. validate
         if (!this._aSockets['' + socket.id])
         {
-            // add exception to mongo
+            // a. compose
+            let actionLog = {
+                created: new Date().getTime(),
+                context: '_onUserDisconnect',
+                what: 'this._aSockets[socket.id] not found'
+            };
+
+            // 11. store
+            this._dbCollection_exceptions.insertOne(actionLog);
+
             return;
         }
 
@@ -677,8 +679,22 @@ module.exports = {
             // a. cleanup
             pair.primaryDevice = null;
 
-            // d. send
+            // b. send
             if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_disconnected');
+
+            // c. log
+            this._dbCollection_pairs.updateMany(
+                {
+                    "data.token": sToken
+                },
+                {
+                    $push: { logs: { action: this._ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED, timestamp: new Date().getTime() } }
+                },
+                function(err, result)
+                {
+                    CoreModule_Assert.equal(err, null);
+                }
+            );
         }
 
         // 10. validate
@@ -689,6 +705,20 @@ module.exports = {
 
             // b. send
             if (pair.primaryDevice) pair.primaryDevice.emit('secondarydevice_disconnected');
+
+            // c. log
+            this._dbCollection_pairs.updateMany(
+                {
+                    "data.token": sToken
+                },
+                {
+                    $push: { logs: { action: this._ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED, timestamp: new Date().getTime() } }
+                },
+                function(err, result)
+                {
+                    CoreModule_Assert.equal(err, null);
+                }
+            );
         }
 
         // 11. validate
@@ -702,6 +732,21 @@ module.exports = {
 
             // c. store
             pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
+
+            // d. log
+            this._dbCollection_pairs.updateMany(
+                {
+                    "data.token": sToken
+                },
+                {
+                    $set: { "states.archived" : true },
+                    $push: { logs: { action: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().getTime() } }
+                },
+                function(err, result)
+                {
+                    CoreModule_Assert.equal(err, null);
+                }
+            );
         }
 
 
@@ -731,35 +776,6 @@ module.exports = {
         );
 
 
-
-        // // 13. load
-        // let actionLog = this._dbCollection_sockets.find({ socketId: socket.id }).toArray(function(err, aDocs) {
-        //
-        //     // a. validate
-        //     CoreModule_Assert.equal(err, null);
-        //
-        //     console.log('aDocs', aDocs);
-        //
-        //     // b. process
-        //     for (let nIndex = 0; nIndex < aDocs.length; nIndex++)
-        //     {
-        //         // I. register
-        //         let actionLog = aDocs[nIndex];
-        //
-        //         // b. update
-        //         //actionLog.logs.push({ action: this._ACTIONTYPE_DISCONNECTED, timestamp: new Date().toUTCString() });
-        //         //actionLog.connected = false;
-        //
-        //
-        //
-        //         // c. store
-        //         //this._dbCollection_sockets.updateOne({ socketId:actionLog.socketId }, actionLog);
-        //     }
-        //
-        //     // c. store
-        //     //this._dbCollection_sockets.updateMany(aDocs);
-        //
-        // }.bind(this));
     },
 
     _onData: function(socket, encryptedData)
@@ -819,7 +835,7 @@ module.exports = {
 
 
         // 9. log
-        this._dbCollection_sockets.updateMany(
+        this._dbCollection_pairs.updateMany(
             {
                 "data.token": sToken
             },
@@ -828,8 +844,8 @@ module.exports = {
                 $push: { logs: {
                         type: this._ACTIONTYPE_DATA,
                         timestamp: new Date().getTime(),
-                        contentType:encryptedData.sType,
-                        direction:pair.direction
+                        contentType: encryptedData.sType,
+                        direction: pair.direction
                     } }
             },
             function(err, result)

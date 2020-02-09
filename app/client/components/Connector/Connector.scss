@@ -30,9 +30,6 @@ div.component_QR_card {
 
 div.component_QR_card_front, div.component_QR_card_back {
     position: absolute;
-
-    //backface-visibility: hidden;
-
     -webkit-perspective: 0;
     -webkit-backface-visibility: hidden;
     -webkit-transform: translate3d(0,0,0);
