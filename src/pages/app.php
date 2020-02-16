@@ -72,7 +72,7 @@
 
     <!-- Data input -->
 
-    <div data-mimoto-id="component_DataInput" class="component_DataInput">
+    <div data-mimoto-id="component_DataInput" class="component_DataInput unlocked">
         <div class="sender_input">
             <div id="sender_menu" class="sender_menu">
                 <div data-type="password" class="sender_menu_tab selected">Password</div>
@@ -87,7 +87,7 @@
                     <div data-mimoto-id="sender_data_label_data" class="sender_data_label_data">
                         <div class="sender_data_label_data_cover">
                             <div class="sender_data_label_cover_internal"></div>
-                            <div class="sender_data_label_cover_label">Done!</div>
+                            <div class="sender_data_label_cover_label"><img class="sender_data_label_cover_label_indicator" src="static/images/waiting.svg">&nbsp;<span data-mimoto-id="progress">Encrypting data ...</span></div>
                         </div>
                         <div class="sender_data_label_data_input">
                             <input data-mimoto-id="data_input_password" class="data_input selected" type="password" placeholder="Enter password"/>
@@ -126,7 +126,6 @@
                 </div>
                 <div class="sender_data_menu">
                     <div data-mimoto-id="button_input_send" class="button disabled">Send</div>
-                    <div data-mimoto-id="progress" class="component_DataInput_progress"></div>
                 </div>
             </div>
         </div>
@@ -188,15 +187,12 @@
                     <div data-mimoto-id="receiver_data_label_data" class="receiver_data_label_data"></div>
                 </div>
                 <div class="receiver_data_menu">
-                    <div data-mimoto-id="receiver_data_button" class="button">Copy&nbsp;to&nbsp;clipboard
-                    </div>
+                    <div data-mimoto-id="receiver_data_button" class="button">Copy&nbsp;to&nbsp;clipboard</div>
                 </div>
             </div>
             <div class="receiver_data_options">
-                <span data-mimoto-id="receiver_data_option_clearnow"
-                      class="receiver_data_option">Clear now</span> |
-                <span data-mimoto-id="receiver_data_option_extend"
-                      class="receiver_data_option">extend</span> |
+                <span data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</span> |
+                <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
                 clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
             </div>
         </div>

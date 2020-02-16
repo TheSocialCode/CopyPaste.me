@@ -51,6 +51,9 @@ module.exports.prototype = {
     _bValidated: false,
     _data: {},
 
+    // states
+    _bUnlocked: true,
+
 
 
     // ----------------------------------------------------------------------------
@@ -118,12 +121,29 @@ module.exports.prototype = {
         if (nProgress > 0 && nProgress < 1)
         {
             // a. update
-            this._elUploadProgress.innerText = Math.ceil(100 * nProgress) + '%';
+            this._elUploadProgress.innerText = 'Sharing ' + Math.ceil(100 * nProgress) + '%';
         }
         else
         {
             // a. hide
-            this._elUploadProgress.innerText = '';
+            this._elUploadProgress.innerText = 'Sharing done!';
+
+            // b. toggle outp0ut
+            document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.remove('showProgress');
+            document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.add('hideProgress');
+
+
+            // c. time clearing of animation
+            let timerCover = setTimeout(function()
+            {
+                // I. cleanup
+                document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.remove('hideProgress');
+
+                // II. toggle
+                this._bUnlocked = true;
+                this._elRoot.classList.add('unlocked');
+
+            }.bind(this), 900);
         }
     },
 
@@ -162,52 +182,71 @@ module.exports.prototype = {
         this._elButtonSend.addEventListener('click', this._onButtonSendClick.bind(this));
     },
 
+    /**
+     * Setup tab menu
+     * @private
+     */
     _setupTabMenu: function()
     {
-        // find
+        // 1. find
         let elSenderMenu = document.getElementById('sender_menu');
 
-        // store
+        // 2. store
         this._aTabs = document.querySelectorAll('.sender_menu_tab', elSenderMenu);
 
-        //
+        // 3. manage
         for (let nTabIndex = 0; nTabIndex < this._aTabs.length; nTabIndex++)
         {
-            // register
+            // a. register
             let elTab = this._aTabs[nTabIndex];
 
+            // b. configure
             elTab.addEventListener('click', function(sDataType)
             {
-                // focus
+                // I. validate or skip
+                if (!this._bUnlocked) return;
+
+                // II. focus
                 this._focusTab(sDataType);
 
-                // toggle
+                // III. toggle
                 this._focusDataInput(sDataType);
 
             }.bind(this, elTab.getAttribute('data-type')));
         }
 
+        // 4. auto focus
         this._focusDataInput('password');
     },
 
+    /**
+     * Focus requested tab
+     * @param sDataType
+     * @private
+     */
     _focusTab: function(sDataType)
     {
         // 1. cleanup
         this._discardAllInput();
 
+        // 2. change focus
         for (let nTabIndex = 0; nTabIndex < this._aTabs.length; nTabIndex++)
         {
-            // register
+            // a. register
             let elTab = this._aTabs[nTabIndex];
 
+            // b. verify
             if (elTab.getAttribute('data-type') === sDataType)
             {
+                // I. toggle
                 elTab.classList.add('selected');
 
+                // II. focus
                 this._focusDataInput(sDataType);
             }
             else
             {
+                // I. toggle
                 elTab.classList.remove('selected');
             }
         }
@@ -324,35 +363,30 @@ module.exports.prototype = {
         // 2. disable
         this._toggleSendButton(false);
 
-        // 3. broadcast
-        this.dispatchEvent(this.REQUEST_DATABROADCAST, this._data);
 
-        // 4. clear
-        this._data.value = null;
+        // --- show progress
 
-        // 5. cleanup
-        this._clearInput();
-    },
 
-    _clearInput: function()
-    {
-        // 1. prepare
-        document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.add('clear');
+        // 3. toggle
+        this._bUnlocked = false;
+        this._elRoot.classList.remove('unlocked');
 
-        // 2. time clearing of value
+        // 4. prepare
+        document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.add('showProgress');
+
+        // 5. time clearing of value
         let timerValue = setTimeout(function()
         {
+            // a. broadcast
+            this.dispatchEvent(this.REQUEST_DATABROADCAST, this._data);
+
+            // b. clear
+            this._data.value = null;
+
+            // c. cleanup
             this._discardAllInput(this._data.sType);
 
         }.bind(this), 600);
-
-        // 3. time clearing of animation
-        let timerCover = setTimeout(function()
-        {
-            // a. cleanup
-            document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.remove('clear');
-
-        }.bind(this), 1200);
     },
 
     _discardAllInput: function(sType)

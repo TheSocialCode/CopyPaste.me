@@ -13,12 +13,13 @@ const EventDispatcherExtender = require('./../../../extenders/EventDispatcherExt
 // import helpers
 const Module_FileSaver = require('file-saver');
 const Module_ClipboardCopy = require('clipboard-copy');
+const DataInput = require('./../../DataInput/DataInput');
 
 
-module.exports = function(elDataContainer, data)
+module.exports = function(elDataContainer)
 {
     // start
-    this.__construct(elDataContainer, data);
+    this.__construct(elDataContainer);
 };
 
 module.exports.prototype = {
@@ -48,72 +49,77 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (elDataContainer, data)
+    __construct: function (elDataContainer)
     {
         // 1. extend
         new EventDispatcherExtender(this);
 
         // 2. store
         this._elDataContainer = elDataContainer;
-        this._data = data;
 
-        // 3. setup
-        this._setup();
-    },
-
-
-
-    // ----------------------------------------------------------------------------
-    // --- Private methods --------------------------------------------------------
-    // ----------------------------------------------------------------------------
-
-
-    /**
-     * Setup
-     * @private
-     */
-    _setup: function()
-    {
-        // 1. init
+        // 3. init
         var elDataTemplate = document.getElementById('template-data');
 
-        // 2. copy and prepare
+        // 4. copy and prepare
         this._elData = elDataTemplate.cloneNode(true);
         this._elData.removeAttribute('id');
         this._elButton = this._elData.querySelector('[data-mimoto-id="receiver_data_button"]');
 
-        // 4. show
+        // 5. show
         this._elDataContainer.insertBefore(this._elData, this._elDataContainer.firstChild);
 
 
-        // ---
+    // case DataInput.prototype.DATATYPE_DOCUMENT:
+    //
+    //     this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value.fileName;
+    //     this._elButton.innerText = 'Download';
+    //     break;
 
 
-        // 5. init
+        // TEMP
+        //this.showData(data);
+    },
+
+
+    // ----------------------------------------------------------------------------
+    // --- Public methods ---------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
+     * Show data
+     * @private
+     */
+    showData: function(data)
+    {
+        // 1. store
+        this._data = data;
+
+        // 2. init
         this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900 + ((this._elDataContainer.children.length > 1) ? 1000 : 0);
 
-        // 6. show data or data representation
+        // 3. select
         switch(this._data.sType)
         {
-            case 'password':
+            case DataInput.prototype.DATATYPE_PASSWORD:
 
                 this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = '* * * * * * * * *';
                 this._elButton.innerText = 'Copy to clipboard';
                 break;
 
-            case 'url':
+            case DataInput.prototype.DATATYPE_URL:
 
                 this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value;
                 this._elButton.innerText = 'Open URL';
                 break;
 
-            case 'text':
+            case DataInput.prototype.DATATYPE_TEXT:
 
                 this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value;
                 this._elButton.innerText = 'Copy to clipboard';
                 break;
 
-            case 'image':
+            case DataInput.prototype.DATATYPE_IMAGE:
 
                 var elImage = document.createElement('img');
 
@@ -127,31 +133,31 @@ module.exports.prototype = {
 
                 break;
 
-            case 'document':
+            case DataInput.prototype.DATATYPE_DOCUMENT:
 
                 this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value.fileName;
                 this._elButton.innerText = 'Download';
                 break;
         }
 
-        // 7. configure
+        // 4. configure
         this._elButton.addEventListener('click', this._onButtonClick.bind(this));
 
-        // 8. configure
+        // 5. configure
         this._elData.querySelector('[data-mimoto-id=receiver_data_option_clearnow]').addEventListener('click', function(elData) {
 
             this._clearData(elData);
 
         }.bind(this, this._elData));
 
-        // 9. configure
+        // 6. configure
         this._elData.querySelector('[data-mimoto-id=receiver_data_option_extend]').addEventListener('click', function() {
 
             this._extendAutoDestructionDelay()
 
         }.bind(this));
 
-        // 10. setup
+        // 7. setup
         this._timer = setInterval(function()
         {
             if (this._updateTimer())
@@ -162,10 +168,10 @@ module.exports.prototype = {
         }.bind(this), 100);
 
 
-        // register
+        // 8. register
         let elContent = this._elData.querySelector('[data-mimoto-id="content"]');
 
-        // 6. verify
+        // 9. verify
         if (this._elDataContainer.children.length === 0)
         {
             elContent.classList.add('show');
@@ -175,6 +181,14 @@ module.exports.prototype = {
             this._show(elContent);
         }
     },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Private methods --------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
 
     /**
      * Show
@@ -318,7 +332,7 @@ module.exports.prototype = {
         // 1. select
         switch(this._data.sType)
         {
-            case 'password':
+            case DataInput.prototype.DATATYPE_PASSWORD:
 
                 // a. copy
                 this._copyToClipboard(this._data.value);
@@ -327,13 +341,13 @@ module.exports.prototype = {
                 this.dispatchEvent(this.USED_CLIPBOARD);
                 break;
 
-            case 'url':
+            case DataInput.prototype.DATATYPE_URL:
 
                 // a. open
                 window.open(this._data.value, '_blank');
                 break;
 
-            case 'text':
+            case DataInput.prototype.DATATYPE_TEXT:
 
                 // a. copy
                 this._copyToClipboard(this._data.value);
@@ -342,13 +356,13 @@ module.exports.prototype = {
                 this.dispatchEvent(this.USED_CLIPBOARD);
                 break;
 
-            case 'image':
+            case DataInput.prototype.DATATYPE_IMAGE:
 
                 // a. download
                 Module_FileSaver.saveAs(this._data.value.base64, this._data.value.fileName);
                 break;
 
-            case 'document':
+            case DataInput.prototype.DATATYPE_DOCUMENT:
 
                 // a. download
                 Module_FileSaver.saveAs(this._data.value.base64, this._data.value.fileName);

@@ -102,13 +102,13 @@ module.exports.prototype = {
      * Show data that was shared with this client
      * @param data
      */
-    showData: function(data)
+    prepareData: function(metaData)
     {
         // 1. toggle
         this._waiting.hide();
 
         // 2. create
-        let sharedData = new SharedData(this._elContainer, data);
+        let sharedData = new SharedData(this._elContainer, metaData);
 
         // 3. configure
         sharedData.addEventListener(SharedData.prototype.CLEARED, this._onSharedDataCleared.bind(this, sharedData));
@@ -116,6 +116,36 @@ module.exports.prototype = {
 
         // 4. store
         this._aSharedData.push(sharedData);
+    },
+
+    /**
+     * Show data that was shared with this client
+     * @param data
+     */
+    showData: function(data)
+    {
+        // get correct item based on ID
+
+
+//        this._aSharedData.showData(data);
+
+        // 1. toggle
+        this._waiting.hide();
+
+        // 2. create
+        let sharedData = new SharedData(this._elContainer);
+
+        // 3. configure
+        sharedData.addEventListener(SharedData.prototype.CLEARED, this._onSharedDataCleared.bind(this, sharedData));
+        sharedData.addEventListener(SharedData.prototype.USED_CLIPBOARD, this._onSharedDataUsedClipboard.bind(this, sharedData));
+
+        // 4. store
+        this._aSharedData.push(sharedData);
+
+
+
+        sharedData.showData(data);
+
     },
 
     /**

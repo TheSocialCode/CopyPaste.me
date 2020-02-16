@@ -93,6 +93,7 @@ module.exports.prototype = {
 
         // 5. configure
         this._dataManager.addEventListener(DataManager.prototype.DATA_READY_FOR_TRANSFER, this._onDataManagerDataReadyForTransfer.bind(this));
+        this._dataManager.addEventListener(DataManager.prototype.DATA_PREPARE_FOR_DISPLAY, this._onDataManagerDataPrepareForDisplay.bind(this));
         this._dataManager.addEventListener(DataManager.prototype.DATA_READY_FOR_DISPLAY, this._onDataManagerDataReadyForDisplay.bind(this));
 
         // 6. verify
@@ -686,6 +687,17 @@ module.exports.prototype = {
 
         // 2. update
         this._dataInput.showTransferProgress((packageToTransfer.packageNumber + 1) / packageToTransfer.packageCount);
+    },
+
+    /**
+     * Handle PackageManager event `DATA_PREPARE_FOR DISPLAY`
+     * @param metaData
+     * @private
+     */
+    _onDataManagerDataPrepareForDisplay: function()
+    {
+        // 1. forward
+        //this._dataOutput.prepareData();
     },
 
     /**
