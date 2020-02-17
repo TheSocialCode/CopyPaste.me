@@ -219,18 +219,21 @@ div.sender_data_label_cover_label {
 
 .hideProgress div.sender_data_label_cover_label {
     animation: hideProgress-cover-label 0.9s;
-    clip-path: inset(0 100% 0 0);
+    //clip-path: inset(0 100% 0 0);
 }
 
     @keyframes hideProgress-cover-label {
         0% {
-            clip-path: inset(0 0 0 0);
+            //clip-path: inset(0 0 0 0);
+            opacity: 1;
         }
         33% {
-            clip-path: inset(0 0 0 0);
+            //clip-path: inset(0 0 0 0);
+            opacity: 1;
         }
         100% {
-            clip-path: inset(0 0 0 100%);
+            //clip-path: inset(0 0 0 100%);
+            opacity: 0;
         }
     }
 
