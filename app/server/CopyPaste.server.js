@@ -121,11 +121,15 @@ module.exports = {
             // init
             let sMongoURL = 'mongodb://';
 
+            let sUsername = encodeURIComponent(this._configFile.mongodb.username);
+            let sPassword = encodeURIComponent(this._configFile.mongodb.password);
+
+
             // compose
-            if (bMongoAuthenticated) sMongoURL += this._configFile.mongodb.username + ':' + this._configFile.mongodb.password + '@';
+            if (bMongoAuthenticated) sMongoURL += sUsername + ':' + sPassword + '@';
             sMongoURL += this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
             if (bMongoAuthenticated) sMongoURL += '?authMechanism=SCRAM-SHA-1';
-            
+
             // 6. connect
             this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
         }
