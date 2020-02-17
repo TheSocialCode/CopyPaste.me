@@ -114,9 +114,18 @@ module.exports = {
             // 4. init
             this._mongo = Module_MongoDB.MongoClient;
 
-            // 5. configure
-            const sMongoURL = 'mongodb://' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
 
+            // set (TEMP - move to config)
+            let bMongoAuthenticated = true;
+
+            // init
+            let sMongoURL = 'mongodb://';
+
+            // compose
+            if (bMongoAuthenticated) sMongoURL += this._configFile.mongodb.username + ':' + this._configFile.mongodb.password + '@';
+            sMongoURL += this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
+            if (bMongoAuthenticated) sMongoURL += '?authMechanism=SCRAM-SHA-1';
+            
             // 6. connect
             this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
         }
