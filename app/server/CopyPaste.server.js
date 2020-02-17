@@ -212,7 +212,7 @@ module.exports = {
             ' ',
             'Please help keeping this service free by donating: https://paypal.me/thesocialcode',
             ' ',
-            'listening on *:3000 ' + JSON.stringify(this._config),
+            'listening on *:' + this._configFile.socketio.server.port + ' ' + JSON.stringify(this._config),
             ''
         ];
 
