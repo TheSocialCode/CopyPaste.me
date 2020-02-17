@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.location.pathname.toLowerCase() === '/faq') return;
 
     // 3. startup
-    this.client = new Client(window.location.protocol + '//' + window.location.hostname +  ':3000');
+    this.client = new Client(window.location.protocol + '//' + window.location.hostname +  ':443');
 
 }, true);
 
