@@ -1,6 +1,12 @@
 {
     "socketio": {
-        "port": 3000
+        "client": {
+            "port": 3000
+        },
+        "server": {
+            "host": "localhost",
+            "port": 3000
+        }
     },
     "ssl": {
         "key": "absolute path to your key file (usually something like .key or .pem)",
