@@ -165,7 +165,7 @@ module.exports = {
         this._io.on('connection', this._onUserConnect.bind(this));
 
         // 10. listen
-        this._server.listen(this._configFile.socketio.client.port, this._configFile.socketio.client.host, this._onSocketIOConnect.bind(this));
+        this._server.listen(this._configFile.socketio.server.port, this._configFile.socketio.server.host, this._onSocketIOConnect.bind(this));
     },
 
     /**
