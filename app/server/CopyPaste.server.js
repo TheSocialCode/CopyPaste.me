@@ -128,7 +128,7 @@ module.exports = {
             // compose
             if (bMongoAuthenticated) sMongoURL += sUsername + ':' + sPassword + '@';
             sMongoURL += this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
-            if (bMongoAuthenticated) sMongoURL += '?authMechanism=SCRAM-SHA-1';
+            if (bMongoAuthenticated) sMongoURL += '?authMechanism=SCRAM-SHA-1&authSource=' + this._configFile.mongodb.dbname;
 
             // 6. connect
             this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
