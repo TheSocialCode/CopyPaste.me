@@ -141,28 +141,42 @@ div.sender_data_label_cover_label {
     width: 100%;
 }
 
-@keyframes showProgress-cover-internal {
-    0% {
-        width: 0;
+    @keyframes showProgress-cover-internal {
+        0% {
+            width: 0;
+        }
+        100% {
+            width: 100%;
+        }
     }
-    100% {
-        width: 100%;
-    }
-}
 
 .showProgress div.sender_data_label_data_input {
     animation: showProgress-cover-input 0.6s;
     margin-left: 0;
 }
 
-@keyframes showProgress-cover-input {
-    0% {
-        opacity: 1;
+    @keyframes showProgress-cover-input {
+        0% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
     }
-    100% {
-        opacity: 0;
-    }
+
+.showProgress div.sender_data_label_cover_label {
+    animation: showProgress-cover-label 0.6s;
+    clip-path: inset(0 100% 0 0);
 }
+
+    @keyframes showProgress-cover-label {
+        0% {
+            clip-path: inset(0 100% 0 0);
+        }
+        100% {
+            clip-path: inset(0 0 0 0);
+        }
+    }
 
 
 .hideProgress div.sender_data_label_cover_internal {
@@ -171,37 +185,54 @@ div.sender_data_label_cover_label {
     margin-left: 100%;
 }
 
-@keyframes hideProgress-cover-internal {
-    0% {
-        width: 100%;
-        margin-left: 0;
+    @keyframes hideProgress-cover-internal {
+        0% {
+            width: 100%;
+            margin-left: 0;
+        }
+        33% {
+            width: 100%;
+            margin-left: 0;
+        }
+        100% {
+            width: 0;
+            margin-left: 100%;
+        }
     }
-    33% {
-        width: 100%;
-        margin-left: 0;
-    }
-    100% {
-        width: 0;
-        margin-left: 100%;
-    }
-}
 
 
 .hideProgress div.sender_data_label_data_input {
     animation: hideProgress-cover-input 0.9s;
 }
 
-@keyframes hideProgress-cover-input {
-    0% {
-        opacity: 0;
+    @keyframes hideProgress-cover-input {
+        0% {
+            opacity: 0;
+        }
+        33% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
     }
-    33% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
+
+.hideProgress div.sender_data_label_cover_label {
+    animation: hideProgress-cover-label 0.9s;
+    clip-path: inset(0 100% 0 0);
 }
+
+    @keyframes hideProgress-cover-label {
+        0% {
+            clip-path: inset(0 0 0 0);
+        }
+        33% {
+            clip-path: inset(0 0 0 0);
+        }
+        100% {
+            clip-path: inset(0 0 0 100%);
+        }
+    }
 
 
 div.sender_data_menu {

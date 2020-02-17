@@ -11,6 +11,7 @@
 
     // 4. load (ensures use of latest JS build)
     $manifest = json_decode(file_get_contents(dirname(__FILE__).'/static/js/manifest.json'), true);
+    $config = json_decode(file_get_contents(dirname(dirname(__FILE__)).'/CopyPaste.config.json'), true);
 
 ?>
 <!doctype html>
@@ -83,6 +84,15 @@
         </div>
     </div>
 
+    <script>
+        document.CopyPaste = {
+            config: {
+                socketio: {
+                    port: '<?php echo $config['socketio']['client']['port']; ?>'
+                }
+            }
+        };
+    </script>
     <script src="/static/js/<?php echo $manifest['main.js']; ?>"></script>
 </body>
 </html>

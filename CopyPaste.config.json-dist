@@ -1,4 +1,7 @@
 {
+    "socketio": {
+        "port": 3000
+    },
     "ssl": {
         "key": "absolute path to your key file (usually something like .key or .pem)",
         "certificate": "absolute path to your certificate file (usually something like .crt or .pem)"

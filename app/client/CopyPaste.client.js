@@ -28,8 +28,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // 2. verify
     if (window.location.pathname.toLowerCase() === '/faq') return;
 
-    // 3. startup
-    this.client = new Client(window.location.protocol + '//' + window.location.hostname +  ':443');
+    // 3. prepare
+    let sPort = (document.CopyPaste.config.socketio.port) ? ':' + document.CopyPaste.config.socketio.port : '';
+
+    // 4. startup
+    this.client = new Client(window.location.protocol + '//' + window.location.hostname + sPort);
 
 }, true);
 
