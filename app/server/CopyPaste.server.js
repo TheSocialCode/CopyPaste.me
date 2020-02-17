@@ -33,7 +33,8 @@ module.exports = {
     _config: {
         mode: 'prod',   // options: "prod" (no output)  | "dev" (output debugging comments)
         https: true,    // options: 'true' (runs on https)  | 'false' (runs on http)
-        mongo: true
+        mongo: true,
+        mongoauthenticate: true
     },
     _configFile: null,
 
@@ -98,6 +99,7 @@ module.exports = {
         if (config.mode && config.mode === 'prod' || config.mode === 'dev') this._config.mode = config.mode;
         if (config.https === true || config.https === false) this._config.https = config.https;
         if (config.mongo === true || config.mongo === false) this._config.mongo = config.mongo;
+        if (config.mongoauthenticate === true || config.mongoauthenticate === false) this._config.mongoauthenticate = config.mongoauthenticate;
 
         // 2. load
         let jsonConfigFile = Module_FS.readFileSync('CopyPaste.config.json');
@@ -114,21 +116,21 @@ module.exports = {
             // 4. init
             this._mongo = Module_MongoDB.MongoClient;
 
-
-            // set (TEMP - move to config)
-            let bMongoAuthenticated = true;
-
             // init
             let sMongoURL = 'mongodb://';
 
-            let sUsername = encodeURIComponent(this._configFile.mongodb.username);
-            let sPassword = encodeURIComponent(this._configFile.mongodb.password);
-
 
             // compose
-            if (bMongoAuthenticated) sMongoURL += sUsername + ':' + sPassword + '@';
+            if (this._config.mongoauthenticate)
+            {
+                let sUsername = encodeURIComponent(this._configFile.mongodb.username.toString());
+                let sPassword = encodeURIComponent(this._configFile.mongodb.password.toString());
+
+                sMongoURL += sUsername + ':' + sPassword + '@';
+            }
+
             sMongoURL += this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
-            if (bMongoAuthenticated) sMongoURL += '?authMechanism=SCRAM-SHA-1&authSource=' + this._configFile.mongodb.dbname;
+            if (this._config.mongoauthenticate) sMongoURL += '?authMechanism=SCRAM-SHA-1&authSource=' + this._configFile.mongodb.dbname;
 
             // 6. connect
             this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
@@ -153,7 +155,7 @@ module.exports = {
             this._app = Module_Express();
 
             // b. setup
-            this._server = new Module_HTTP.createServer(this.app, { pingTimeout: 60000 });
+            this._server = new Module_HTTP.createServer(this._app, { pingTimeout: 60000 });
         }
 
         // 8. setup
@@ -1196,6 +1198,10 @@ process.argv.forEach((value, index) => {
     if (value.substr(0, 6) === 'https=')
     {
         this.Mimoto.config.https = (value.substr(6) === 'false') ? false : true;
+    }
+    if (value.substr(0, 18) === 'mongoauthenticate=')
+    {
+        this.Mimoto.config.mongoauthenticate = (value.substr(18) === 'false') ? false : true;
     }
 });
 
