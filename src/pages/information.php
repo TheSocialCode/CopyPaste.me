@@ -63,7 +63,7 @@
 
         <div class="main-interface-information-section right">
             <h1 class="main-interface-information-section-title">How you can help to keep it free</h1>
-            <div class="main-interface-information-section-body last">
+            <div class="main-interface-information-section-body bottom">
                 <p>The Social Code Foundation wants to offer this privacy-friendly sharing service free to all, but to cover the operational costs it relies on donations by enthusiastic users. For privacy reasons, and because the advertisement business model is broken to the core, the project can’t be funded with ad revenue. For long term sustainability reasons the project doesn’t want to rely on investors: profit and economic growth shouldn't be at the core of every initiative.</p>
                 <div class="supportoptions">
                     <div class="buttonSupport paypal">Make a donation</div><div class="buttonSupport patreon">Become a patron</div>
