@@ -1,0 +1,127 @@
+div.main-information {
+    margin-bottom: 30px;
+}
+
+div.main-interface-information {
+    background-color: $color-background-content;
+    color: $color-text-dark;
+
+    display: block;
+
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding: 10px 30px 30px 30px;
+
+    font-family: Montserrat, sans-serif;
+
+    width: 100%;
+    z-index: 1000;
+
+    font-size: medium;
+    line-height: 24px;
+}
+
+div.main-interface-information-section {
+    //margin-top: 75px;
+    margin-bottom: 20px;
+
+    max-width: 600px;
+
+    & span.link {
+        color: $color-background-header;
+    }
+
+    & span.highlight {
+        font-style: italic;
+    }
+
+    &.left {
+        text-align: left;
+        float: left;
+    }
+
+    &.right {
+        text-align: right;
+        float: right;
+    }
+
+    @media only screen and (max-width: 600px) {
+        &.right {
+            text-align: left;
+            float: left;
+        }
+    }
+
+    h1.main-interface-information-section-title {
+        font-size: 24pt;
+        font-weight: bolder;
+        margin-bottom: 25px;
+    }
+
+    div.main-interface-information-section-body, p.main-interface-information-section-body {
+        font-size: 12pt;
+        padding-bottom: 20px;
+    }
+
+    div.main-interface-information-section-body.bottom {
+        padding-bottom: 80px;
+    }
+}
+
+
+div.features {
+    clear: both;
+    display: block;
+    background-color: #f5f5f5;
+    padding-top: 50px;
+    padding-bottom: 30px;
+    margin-bottom: 50px;
+}
+
+div.features_divider {
+    background-color: #cccccc;
+    height: 1px;
+    max-width: 585px;
+    margin: 35px auto 50px auto;
+}
+
+div.feature_datatitle {
+
+}
+
+div.feature_adverb, div.feature_divider {
+    display: inline-block;
+    font-family: Montserrat, sans-serif;
+    font-style: italic;
+    font-size: 24px;
+    line-height: 24px;
+}
+
+div.feature_divider {
+    padding: 0 10px 0 10px;
+}
+
+img.feature_image {
+    height: 65px;
+    margin-top: 15px;
+}
+
+div.feature_datatype {
+    display: inline-block;
+    font-family: Montserrat, sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    line-height: 24px;
+}
+
+div.feature_description {
+    font-family: Montserrat, sans-serif;
+    font-size: 18px;
+    line-height: 24px;
+    max-width: 500px;
+    text-align: center;
+    margin: 0 auto 0 auto;
+    padding: 20px;
+}

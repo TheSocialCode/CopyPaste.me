@@ -1,11 +1,12 @@
 div.module_ToggleButton {
     display: inline-block;
-    margin-top: 30px;
-    background-color: #67909D;
+    margin-top: 34px;
+    background-color: #436c90;
     color: $textcolor-light;
-    border-radius: 8px;
-    padding: 3px 8px 5px 8px;
-    font-size: small;
+    border-radius: 9px;
+    padding: 6px 14px 8px 14px;
+    font-size: 13px;
+    letter-spacing: -0.55px;
     cursor: pointer;
     user-select: none;
 

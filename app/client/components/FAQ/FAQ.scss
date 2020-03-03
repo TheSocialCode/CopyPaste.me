@@ -7,13 +7,13 @@ div.interface-faq {
     text-align: center;
     margin-bottom: 70px;
     line-height: 24px;
-    padding: 0 10px 0 10px;
+    padding: 25px 10px 0 10px;
 }
 
 h1.faq_title {
     font-size: x-large;
     font-weight: bold;
-    color: $textcolor-light;
+    color: $textcolor-dark;
     margin-bottom: 35px;
 }
 
@@ -26,16 +26,16 @@ h2.faq_question {
 p.faq_answer {
 
     font-size: medium;
-    color: $textcolor-light;
+    color: $textcolor-dark;
     margin-bottom: 35px;
 
     & a {
-        color: $textcolor-light;
+        color: $textcolor-dark;
         text-decoration: underline;
     }
 
     & a:hover {
-        color: $textcolor-dark;
+        color: $textcolor-alert;
         text-decoration: none;
     }
 }

@@ -148,6 +148,7 @@ module.exports.prototype = {
     {
         // 1. toggle visibility
         this._elRoot.classList.add('show');
+        document.body.classList.add('app');
 
         // 2. apply dimensions to main component
         this._elRoot.style.width = this._elFront.offsetWidth + 'px';
@@ -174,6 +175,7 @@ module.exports.prototype = {
     {
         // 1. toggle visibility
         this._elRoot.classList.remove('show');
+        document.body.classList.remove('app');
 
         // 2. toggle visibility
         this._manualConnectButton.hide();

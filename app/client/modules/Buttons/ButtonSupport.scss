@@ -1,0 +1,37 @@
+
+div.buttonSupport {
+    display: inline-block;
+    color: $textcolor-light;
+    font-size: 14px;
+    padding: 5px 22px 6px 22px;
+    border-radius: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+
+    &.paypal {
+        background-color: #406c91;
+    }
+
+    &.patreon {
+        background-color: #e65d48;
+    }
+}
+
+div.buttonSupport:hover {
+    display: inline-block;
+    background-color: #333333;
+}
+
+
+div.supportoptions {
+    margin: 25px 0 25px 0;
+
+    & > div {
+        margin-left: 0;
+    }
+
+    & > div:last-child {
+        margin-left: 8px;
+    }
+}

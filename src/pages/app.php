@@ -164,7 +164,6 @@
 </div>
 
 
-
 <!-- General -->
 
 <div id="templates" class="templates">
