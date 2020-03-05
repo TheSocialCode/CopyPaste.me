@@ -29,9 +29,7 @@
     <meta property="og:description" content="Easily and quickly share passwords, texts and files between devices.">
     <meta property="og:image" content="<?php echo $sURL ?>/static/images/copypaste-preview.png">
 
-<!--    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,800&display=swap" rel="stylesheet">-->
-
-    <style nonce="d09wMWtZZHBZTUpyQjF5MjFuWlNzMzd1cVE9">
+    <style nonce="<?php echo $config['csp']['nonce-css']; ?>">
         /* montserrat-regular - latin */
         @font-face {
             font-family: 'Montserrat';
@@ -87,7 +85,7 @@
     </style>
 
 </head>
-<style nonce="d09wMWtZZHBZTUpyQjF5MjFuWlNzMzd1cVE9" data-mimoto-id="css-startup">
+<style nonce="<?php echo $config['csp']['nonce-js']; ?>" data-mimoto-id="css-startup">
 
     body {
        visibility: hidden;
@@ -155,7 +153,7 @@
         </div>
     </div>
 
-    <script nonce="d09wMWtZZHBZTUpyQjF5MjFuWlNzMzd1cVE9">
+    <script nonce="<?php echo $config['csp']['nonce-js']; ?>">
         document.CopyPaste = {
             config: {
                 socketio: {

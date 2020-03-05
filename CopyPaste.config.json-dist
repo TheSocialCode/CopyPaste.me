@@ -12,6 +12,10 @@
         "key": "absolute path to your key file (usually something like .key or .pem)",
         "certificate": "absolute path to your certificate file (usually something like .crt or .pem)"
     },
+    "csp": {
+        "nonce-js":  "",
+        "nonce-css":  ""
+    },
     "mongodb": {
         "host": "localhost",
         "port": 27017,
