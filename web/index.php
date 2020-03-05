@@ -30,8 +30,8 @@
     <meta property="og:image" content="<?php echo $sURL ?>/static/images/copypaste-preview.png">
 
 <!--    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,800&display=swap" rel="stylesheet">-->
-    
-    <style>
+
+    <style nonce="TjNHZmpXMXdoMmVkQWFVTjRSVFhPQnJsZzV5">
         /* montserrat-regular - latin */
         @font-face {
             font-family: 'Montserrat';
@@ -87,7 +87,7 @@
     </style>
 
 </head>
-<style data-mimoto-id="css-startup">
+<style nonce="TjNHZmpXMXdoMmVkQWFVTjRSVFhPQnJsZzV5" data-mimoto-id="css-startup">
 
     body {
        visibility: hidden;
@@ -155,7 +155,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="d09wMWtZZHBZTUpyQjF5MjFuWlNzMzd1cVE9">
         document.CopyPaste = {
             config: {
                 socketio: {
