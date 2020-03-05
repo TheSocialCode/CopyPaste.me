@@ -31,7 +31,7 @@
 
 <!--    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,800&display=swap" rel="stylesheet">-->
 
-    <style nonce="TjNHZmpXMXdoMmVkQWFVTjRSVFhPQnJsZzV5">
+    <style nonce="d09wMWtZZHBZTUpyQjF5MjFuWlNzMzd1cVE9">
         /* montserrat-regular - latin */
         @font-face {
             font-family: 'Montserrat';
@@ -87,7 +87,7 @@
     </style>
 
 </head>
-<style nonce="TjNHZmpXMXdoMmVkQWFVTjRSVFhPQnJsZzV5" data-mimoto-id="css-startup">
+<style nonce="d09wMWtZZHBZTUpyQjF5MjFuWlNzMzd1cVE9" data-mimoto-id="css-startup">
 
     body {
        visibility: hidden;
