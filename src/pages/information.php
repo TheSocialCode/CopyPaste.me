@@ -9,7 +9,7 @@
         <div class="main-interface-information-section right">
             <h1 class="main-interface-information-section-title">How does it work?</h1>
             <div class="main-interface-information-section-body">
-                <p>The QR-code above is generated specifically for you. Scan it by pointing your phone’s camera at it (most of them have a QR-scanner built in) to setup the connection and start sharing! If you don’t have a camera at hand, for instance whan you want to connect your laptop to another computer, simply use the <span class="highlight">`connect manually`</span> option.</p>
+                <p>The QR code above is generated specifically for you. Scan it by pointing your phone’s camera at it (most of them have a QR-scanner built in) to setup the connection and start sharing! If you don’t have a camera at hand, for instance whan you want to connect your laptop to another computer, simply use the <span class="highlight">'connect manually'</span> option.</p>
             </div>
         </div>
     </div>
@@ -44,7 +44,7 @@
             </div>
             <img src="/static/images/features_files.png" class="feature_image">
             <div class="feature_description">
-                Never again the desparate search for a USB-stick or someone
+                Never again the desparate search for a USB stick or someone
                 from the technical desk to get files from your laptop or phone
                 to a computer you need it on. Also very handy for sharing
                 files or photos with people you’ve just met, but currently
