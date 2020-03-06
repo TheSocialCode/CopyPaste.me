@@ -1,16 +1,21 @@
 const path = require('path');
 const webpack = require('webpack');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
-const RemovePlugin = require('remove-files-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
 module.exports = {
 
     // --- Javascript ---
 
-    entry: './app/client/CopyPaste.client.js',
+    // entry: './app/client/CopyPaste.client.js',
+    entry: [
+        './app/client/CopyPaste.client.js',
+        './app/client/CopyPaste.client.scss',
+    ],
     output: {
-        path: path.resolve(__dirname, 'web/static/js'),
+        path: path.resolve(__dirname, 'web/static/dist'),
         filename: 'CopyPaste.[chunkhash].js'
     },
     watch: true,
@@ -20,34 +25,32 @@ module.exports = {
     // --- CSS ---
 
     module: {
-        rules: [
+        rules : [
             {
-                test: /\.s[ac]ss$/i,
+                test: /\.s?[ac]ss$/,
                 use: [
-                    // Creates `style` nodes from JS strings
-                    'style-loader',
-                    // Translates CSS into CommonJS
-                    'css-loader',
-                    // Compiles Sass to CSS
-                    'sass-loader',
+                    MiniCssExtractPlugin.loader,
+                    { loader: 'css-loader', options: { url: false, sourceMap: true } },
+                    { loader: 'sass-loader', options: { sourceMap: true } }
                 ],
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: "babel-loader"
             }
-        ],
+        ]
     },
 
 
     // --- output
 
     plugins: [
+        new CleanWebpackPlugin(),
         new webpack.BannerPlugin('CopyPaste.me - Frictionless sharing between devices\nCreated by The Social Code\n\n@author  Sebastian Kersten\n@license UNLICENSED\n\nPlease help keeping the service free by donating: https://paypal.me/thesocialcode\n'),
         new ManifestPlugin(),
-        new RemovePlugin({
-            // Before compilation removes entire `./web/static/js` folder to trash
-            before: {
-                include: [
-                    path.resolve(__dirname, 'web/static/js')
-                ]
-            }
+        new MiniCssExtractPlugin({
+            filename: 'CopyPaste.[chunkhash].css'
         })
     ]
 };

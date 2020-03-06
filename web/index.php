@@ -10,7 +10,7 @@
     $sURL = $sProtocol.$_SERVER['HTTP_HOST'];
 
     // 4. load (ensures use of latest JS build)
-    $manifest = json_decode(file_get_contents(dirname(__FILE__).'/static/js/manifest.json'), true);
+    $manifest = json_decode(file_get_contents(dirname(__FILE__).'/static/dist/manifest.json'), true);
     $config = json_decode(file_get_contents(dirname(dirname(__FILE__)).'/CopyPaste.config.json'), true);
 
 ?>
@@ -29,69 +29,9 @@
     <meta property="og:description" content="Easily and quickly share passwords, texts and files between devices.">
     <meta property="og:image" content="<?php echo $sURL ?>/static/images/copypaste-preview.png">
 
-    <style nonce="<?php echo $config['csp']['nonce-css']; ?>">
-        /* montserrat-regular - latin */
-        @font-face {
-            font-family: 'Montserrat';
-            font-style: normal;
-            font-weight: 400;
-            src: url('/static/fonts/montserrat-v14-latin-regular.eot'); /* IE9 Compat Modes */
-            src: local('Montserrat Regular'), local('Montserrat-Regular'),
-            url('/static/fonts/montserrat-v14-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-            url('/static/fonts/montserrat-v14-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-            url('/static/fonts/montserrat-v14-latin-regular.woff') format('woff'), /* Modern Browsers */
-            url('/static/fonts/montserrat-v14-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-            url('/static/fonts/montserrat-v14-latin-regular.svg#Montserrat') format('svg'); /* Legacy iOS */
-        }
-        /* montserrat-italic - latin */
-        @font-face {
-            font-family: 'Montserrat';
-            font-style: italic;
-            font-weight: 400;
-            src: url('/static/fonts/montserrat-v14-latin-italic.eot'); /* IE9 Compat Modes */
-            src: local('Montserrat Italic'), local('Montserrat-Italic'),
-            url('/static/fonts/montserrat-v14-latin-italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-            url('/static/fonts/montserrat-v14-latin-italic.woff2') format('woff2'), /* Super Modern Browsers */
-            url('/static/fonts/montserrat-v14-latin-italic.woff') format('woff'), /* Modern Browsers */
-            url('/static/fonts/montserrat-v14-latin-italic.ttf') format('truetype'), /* Safari, Android, iOS */
-            url('/static/fonts/montserrat-v14-latin-italic.svg#Montserrat') format('svg'); /* Legacy iOS */
-        }
-        /* montserrat-700 - latin */
-        @font-face {
-            font-family: 'Montserrat';
-            font-style: normal;
-            font-weight: 700;
-            src: url('/static/fonts/montserrat-v14-latin-700.eot'); /* IE9 Compat Modes */
-            src: local('Montserrat Bold'), local('Montserrat-Bold'),
-            url('/static/fonts/montserrat-v14-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-            url('/static/fonts/montserrat-v14-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
-            url('/static/fonts/montserrat-v14-latin-700.woff') format('woff'), /* Modern Browsers */
-            url('/static/fonts/montserrat-v14-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
-            url('/static/fonts/montserrat-v14-latin-700.svg#Montserrat') format('svg'); /* Legacy iOS */
-        }
-        /* montserrat-800 - latin */
-        @font-face {
-            font-family: 'Montserrat';
-            font-style: normal;
-            font-weight: 800;
-            src: url('/static/fonts/montserrat-v14-latin-800.eot'); /* IE9 Compat Modes */
-            src: local('Montserrat ExtraBold'), local('Montserrat-ExtraBold'),
-            url('/static/fonts/montserrat-v14-latin-800.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-            url('/static/fonts/montserrat-v14-latin-800.woff2') format('woff2'), /* Super Modern Browsers */
-            url('/static/fonts/montserrat-v14-latin-800.woff') format('woff'), /* Modern Browsers */
-            url('/static/fonts/montserrat-v14-latin-800.ttf') format('truetype'), /* Safari, Android, iOS */
-            url('/static/fonts/montserrat-v14-latin-800.svg#Montserrat') format('svg'); /* Legacy iOS */
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/static/dist/<?php echo $manifest['main.css']; ?>">
 
 </head>
-<style nonce="<?php echo $config['csp']['nonce-js']; ?>" data-mimoto-id="css-startup">
-
-    body {
-       visibility: hidden;
-    }
-
-</style>
 <body>
     <div class="main-interface">
 
@@ -108,7 +48,7 @@
                 <h1 class="tagline">Frictionless sharing<br>between devices</h1>
                 <h2 class="description">Private end-to-end encryption, secure transfer and your data is never stored on the server</h2>
 
-                <div data-mimoto-id="component_AlertMessage" class="component_AlertMessage"></div>
+                <div class="component_AlertMessage_container"><div data-mimoto-id="component_AlertMessage" class="component_AlertMessage"></div></div>
 
                 <div class="warning_security_compromised">
                     <div class="warning_security_compromised_title">WARNING: Security compromised</div>
@@ -162,6 +102,6 @@
             }
         };
     </script>
-    <script src="/static/js/<?php echo $manifest['main.js']; ?>"></script>
+    <script src="/static/dist/<?php echo $manifest['main.js']; ?>"></script>
 </body>
 </html>

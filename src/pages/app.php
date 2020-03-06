@@ -96,8 +96,8 @@
                             <div data-mimoto-id="data_input_image" class="data_input">
                                 <div class="data_input_image">
                                     <div class="data_input_image_menu">
-                                        <div class="button" onclick="document.getElementById('data_input_image_file').click();">Select image</div>
-                                        <input id="data_input_image_file" type="file" style="display:none;" accept='image/*' name="data_input_image_file"/>
+                                        <div data-mimoto-id="data_input_image_file_button" class="button">Select image</div>
+                                        <input data-mimoto-id="data_input_image_file_inputfield" type="file" style="display:none;" accept='image/*' name="data_input_image_file"/>
                                     </div>
                                     <div data-mimoto-id="data_input_image_preview"
                                          class="data_input_image_preview">
@@ -111,10 +111,8 @@
                             <div data-mimoto-id="data_input_document" class="data_input">
                                 <div class="data_input_document">
                                     <div class="data_input_document_menu">
-                                        <div class="button" onclick="document.getElementById('data_input_document_file').click();">
-                                            Select document
-                                        </div>
-                                        <input id="data_input_document_file" type="file" style="display:none;" name="data_input_document_file"/>
+                                        <div data-mimoto-id="data_input_document_file_button" class="button">Select document</div>
+                                        <input data-mimoto-id="data_input_document_file_inputfield" type="file" style="display:none;" name="data_input_document_file"/>
                                     </div>
                                     <div data-mimoto-id="data_input_document_preview" class="data_input_document_preview">
                                         <div data-mimoto-id="data_input_document_preview_label" class="data_input_document_preview_label"></div>

@@ -30,7 +30,11 @@ module.exports.prototype = {
     _elInputURL: null,
     _elInputText: null,
     _elInputImage: null,
+    _elInputImageButton: null,
+    _elInputImageInputfield: null,
     _elInputDocument: null,
+    _elInputDocumentButton: null,
+    _elInputDocumentInputfield: null,
     _elUploadProgress: null,
 
     // utils
@@ -77,7 +81,11 @@ module.exports.prototype = {
         this._elInputURL = this._elRoot.querySelector('[data-mimoto-id="data_input_url"]');
         this._elInputText = this._elRoot.querySelector('[data-mimoto-id="data_input_text"]');
         this._elInputImage = this._elRoot.querySelector('[data-mimoto-id="data_input_image"]');
+        this._elInputImageButton = this._elInputImage.querySelector('[data-mimoto-id="data_input_image_file_button"]');
+        this._elInputImageInputfield = this._elInputImage.querySelector('[data-mimoto-id="data_input_image_file_inputfield"]');
         this._elInputDocument = this._elRoot.querySelector('[data-mimoto-id="data_input_document"]');
+        this._elInputDocumentButton = this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_file_button"]');
+        this._elInputDocumentInputfield = this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_file_inputfield"]');
         this._elUploadProgress = this._elRoot.querySelector('[data-mimoto-id="progress"]');
         this._elButtonSend = this._elRoot.querySelector('[data-mimoto-id="button_input_send"]');
 
@@ -175,10 +183,14 @@ module.exports.prototype = {
         this._elInputText.addEventListener('input', this._validateText.bind(this));
 
         // 4. configure input: image & document
-        document.getElementById('data_input_image_file').addEventListener('change', this._onSelectImage.bind(this));
-        document.getElementById('data_input_document_file').addEventListener('change', this._onSelectDocument.bind(this));
+        this._elInputImageButton.addEventListener('click', function() { this._elInputImageInputfield.click(); }.bind(this));
+        this._elInputImageInputfield.addEventListener('change', this._onSelectImage.bind(this));
 
-        // 5. configure send button
+        // 5. configure input: document
+        this._elInputDocumentButton.addEventListener('click', function() { this._elInputDocumentInputfield.click(); }.bind(this));
+        this._elInputDocumentInputfield.addEventListener('change', this._onSelectDocument.bind(this));
+
+        // 6. configure send button
         this._elButtonSend.addEventListener('click', this._onButtonSendClick.bind(this));
     },
 

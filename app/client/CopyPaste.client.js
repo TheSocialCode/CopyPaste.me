@@ -7,9 +7,6 @@
 'use strict';
 
 
-// import CSS
-import './CopyPaste.client.scss';
-
 // import
 const Client = require('./components/Client');
 
@@ -35,6 +32,3 @@ document.addEventListener('DOMContentLoaded', function () {
     this.client = new Client(window.location.protocol + '//' + window.location.hostname + sPort);
 
 }, true);
-
-// show interface
-document.querySelector('[data-mimoto-id="css-startup"]').remove();
