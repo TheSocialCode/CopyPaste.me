@@ -1,5 +1,5 @@
 
-div.buttonSupport {
+a.buttonSupport {
     display: inline-block;
     color: $textcolor-light;
     font-size: 14px;
@@ -8,6 +8,7 @@ div.buttonSupport {
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
+    text-decoration: none;
 
     &.paypal {
         background-color: #406c91;
@@ -18,7 +19,7 @@ div.buttonSupport {
     }
 }
 
-div.buttonSupport:hover {
+a.buttonSupport:hover {
     display: inline-block;
     background-color: #333333;
 }
@@ -27,18 +28,18 @@ div.buttonSupport:hover {
 div.supportoptions {
     margin: 25px 0 25px 0;
 
-    & > div {
+    & > a {
         margin-left: 0;
     }
 
-    & > div:last-child {
+    & > a:last-child {
         margin-left: 8px;
     }
 }
 
 @media only screen and (max-width: 400px) {
 
-    div.buttonSupport {
+    a.buttonSupport {
         width: 100%;
         text-align: center;
     }

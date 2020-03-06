@@ -66,7 +66,7 @@
             <div class="main-interface-information-section-body bottom">
                 <p>The Social Code Foundation wants to offer this privacy-friendly sharing service free to all, but to cover the operational costs it relies on donations by enthusiastic users. For privacy reasons, and because the advertisement business model is broken to the core, the project can’t be funded with ad revenue. For long term sustainability reasons the project doesn’t want to rely on investors: profit and economic growth shouldn't be at the core of every initiative.</p>
                 <div class="supportoptions">
-                    <div class="buttonSupport paypal">Make a donation</div><div class="buttonSupport patreon">Become a patron</div>
+                    <a href="https://paypal.me/thesocialcode/25" target="_blank" class="buttonSupport paypal">Make a donation</a><a href="https://www.patreon.com/thesocialcode" target="_blank" class="buttonSupport patreon">Become a patron</a>
                 </div>
                 <p>So if you like this service, please consider supporting the project by chipping in. Thank you very much for making this possible!</p>
             </div>

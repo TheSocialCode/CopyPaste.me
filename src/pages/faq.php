@@ -76,7 +76,7 @@
                 <p class="main-interface-information-section-body">
 
                     So, if you enjoy using it, please consider making a donation.
-                    <a class="button" href="https://paypal.me/thesocialcode" target="_blank" style="color:gold; text-decoration: none; font-weight:bold; cursor: pointer">Donate now</a>
+                    <a class="button" href="https://paypal.me/thesocialcode/42" target="_blank" style="color:gold; text-decoration: none; font-weight:bold; cursor: pointer">Donate now</a>
 
                     I hope you enjoy using it!<br>
                     <br>
