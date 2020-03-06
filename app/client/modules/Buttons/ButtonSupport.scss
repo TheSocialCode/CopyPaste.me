@@ -20,7 +20,6 @@ a.buttonSupport {
 }
 
 a.buttonSupport:hover {
-    display: inline-block;
     background-color: #333333;
 }
 
@@ -40,7 +39,7 @@ div.supportoptions {
 @media only screen and (max-width: 400px) {
 
     a.buttonSupport {
-        width: 100%;
+        display: block;
         text-align: center;
     }
 
