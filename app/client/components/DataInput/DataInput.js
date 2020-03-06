@@ -296,11 +296,8 @@ module.exports.prototype = {
 
     _onSelectImage: function()
     {
-        // 1. find
-        let imageInput = document.getElementById('data_input_image_file');
-
-        // 2. validate
-        if (imageInput.files && imageInput.files[0])
+        // 1. validate
+        if (this._elInputImageInputfield.files && this._elInputImageInputfield.files[0])
         {
             // a. init
             var reader = new FileReader();
@@ -310,7 +307,7 @@ module.exports.prototype = {
             {
                 // I. store
                 this._data.value = {
-                    fileName: imageInput.files[0].name,
+                    fileName: this._elInputImageInputfield.files[0].name,
                     base64: e.target.result
                 };
 
@@ -327,17 +324,14 @@ module.exports.prototype = {
             // reader.onerror = function (error) { console.log('Error: ', error); };
 
             // c. load
-            reader.readAsDataURL(imageInput.files[0]);
+            reader.readAsDataURL(this._elInputImageInputfield.files[0]);
         }
     },
 
     _onSelectDocument: function()
     {
-        // 1. find
-        let documentInput = document.getElementById('data_input_document_file');
-
-        // 2. validate
-        if (documentInput.files && documentInput.files[0])
+        // 1. validate
+        if (this._elInputDocumentInputfield.files && this._elInputDocumentInputfield.files[0])
         {
             // a. init
             var reader = new FileReader();
@@ -347,7 +341,7 @@ module.exports.prototype = {
             {
                 // I. store
                 this._data.value = {
-                    fileName: documentInput.files[0].name,
+                    fileName: this._elInputDocumentInputfield.files[0].name,
                     base64: e.target.result
                 };
 
@@ -363,7 +357,7 @@ module.exports.prototype = {
             // reader.onerror = function (error) { console.log('Error: ', error); };
 
             // c. load
-            reader.readAsDataURL(documentInput.files[0]);
+            reader.readAsDataURL(this._elInputDocumentInputfield.files[0]);
         }
     },
 
