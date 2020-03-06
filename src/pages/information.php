@@ -9,7 +9,7 @@
         <div class="main-interface-information-section right">
             <h1 class="main-interface-information-section-title">How does it work?</h1>
             <div class="main-interface-information-section-body">
-                <p>The QR code above is generated specifically for you. Scan it by pointing your phone’s camera at it (most of them have a QR-scanner built in) to setup the connection and start sharing! If you don’t have a camera at hand, for instance whan you want to connect your laptop to another computer, simply use the <span class="highlight">'connect manually'</span> option.</p>
+                <p>The QR code above is generated specifically for you. Scan it by pointing your phone’s camera at it (most of them have a QR scanner built in) to setup the connection and start sharing! If you don’t have a camera at hand, for instance whan you want to connect your laptop to another computer, simply use the <span class="highlight">'connect manually'</span> option.</p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
         <div class="main-interface-information-section right">
             <h1 class="main-interface-information-section-title">How you can help to keep it free</h1>
             <div class="main-interface-information-section-body bottom">
-                <p>The Social Code Foundation wants to offer this privacy-friendly sharing service free to all, but to cover the operational costs it relies on donations by enthusiastic users. For privacy reasons, and because the advertisement business model is broken to the core, the project can’t be funded with ad revenue. For long term sustainability reasons the project doesn’t want to rely on investors: profit and economic growth shouldn't be at the core of every initiative.</p>
+                <p><a href="https://thesocialcodefoundation.org" target="_blank">The Social Code Foundation</a> wants to offer this privacy-friendly sharing service free to all, but to cover the operational costs it relies on donations by enthusiastic users. For privacy reasons, and because the advertisement business model is broken to the core, the project can’t be funded with ad revenue. For long term sustainability reasons the project doesn’t want to rely on investors: profit and economic growth shouldn't be at the core of every initiative.</p>
                 <div class="supportoptions">
                     <a href="https://paypal.me/thesocialcode/25" target="_blank" class="buttonSupport paypal">Make a donation</a><a href="https://www.patreon.com/thesocialcode" target="_blank" class="buttonSupport patreon">Become a patron</a>
                 </div>

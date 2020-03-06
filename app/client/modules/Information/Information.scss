@@ -26,7 +26,6 @@ div.main-interface-information {
 div.main-interface-information-section {
     //margin-top: 75px;
     margin-bottom: 20px;
-
     max-width: 600px;
 
     & span.link {
@@ -35,6 +34,18 @@ div.main-interface-information-section {
 
     & span.highlight {
         font-style: italic;
+    }
+
+    & a {
+        //color: $color-background-header;
+        color: $color-text-dark;
+        text-decoration: none;
+        font-style: italic;
+        font-weight: bold;
+
+        &:hover {
+            text-decoration: underline;
+        }
     }
 
     &.left {

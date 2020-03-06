@@ -11,16 +11,27 @@ a.buttonSupport {
     text-decoration: none;
 
     &.paypal {
+        color: $textcolor-light;
         background-color: #406c91;
+
+        &:hover {
+            text-decoration: none;
+        }
     }
 
     &.patreon {
+        color: $textcolor-light;
         background-color: #e65d48;
+
+        &:hover {
+            text-decoration: none;
+        }
     }
 }
 
 a.buttonSupport:hover {
     background-color: #333333;
+    text-decoration: none;
 }
 
 
