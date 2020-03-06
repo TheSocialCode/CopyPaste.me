@@ -36,7 +36,7 @@ div.supportoptions {
     }
 }
 
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 400px) {
 
     a.buttonSupport {
         display: block;
@@ -46,11 +46,11 @@ div.supportoptions {
     div.supportoptions {
         margin: 25px 0 25px 0;
 
-        & > div {
+        & > a {
             margin-left: 0;
         }
 
-        & > div:last-child {
+        & > a:last-child {
             margin-left: 0;
             margin-top: 10px;
         }
