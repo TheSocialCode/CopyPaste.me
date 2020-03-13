@@ -356,6 +356,10 @@ div.data_input_document_menu {
 
 }
 
+input.data_input_image_file_inputfield, input.data_input_document_file_inputfield {
+    display: none;
+}
+
 div.data_input_document_preview {
     display: none;
 }

@@ -97,7 +97,7 @@
                                 <div class="data_input_image">
                                     <div class="data_input_image_menu">
                                         <div data-mimoto-id="data_input_image_file_button" class="button">Select image</div>
-                                        <input data-mimoto-id="data_input_image_file_inputfield" type="file" style="display:none;" accept='image/*' name="data_input_image_file"/>
+                                        <input data-mimoto-id="data_input_image_file_inputfield" type="file" class="data_input_image_file_inputfield" accept='image/*' name="data_input_image_file"/>
                                     </div>
                                     <div data-mimoto-id="data_input_image_preview"
                                          class="data_input_image_preview">
@@ -112,7 +112,7 @@
                                 <div class="data_input_document">
                                     <div class="data_input_document_menu">
                                         <div data-mimoto-id="data_input_document_file_button" class="button">Select document</div>
-                                        <input data-mimoto-id="data_input_document_file_inputfield" type="file" style="display:none;" name="data_input_document_file"/>
+                                        <input data-mimoto-id="data_input_document_file_inputfield" class="data_input_document_file_inputfield" type="file" name="data_input_document_file"/>
                                     </div>
                                     <div data-mimoto-id="data_input_document_preview" class="data_input_document_preview">
                                         <div data-mimoto-id="data_input_document_preview_label" class="data_input_document_preview_label"></div>

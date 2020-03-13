@@ -9,6 +9,20 @@ div.button, a.button {
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
+    font-weight: bold;
+}
+
+a.button.dark {
+    color:gold;
+    text-decoration: none;
+    font-weight:bold;
+    cursor: pointer;
+    font-style: normal;
+
+    &:hover {
+        background-color: $background-button-dark;
+        text-decoration: none;
+    }
 }
 
 div.button.disabled {
@@ -26,4 +40,5 @@ div.button.disabled:hover {
 div.button:hover {
     display: inline-block;
     background-color: $background-button-dark;
+    text-decoration: none;
 }

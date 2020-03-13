@@ -1,6 +1,6 @@
 <!--<div class="interface-faq">-->
 
-    <div class="button" onclick="window.open('https://paypal.me/thesocialcode', '_blank')" style="color:gold; text-decoration: none; font-weight:bold; cursor: pointer">Please donate to keep this service free ♥</div>
+    <a class="button dark" href="https://paypal.me/thesocialcode" target="_blank">Please donate to keep this service free ♥</a>
     <br>
     <br>
     <h1 class="faq_title">Frequently Asked Question</h1>
@@ -28,7 +28,7 @@
         </div>
     </div>
 
-    <h1>Privacy and security</h1>
+    <h1 class="faq_title">Privacy and security</h1>
 
 
     <div class="main-information">
@@ -52,7 +52,7 @@
     </div>
 
 
-    <h1>Contribute</h1>
+    <h1 class="faq_title">Contribute</h1>
 
     <div class="main-information">
         <div class="main-interface-information">
@@ -71,12 +71,15 @@
                     That's great! The tool gets better the more people contribute. Please mail me at <a href="mailto:sebastian@copypaste.me">sebastian@copypaste.me</a>
                 </p>
             </div>
+
             <div class="main-interface-information-section right">
                 <h1 class="main-interface-information-section-title"></h1>
                 <p class="main-interface-information-section-body">
 
-                    So, if you enjoy using it, please consider making a donation.
-                    <a class="button" href="https://paypal.me/thesocialcode/42" target="_blank" style="color:gold; text-decoration: none; font-weight:bold; cursor: pointer">Donate now</a>
+                    So, if you enjoy using it, please consider making a donation.<br>
+                    <br>
+                    <a class="button dark" href="https://paypal.me/thesocialcode/42" target="_blank">Donate now</a>
+
 
                     I hope you enjoy using it!<br>
                     <br>
@@ -84,8 +87,17 @@
                     <br>
                     <br>
                     P.S. - Don't share things that can't stand the light of day, hurt or exclude others. I'm not responsible for other people's misbehaviour. Thanks! ♥
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+
                 </p>
+
+
             </div>
+
         </div>
     </div>
 
