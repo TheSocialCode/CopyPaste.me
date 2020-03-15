@@ -220,7 +220,7 @@ module.exports.prototype = {
         this._aReceivedPackages[receivedData.id].receivedCount++;
 
 
-        console.log('Package # ' + receivedData.receivedCount + ' of ' + receivedData.packageCount);
+        console.log('Package # ' + this._aReceivedPackages[receivedData.id].receivedCount + ' of ' + this._aReceivedPackages[receivedData.id].packageCount);
 
 
 
