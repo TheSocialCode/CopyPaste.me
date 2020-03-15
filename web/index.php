@@ -42,7 +42,8 @@
             <div class="main-interface-header-content">
 
                 <div class="logo">
-                    <a class="logo" href="/"><span class="logo-copypaste">CopyPaste</span><span class="logo-me">.me</span></a>
+<!--                    <a class="logo" href="/"><span class="logo-copypaste">CopyPaste</span><span class="logo-me">.me</span></a>-->
+                    <a class="logo" href="/"><img src="/static/images/copypaste_logo.png" width="200" /></a>
                 </div>
 
                 <h1 class="tagline">Frictionless sharing<br>between devices</h1>
