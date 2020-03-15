@@ -29,7 +29,7 @@
     <meta property="og:description" content="Easily and quickly share passwords, texts and files between devices.">
     <meta property="og:image" content="<?php echo $sURL ?>/static/images/copypaste-preview.png">
 
-    <link rel="stylesheet" href="/static/dist/<?php echo $manifest['main.css']; ?>">
+    <link rel="stylesheet" type="text/css" href="/static/dist/<?php echo $manifest['main.css']; ?>">
 
 </head>
 <body>
