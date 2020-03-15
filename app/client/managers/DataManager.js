@@ -33,7 +33,7 @@ module.exports.prototype = {
     _sTheirPublicKey: '',
 
     // settings
-    _nSizePerPackage: 200000,
+    _nSizePerPackage: 100000,
 
     // utils
     _timerPackageTransfer: null,
@@ -173,7 +173,7 @@ module.exports.prototype = {
         }
 
         // 4. configure
-        if (this._aPackagesReadyForTransfer.length > 0 && this._timerPackageTransfer === null) this._timerPackageTransfer = setInterval(this._transferPackages.bind(this), 10);
+        if (this._aPackagesReadyForTransfer.length > 0 && this._timerPackageTransfer === null) this._timerPackageTransfer = setInterval(this._transferPackages.bind(this), 100);
     },
 
     /**
