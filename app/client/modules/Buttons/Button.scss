@@ -3,12 +3,15 @@ div.button, a.button {
     display: inline-block;
     background-color: $support-color-dark;
     color: $textcolor-light;
-    font-size: smaller;
     padding: 8px 12px 10px 12px;
     border-radius: 3px;
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
+    font-size: 14px;
+}
+
+a.button {
     font-weight: bold;
 }
 

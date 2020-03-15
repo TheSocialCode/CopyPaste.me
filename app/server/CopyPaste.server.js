@@ -797,6 +797,10 @@ module.exports = {
     {
         // 1. output
         this._log('Socket.id = ' + socket.id + ' has shared data');
+        this._log('------');
+        this._log('encryptedData', encryptedData);
+        this._log('------');
+        this._log('');
 
         // 2. load
         let sToken = this._getTokenBySocket(socket);
