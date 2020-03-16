@@ -105,7 +105,7 @@
                 <div class="footer_table">
                     <div class="footer_table_column left">
                         <div class="footer-logo-copypaste">CopyPaste<span class="footer-logo-me">.me</span></div>
-                        <div>Created by The Social Code</div>
+                        <div class="footer-logo-credits">Created by <a href="https://thesocialcodefoundation.org" target="_blank">The Social Code</div>
                     </div>
                     <div class="footer_table_column center footer_table_center">
                         <div class="footer_table_center_column">

@@ -172,6 +172,14 @@ div.main-interface-footer-expanded {
     flex-shrink: 0;
     font-size: smaller;
 
+    & a {
+        color: $textcolor-light;
+        text-decoration: none;
+    }
+
+    & a:hover {
+        color: gold;
+    }
 }
 
 div.footer-logo-copypaste {
@@ -204,7 +212,7 @@ div.footer_table_column {
     }
 
     &.right {
-        text-align: right;
+        text-align: left;
     }
 }
 
@@ -213,6 +221,14 @@ div.footer_table_center {
     flex-direction: row;
     flex-wrap: wrap;
 }
+
+    div.footer-logo-copypaste {
+        margin-bottom: 10px;
+    }
+
+    div.footer-logo-credits {
+        margin-bottom: 20px;
+    }
 
 div.footer_table_center_column {
     flex: auto;
@@ -223,13 +239,4 @@ div.footer_table_center_column {
 
 div.footer_table_center_column_cell {
     margin-bottom: 20px;
-
-    & a {
-        color: $textcolor-light;
-        text-decoration: none;
-    }
-
-    & a:hover {
-        color: gold;
-    }
 }
