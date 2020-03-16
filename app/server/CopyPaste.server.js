@@ -16,6 +16,7 @@ const Module_Express = require('express');
 const Module_GenerateUniqueID = require('generate-unique-id');
 const Module_GeneratePassword = require("generate-password");
 const Module_MongoDB = require("mongodb");
+const Module_LogToFile = require('log-to-file');
 
 // import core module
 const CoreModule_Assert = require('assert');
@@ -797,10 +798,16 @@ module.exports = {
     {
         // 1. output
         this._log('Socket.id = ' + socket.id + ' has shared data');
-        console.log('------');
-        console.log('encryptedData', encryptedData);
-        console.log('------');
-        console.log('');
+
+        if (this._configFile.logtofile.file.toString())
+        {
+            let sOutput = '------' + '\n' +
+                'encryptedData = ' + encryptedData + '\n' +
+                '------' + '\n' +
+                '' + '\n';
+
+            Module_LogToFile(sOutput, this._configFile.logtofile.file.toString());
+        }
 
         // 2. load
         let sToken = this._getTokenBySocket(socket);
@@ -1154,16 +1161,19 @@ module.exports = {
 
     _logUsers: function(sTitle)
     {
-        // 1. output
-        console.log('');
-        console.log('Usage: ' + sTitle);
-        console.log('=========================');
-        console.log('Number of sockets:', Object.keys(this._aSockets).length);
-        console.log('Number of active pairs:', Object.keys(this._aActivePairs).length);
-        console.log('Number of inactive pairs:', Object.keys(this._aInactivePairs).length);
-        console.log('---');
-        console.log('Number of pairs that established connection between both devices:', Object.keys(this._aConnectedPairs).length);
-        console.log('Number of pairs that have been used to send data:', Object.keys(this._aUsedPairs).length);
+        // 1. compose
+        let sOutput = '' + '\n' +
+            'Usage: ' + sTitle + '\n' +
+            '=========================' + '\n' +
+            'Number of sockets:' + Object.keys(this._aSockets).length + '\n' +
+            'Number of active pairs:' + Object.keys(this._aActivePairs).length + '\n' +
+            'Number of inactive pairs:' + Object.keys(this._aInactivePairs).length + '\n' +
+            '---' + '\n' +
+            'Number of pairs that established connection between both devices:' + Object.keys(this._aConnectedPairs).length + '\n' +
+            'Number of pairs that have been used to send data:' + Object.keys(this._aUsedPairs).length;
+
+        // 2. output
+        if (this._configFile.logtofile.file.toString()) Module_LogToFile(sOutput, this._configFile.logtofile.file.toString());
 
         // 2. verify
         if (this._config.mode !== 'dev') return;

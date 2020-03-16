@@ -31,4 +31,32 @@ document.addEventListener('DOMContentLoaded', function () {
     // 4. startup
     this.client = new Client(window.location.protocol + '//' + window.location.hostname + sPort);
 
+
+    // ---
+
+
+    // 5. store
+    let elInterfaceContent = document.querySelector('[data-mimoto-id="interface-content"]');
+    var elFooterCollapsed = document.querySelector('[data-mimoto-id="footer-collapsed"]');
+    var elFooterExpanded = document.querySelector('[data-mimoto-id="footer-expanded"]');
+
+    // 6. configure
+    window.addEventListener('scroll', function _toggleFooter(e)
+    {
+        // a. read
+        let rectInterfaceContent = elInterfaceContent.getBoundingClientRect();
+
+        // b. toggle
+        if (window.scrollY > rectInterfaceContent.height + elFooterExpanded.clientHeight + elFooterCollapsed.clientHeight)
+        {
+            elFooterCollapsed.classList.add('animate');
+            elFooterCollapsed.classList.remove('show');
+        }
+        else
+        {
+            elFooterCollapsed.classList.add('show');
+        }
+
+    }.bind(this));
+
 }, true);

@@ -1,4 +1,4 @@
-<!--<div class="interface-faq">-->
+<div class="main-information">
 
     <a class="button dark" href="https://paypal.me/thesocialcode" target="_blank">Please donate to keep this service free ♥</a>
     <br>
@@ -100,10 +100,5 @@
 
         </div>
     </div>
-
-
-
-
-
-
-<!--</div>-->
+    
+</div>

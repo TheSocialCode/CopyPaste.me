@@ -219,18 +219,20 @@ module.exports.prototype = {
      */
     _onSecurityCompromised: function()
     {
-        // 1. disconnect
+        // 1. cleanup
+        this._socket.socket.removeAllListeners();
+
+        // 2. disconnect
         delete this._socket;
 
-        // 2. disable interface
+        // 3. disable interface
         document.querySelector('[data-mimoto-id="component_Client"]').remove();
 
-        // 3. swap logo
+        // 4. swap logo
         document.querySelector('[data-mimoto-id="logo"]').src = 'static/images/copypaste-logo-white.png';
 
-        // 4. show warning
+        // 5. show warning
         document.body.classList.add('security_compromised');
-
     },
 
 

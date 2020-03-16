@@ -22,5 +22,8 @@
         "dbname": "",
         "username":  "",
         "password": ""
+    },
+    "logtofile": {
+        "file": "path/to/your/file.log"
     }
 }

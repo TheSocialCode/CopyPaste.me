@@ -1,6 +1,6 @@
 <div class="main-information">
     <div class="main-interface-information">
-        <div class="main-interface-information-section left">
+        <div id="information_howitworks" class="main-interface-information-section left">
             <h1 class="main-interface-information-section-title">What does it do?</h1>
             <p class="main-interface-information-section-body">
                 <span class="link">CopyPaste.me</span> helps you when you need to send a password, text snippet or file from one phone, laptop or tablet to another device. No more painstakingly typing in your password character by character, sending yourself pieces of text via email or having to look for a USB stick. As long as you have a browser, you are ready to start sharing data between devices.
@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        <div class="main-interface-information-section right">
+        <div id="information_support" class="main-interface-information-section right">
             <h1 class="main-interface-information-section-title">How you can help to keep it free</h1>
             <div class="main-interface-information-section-body bottom">
                 <p><a href="https://thesocialcodefoundation.org" target="_blank">The Social Code Foundation</a> wants to offer this privacy-friendly sharing service free to all, but to cover the operational costs it relies on donations by enthusiastic users. For privacy reasons, and because the advertisement business model is broken to the core, the project can’t be funded with ad revenue. For long term sustainability reasons the project doesn’t want to rely on investors: profit and economic growth shouldn't be at the core of every initiative.</p>

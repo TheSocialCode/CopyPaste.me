@@ -124,25 +124,112 @@ h2.description {
 
 // --- footer ---
 
+
 div.main-interface-footer {
-    color: $textcolor-light;
-    padding: 10px 0 10px 0;
-    flex-shrink: 0;
-    font-size: smaller;
-    background-color: $background-footer;
-    box-shadow: inset 0 6px 6px -6px #24323F;
+    clear: both;
+}
+
+div.main-interface-footer-collapsed {
+
     position: fixed;
     left: 0;
     bottom: 0;
     width: 100%;
     z-index: 2000;
+    color: $textcolor-light;
+    background-color: $background-footer;
+
+    padding: 10px 0 10px 0;
+    flex-shrink: 0;
+    font-size: smaller;
+    opacity: 0;
+
+    &.animate {
+        transition: opacity 0.25s ease-in-out;
+    }
+
+    &.show {
+        opacity: 1;
+
+    }
 }
 
-div.main-interface-footer a {
+div.main-interface-footer-collapsed a {
     color: gold;
     text-decoration: none;
 }
 
-div.main-interface-footer a:hover {
+div.main-interface-footer-collapsed a:hover {
     text-decoration: underline;
+}
+
+div.main-interface-footer-expanded {
+
+    color: $textcolor-light;
+    background-color: $background-footer;
+
+    padding: 30px 30px 40px 30px;
+    flex-shrink: 0;
+    font-size: smaller;
+
+}
+
+div.footer-logo-copypaste {
+
+    font-family: Montserrat, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+
+    & span.footer-logo-me {
+        color: gold;
+    }
+}
+
+div.footer_table {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+div.footer_table_column {
+    flex: auto;
+    min-width: 300px;
+
+    &.left {
+        text-align: left;
+    }
+
+    &.center {
+        text-align: center;
+    }
+
+    &.right {
+        text-align: right;
+    }
+}
+
+div.footer_table_center {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+div.footer_table_center_column {
+    flex: auto;
+    min-width: 200px;
+    text-align: left;
+    margin-top: 7px;
+}
+
+div.footer_table_center_column_cell {
+    margin-bottom: 20px;
+
+    & a {
+        color: $textcolor-light;
+        text-decoration: none;
+    }
+
+    & a:hover {
+        color: gold;
+    }
 }
