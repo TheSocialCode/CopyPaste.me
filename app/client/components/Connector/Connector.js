@@ -81,7 +81,7 @@ module.exports.prototype = {
         var typeNumber = 4;
         var errorCorrectionLevel = 'L';
         var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
-        qr.addData('https://copypaste.me');//sTokenURL);
+        qr.addData(sTokenURL);
         qr.make();
         this._elContainer.innerHTML = qr.createImgTag(5);
 
