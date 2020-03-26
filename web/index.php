@@ -120,13 +120,13 @@
                         </div>
                     </div>
                     <div class="footer_table_column right">
-                        Follow the project<br>
-                        [Email] [Linkedin] [Facebook] [Instagram]
+<!--                        Follow the project<br>-->
+<!--                        [Email] [Linkedin] [Facebook] [Instagram]-->
                     </div>
                 </div>
             </div>
             <div data-mimoto-id="footer-collapsed" class="main-interface-footer-collapsed show">
-                Created by The Social Code - <a href="/faq">FAQ</a> - <a href="https://paypal.me/thesocialcode" target="_blank">Donate now</a>
+                Offered by <a href="https://thesocialcodefoundation.org" target="_blank">The Social Code</a> - <!--<a href="/faq">FAQ</a> - --><a href="https://paypal.me/thesocialcode" target="_blank">Donate now</a>
             </div>
         </div>
     </div>
