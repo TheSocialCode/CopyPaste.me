@@ -3,7 +3,6 @@
  * Created by The Social Code
  * 
  * @author  Sebastian Kersten
- * @license UNLICENSED
  * 
  * Please help keeping the service free by donating: https://paypal.me/thesocialcode
  * 

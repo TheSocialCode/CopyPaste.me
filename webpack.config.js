@@ -47,7 +47,7 @@ module.exports = {
 
     plugins: [
         new CleanWebpackPlugin(),
-        new webpack.BannerPlugin('CopyPaste.me - Frictionless sharing between devices\nCreated by The Social Code\n\n@author  Sebastian Kersten\n@license UNLICENSED\n\nPlease help keeping the service free by donating: https://paypal.me/thesocialcode\n'),
+        new webpack.BannerPlugin('CopyPaste.me - Frictionless sharing between devices\nCreated by The Social Code\n\n@author  Sebastian Kersten\n\nPlease help keeping the service free by donating: https://paypal.me/thesocialcode\n'),
         new ManifestPlugin(),
         new MiniCssExtractPlugin({
             filename: 'CopyPaste.[chunkhash].css'
