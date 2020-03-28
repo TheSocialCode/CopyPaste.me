@@ -205,10 +205,12 @@ div.footer_table_column {
 
     &.left {
         text-align: left;
+        margin-bottom: 10px;
     }
 
     &.center {
         text-align: center;
+        margin-bottom: 20px;
     }
 
     &.right {
@@ -239,4 +241,43 @@ div.footer_table_center_column {
 
 div.footer_table_center_column_cell {
     margin-bottom: 20px;
+}
+
+div.footer_socialicons_title {
+    margin-bottom: 20px;
+}
+
+div.footer_socialicons {
+    margin-left: -13px;
+}
+
+div.footer_socialicon {
+
+    display: inline-block;
+    width: 39px;
+    height: 39px;
+
+    background-image: url('/static/images/socialicons.png');
+    background-repeat: no-repeat;
+
+
+    &.facebook {
+        background-position: 0 0;
+    }
+
+    &.instagram {
+        background-position: -39px 0;
+    }
+
+    &.linkedin {
+        background-position: -78px 0;
+    }
+
+    &.email {
+        background-position: -117px 0;
+    }
+
+    &.patreon {
+        background-position: -156px 0;
+    }
 }

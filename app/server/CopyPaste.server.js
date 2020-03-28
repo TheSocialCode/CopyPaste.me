@@ -78,6 +78,8 @@ module.exports = {
     _ACTIONTYPE_ARCHIVED: 'archived',
     _ACTIONTYPE_UNARCHIVED: 'unarchived',
     _ACTIONTYPE_DATA: 'data',
+    _ACTIONTYPE_DATA_START: 'data_start',
+    _ACTIONTYPE_DATA_FINISH: 'data_finish',
 
     _ACTIONTYPE_PRIMARYDEVICE_CONNECTED: 'primarydevice_connected',
     _ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED: 'primarydevice_disconnected',
@@ -834,32 +836,47 @@ module.exports = {
         // 7. send
         receivingSocket.emit('data', encryptedData);
 
-        // 8. store
-        pair.log.push(
-            {
-                type: this._ACTIONTYPE_DATA,
-                timestamp: new Date().toUTCString(),
-                contentType:encryptedData.sType,
-                direction:pair.direction
-            }
-        );
+        // 8. log
+        if (encryptedData.packageNumber === 0)
+        {
+            pair.log.push(
+                {
+                    type: this._ACTIONTYPE_DATA_START,
+                    timestamp: new Date().toUTCString(),
+                    contentType:encryptedData.sType,
+                    direction:pair.direction
+                }
+            );
+        }
+
+        // 9. log
+        if (encryptedData.packageNumber === encryptedData.packageCount)
+        {
+            pair.log.push(
+                {
+                    type: this._ACTIONTYPE_DATA_FINISH,
+                    timestamp: new Date().toUTCString(),
+                    contentType:encryptedData.sType,
+                    direction:pair.direction
+                }
+            );
+        }
 
 
         // --- log
 
 
-        // 9. update
+        // 10. update
         pair.states.dataSent = true;
 
-        // 10. store
+        // 12. store
         if (!this._aUsedPairs[sToken]) this._aUsedPairs[sToken] = true;
 
-        // 11. output
+        // 13. output
         this._logUsers('Data shared (socket.id = ' + socket.id + ')');
 
 
-
-        // 9. log
+        // 13. log
         this._dbCollection_pairs.updateMany(
             {
                 "data.token": sToken

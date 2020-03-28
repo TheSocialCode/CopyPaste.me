@@ -105,7 +105,7 @@
                 <div class="footer_table">
                     <div class="footer_table_column left">
                         <div class="footer-logo-copypaste">CopyPaste<span class="footer-logo-me">.me</span></div>
-                        <div class="footer-logo-credits">Created by <a href="https://thesocialcodefoundation.org" target="_blank">The Social Code</div>
+                        <div class="footer-logo-credits">Offered by <a href="https://thesocialcodefoundation.org" target="_blank">The Social Code</div>
                     </div>
                     <div class="footer_table_column center footer_table_center">
                         <div class="footer_table_center_column">
@@ -120,8 +120,14 @@
                         </div>
                     </div>
                     <div class="footer_table_column right">
-                        Follow the project<br>
-                        [Email] [Linkedin] [Facebook] [Instagram]
+                        <div class="footer_socialicons_title">Follow the project</div>
+                        <div class="footer_socialicons">
+                            <a href="https://www.facebook.com/thesocialcodefoundation" target="_blank"><div class="footer_socialicon facebook"></div></a>
+                            <a href="https://www.instagram.com/the.social.code" target="_blank"><div class="footer_socialicon instagram"></div></a>
+                            <a href="https://www.linkedin.com/company/thesocialcode" target="_blank"><div class="footer_socialicon linkedin"></div></a>
+                            <a href="https://www.getrevue.co/profile/TheSocialCode" target="_blank"><div class="footer_socialicon email"></div></a>
+                            <a href="https://patreon.com/thesocialcode" target="_blank"><div class="footer_socialicon patreon"></div></a>
+                        </div>
                     </div>
                 </div>
             </div>
