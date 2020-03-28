@@ -120,8 +120,8 @@
                         </div>
                     </div>
                     <div class="footer_table_column right">
-<!--                        Follow the project<br>-->
-<!--                        [Email] [Linkedin] [Facebook] [Instagram]-->
+                        Follow the project<br>
+                        [Email] [Linkedin] [Facebook] [Instagram]
                     </div>
                 </div>
             </div>
