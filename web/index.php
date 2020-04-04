@@ -47,12 +47,11 @@
         <div data-mimoto-id="interface-content">
             <div class="main-interface-container">
 
-                <div class="main-interface-header-background"></div>
+                <div data-mimoto-id="main-interface-header-background" class="main-interface-header-background"></div>
 
                 <div class="main-interface-header-content">
 
                     <div class="logo">
-    <!--                    <a class="logo" href="/"><span class="logo-copypaste">CopyPaste</span><span class="logo-me">.me</span></a>-->
                         <a class="logo" href="/"><img data-mimoto-id="logo" src="/static/images/copypaste-logo-normal.png" width="200" /></a>
                     </div>
 
@@ -61,14 +60,7 @@
 
                     <div class="component_AlertMessage_container"><div data-mimoto-id="component_AlertMessage" class="component_AlertMessage"></div></div>
 
-                    <div class="warning_security_compromised">
-                        <div class="warning_security_compromised_title">WARNING: Security compromised</div>
-                        <p>It appears a third device tried to connect to your session.</p>
-                        <p>Just to be sure, we shut it down.</p>
-                        <p>Your data is safe!</p>
-                        <br>
-                        <p>To start a new session, <a href="/">reload</a> this page!</p>
-                    </div>
+                    <div data-mimoto-id="warning_security_compromised" class="warning_security_compromised"></div>
 
                     <?php
                         switch($sSection)
@@ -110,7 +102,7 @@
                     <div class="footer_table_column center footer_table_center">
                         <div class="footer_table_center_column">
                             <div class="footer_table_center_column_cell"><a href="#information_howitworks">How it works</a></div>
-                            <div class="footer_table_center_column_cell"><a href="/">Privacy</a></div>
+                            <div class="footer_table_center_column_cell"><a href="/">Security & privacy</a></div>
                             <div class="footer_table_center_column_cell"><a href="/faq">FAQ</a></div>
                         </div>
                         <div class="footer_table_center_column">

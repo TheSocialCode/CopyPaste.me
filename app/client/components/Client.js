@@ -220,19 +220,30 @@ module.exports.prototype = {
     _onSecurityCompromised: function()
     {
         // 1. cleanup
-        this._socket.socket.removeAllListeners();
+        this._socket.removeAllListeners();
 
         // 2. disconnect
         delete this._socket;
 
         // 3. disable interface
         document.querySelector('[data-mimoto-id="component_Client"]').remove();
+        document.querySelector('[data-mimoto-id="main-information"]').remove();
+        document.querySelector('[data-mimoto-id="main-interface-header-background"]').remove();
 
         // 4. swap logo
         document.querySelector('[data-mimoto-id="logo"]').src = 'static/images/copypaste-logo-white.png';
 
         // 5. show warning
         document.body.classList.add('security_compromised');
+
+        // 6. output warning
+        document.querySelector('[data-mimoto-id="warning_security_compromised"]').innerHTML = '' +
+            '<div class="warning_security_compromised_title">WARNING: Security compromised</div>' +
+            '<p>It appears a third device tried to connect to your session.</p>' +
+            '<p>Just to be sure, we shut it down.</p>' +
+            '<p>Your data is safe!</p>' +
+            '<br>' +
+            '<p>To start a new session, <a href="/">reload</a> this page!</p>';
     },
 
 

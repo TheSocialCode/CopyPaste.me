@@ -40,14 +40,17 @@ document.addEventListener('DOMContentLoaded', function () {
     var elFooterCollapsed = document.querySelector('[data-mimoto-id="footer-collapsed"]');
     var elFooterExpanded = document.querySelector('[data-mimoto-id="footer-expanded"]');
 
-    // 6. configure
-    window.addEventListener('scroll', function _toggleFooter(e)
+    // 6. define
+    this._toggleFooter = function(e)
     {
         // a. read
         let rectInterfaceContent = elInterfaceContent.getBoundingClientRect();
 
+        var limit = Math.max( document.body.scrollHeight, document.body.offsetHeight,
+            document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );
+
         // b. toggle
-        if (window.scrollY > rectInterfaceContent.height + elFooterExpanded.clientHeight + elFooterCollapsed.clientHeight)
+        if (window.scrollY > limit - window.innerHeight - elFooterExpanded.clientHeight + elFooterCollapsed.clientHeight)
         {
             elFooterCollapsed.classList.add('animate');
             elFooterCollapsed.classList.remove('show');
@@ -56,7 +59,12 @@ document.addEventListener('DOMContentLoaded', function () {
         {
             elFooterCollapsed.classList.add('show');
         }
+    };
 
-    }.bind(this));
+    // 7. init
+    this._toggleFooter();
+
+    // 8. configure
+    window.addEventListener('scroll', this._toggleFooter.bind(this));
 
 }, true);

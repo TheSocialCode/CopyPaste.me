@@ -1,4 +1,4 @@
-<div class="main-information">
+<div data-mimoto-id="main-information" class="main-information">
     <div class="main-interface-information">
         <div id="information_howitworks" class="main-interface-information-section left">
             <h1 class="main-interface-information-section-title">What does it do?</h1>

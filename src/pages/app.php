@@ -11,10 +11,10 @@
             </div>
             <div data-mimoto-id="component_QR_back" class="component_QR_card component_QR_card_back">
                 <div class="component_QR_card_label">Use this URL</div>
-                <div class="component_QR_card_sublabel">to manually connect another device</div>
+                <div class="component_QR_card_sublabel">on the other device</div>
                 <div data-mimoto-id="component_QR_manualurl" class="component_QR_manualurl show">
                     <div class="component_QR_manualurl_inner">
-                        <div class="component_QR_manualurl_url"><a href="/connect"><span data-mimoto-id="connect_url">https://copypaste.me</span>/connect</a></div>
+                        <div class="component_QR_manualurl_url"><a href="/connect" target="_blank"><span data-mimoto-id="connect_url">https://copypaste.me</span>/connect</a></div>
                         <div class="component_QR_manualurl_guidance">and enter<br>the following code:</div>
                         <div data-mimoto-id="manualcode" class="component_QR_manualurl_code"></div>
                         <div data-mimoto-id="countdown" class="component_QR_manualurl_validity">(valid for 2:40 minutes)</div>
