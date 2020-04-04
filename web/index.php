@@ -102,7 +102,7 @@
                     <div class="footer_table_column center footer_table_center">
                         <div class="footer_table_center_column">
                             <div class="footer_table_center_column_cell"><a href="#information_howitworks">How it works</a></div>
-                            <div class="footer_table_center_column_cell"><a href="/">Security & privacy</a></div>
+                            <div class="footer_table_center_column_cell"><a href="/">Security</a></div>
                             <div class="footer_table_center_column_cell"><a href="/faq">FAQ</a></div>
                         </div>
                         <div class="footer_table_center_column">
