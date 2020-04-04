@@ -2,9 +2,11 @@
     <div class="main-interface-information">
         <div id="information_howitworks" class="main-interface-information-section left">
             <h1 class="main-interface-information-section-title">What does it do?</h1>
-            <p class="main-interface-information-section-body">
-                <span class="link">CopyPaste.me</span> helps you when you need to send a password, text snippet or file from one phone, laptop or tablet to another device. No more painstakingly typing in your password character by character, sending yourself pieces of text via email or having to look for a USB stick. As long as you have a browser, you are ready to start sharing data between devices.
-            </p>
+            <div class="main-interface-information-section-body">
+                <p>
+                    <span class="link">CopyPaste.me</span> helps you when you need to send a password, text snippet or file from one phone, laptop or tablet to another device. No more painstakingly typing in your password character by character, sending yourself pieces of text via email or having to look for a USB stick. As long as you have a browser, you are ready to start sharing data between devices.
+                </p>
+            </div>
         </div>
         <div class="main-interface-information-section right">
             <h1 class="main-interface-information-section-title">How does it work?</h1>
