@@ -71,6 +71,15 @@ div.component_QR_manualurl {
 
     & div.component_QR_manualurl_url {
         font-weight: bold;
+
+        & a {
+            text-decoration: none;
+            color: #000000;
+
+            &:hover {
+                color: $color-button-dark;
+            }
+        }
     }
 
     & div.component_QR_manualurl_guidance {
