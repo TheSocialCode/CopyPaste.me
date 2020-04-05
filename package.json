@@ -17,6 +17,7 @@
         "log-to-file": "^2.0.2",
         "mongodb": "^3.5.4",
         "qrcode-generator": "^1.4.4",
+        "sharer.js": "^0.4.0",
         "socket.io": "^2.3.0",
         "socket.io-client": "^2.3.0"
     },

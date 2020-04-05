@@ -1,7 +1,7 @@
 <div data-mimoto-id="main-information" class="main-information">
     <div class="main-interface-information">
         <div id="information_howitworks" class="main-interface-information-section left">
-            <h1 class="main-interface-information-section-title">What does it do?</h1>
+            <h2 class="main-interface-information-section-title">What does it do?</h2>
             <div class="main-interface-information-section-body">
                 <p>
                     <span class="link">CopyPaste.me</span> helps you when you need to send a password, text snippet or file from one phone, laptop or tablet to another device. No more painstakingly typing in your password character by character, sending yourself pieces of text via email or having to look for a USB stick. As long as you have a browser, you are ready to start sharing data between devices.
@@ -9,7 +9,7 @@
             </div>
         </div>
         <div class="main-interface-information-section right">
-            <h1 class="main-interface-information-section-title">How does it work?</h1>
+            <h2 class="main-interface-information-section-title">How does it work?</h2>
             <div class="main-interface-information-section-body">
                 <p>The QR code above is generated specifically for you. Scan it by pointing your phone’s camera at it (most of them have a QR scanner built in) to setup the connection and start sharing! If you don’t have a camera at hand, for instance whan you want to connect your laptop to another computer, simply use the <span class="highlight">'connect manually'</span> option.</p>
             </div>
@@ -57,14 +57,14 @@
 
     <div class="main-interface-information">
         <div class="main-interface-information-section left">
-            <h1 class="main-interface-information-section-title">Your data is yours and yours alone</h1>
+            <h2 class="main-interface-information-section-title">Your data is yours and yours alone</h2>
             <div class="main-interface-information-section-body">
                 <p>You should be able to share your data from one of your devices to another or share it with a friend, colleague or loved one without big technology giants following your every move. Your data is sent over a secure connection, is end-to-end encrypted and no data is stored on the server.</p>
             </div>
         </div>
 
         <div id="information_support" class="main-interface-information-section right">
-            <h1 class="main-interface-information-section-title">How you can help to keep it free</h1>
+            <h2 class="main-interface-information-section-title">How you can help to keep it free</h2>
             <div class="main-interface-information-section-body bottom">
                 <p><a href="https://thesocialcodefoundation.org" target="_blank">The Social Code Foundation</a> wants to offer this privacy-friendly sharing service free to all, but to cover the operational costs it relies on donations by enthusiastic users. For privacy reasons, and because the advertisement business model is broken to the core, the project can’t be funded with ad revenue. For long term sustainability reasons the project doesn’t want to rely on investors: profit and economic growth shouldn't be at the core of every initiative.</p>
                 <div class="supportoptions">

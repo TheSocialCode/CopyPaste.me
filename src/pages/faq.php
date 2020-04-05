@@ -8,7 +8,7 @@
     <div class="main-information">
         <div class="main-interface-information">
             <div class="main-interface-information-section left">
-                <h1 class="main-interface-information-section-title">Why does this tool exist and what do I use it for?</h1>
+                <h2 class="main-interface-information-section-title">Why does this tool exist and what do I use it for?</h2>
                 <p class="main-interface-information-section-body">
                     I needed a tool that could help me when I want to login to some website, service or app on a public or a friend's computer, while my passwords are in the password manager on my phone (and they are way too difficult to remember, which is a good thing; please use apps like 1Password or LastPass to improve the security of your data!)
                 </p>
@@ -20,7 +20,7 @@
                 </p>
             </div>
             <div class="main-interface-information-section right">
-                <h1 class="main-interface-information-section-title">So how does it work?</h1>
+                <h2 class="main-interface-information-section-title">So how does it work?</h2>
                 <p class="main-interface-information-section-body">
                     Your receiving device shows a QR code. By scanning this code with, for instance, your phone, voila: a realtime connection is set up between your devices and you are ready for sharing (for people with technical knowledge: I'm connecting the two devices using socket.io). When you send your data, it's immediately forwarded to the receiving device without storing it on the server. Therefore there will be no traces of logs of what you share.</p>
                 </p>
@@ -34,7 +34,7 @@
     <div class="main-information">
         <div class="main-interface-information">
             <div class="main-interface-information-section left">
-                <h1 class="main-interface-information-section-title">So just to be clear, my data is never stored?</h1>
+                <h2 class="main-interface-information-section-title">So just to be clear, my data is never stored?</h2>
                 <p class="main-interface-information-section-body">
                     Exactly! Your data is yours and yours alone. This this tool is designed to work without the need to store your data. Which is good, because your data shouldn't be stored all over the internet just because you're using online tools.
                 </p>
@@ -43,7 +43,7 @@
                 </p>
             </div>
             <div class="main-interface-information-section right">
-                <h1 class="main-interface-information-section-title">What happens when another person is trying to connect to the same link?</h1>
+                <h2 class="main-interface-information-section-title">What happens when another person is trying to connect to the same link?</h2>
                 <p class="main-interface-information-section-body">
                     Don't worry. A connection only allows two devices. If another person would try to connect, your screen will show a warning about your security being compromised and the connection will immediately be terminated and no data will be sent. Your data is safe!
                 </p>
@@ -57,7 +57,7 @@
     <div class="main-information">
         <div class="main-interface-information">
             <div class="main-interface-information-section left">
-                <h1 class="main-interface-information-section-title">Is this service free? And if so, how do you cover the costs for running it?</h1>
+                <h2 class="main-interface-information-section-title">Is this service free? And if so, how do you cover the costs for running it?</h2>
                 <p class="main-interface-information-section-body">
                     Yes, it's totally free! And to keep it like this, I need your help! For privacy reasons I can't have advertisers (and because I really, really don't want to; that business model is broken to the core) and for long term sustainability reasons I don't want investors (profit and economic growth shouldn't be at the core of every initiative). On top of this, I don’t want intruders like that in the mix when you share data with yourself, a friend a colleague.
                 </p>
@@ -66,14 +66,14 @@
                 </p>
             </div>
             <div class="main-interface-information-section right">
-                <h1 class="main-interface-information-section-title">How can I suggest an improvement or report a bug?</h1>
+                <h2 class="main-interface-information-section-title">How can I suggest an improvement or report a bug?</h2>
                 <p class="main-interface-information-section-body">
                     That's great! The tool gets better the more people contribute. Please mail me at <a href="mailto:sebastian@copypaste.me">sebastian@copypaste.me</a>
                 </p>
             </div>
 
             <div class="main-interface-information-section right">
-                <h1 class="main-interface-information-section-title"></h1>
+                <h2 class="main-interface-information-section-title"></h2>
                 <p class="main-interface-information-section-body">
 
                     So, if you enjoy using it, please consider making a donation.<br>
