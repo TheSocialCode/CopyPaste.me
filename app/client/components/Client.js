@@ -9,6 +9,7 @@
 
 // import
 const Connector = require('./Connector/Connector');
+const ConnectorEvents = require('./Connector/ConnectorEvents');
 const DataInput = require('./DataInput/DataInput');
 const DataOutput = require('./DataOutput/DataOutput');
 const ToggleDirectionButton = require('./ToggleDirectionButton/ToggleDirectionButton');
@@ -36,7 +37,10 @@ module.exports.prototype = {
 
     // connection
     _socket: null,
-    _sToken: '',
+    _sToken: null,
+    _nTokenLifetime: null,
+    _sDeviceID: null,
+
     _sManualCode: '',
     _bIsPrimaryDevice: null,
     _bIsManualConnect: false,
@@ -159,12 +163,12 @@ module.exports.prototype = {
             if (!this._sToken)
             {
                 // I. request
-                this._socket.emit('primarydevice_request_token', this._dataManager.getMyPublicKey());
+                this._socket.emit(ConnectorEvents.prototype.PRIMARYDEVICE_CONNECT, this._dataManager.getMyPublicKey());
             }
             else
             {
                 // I. request
-                this._socket.emit('primarydevice_reconnect_to_token', this._sToken);
+                this._socket.emit(ConnectorEvents.prototype.PRIMARYDEVICE_RECONNECT, this._sDeviceID);
             }
         }
         else
@@ -173,7 +177,7 @@ module.exports.prototype = {
             if (!this._bIsManualConnect)
             {
                 // I. broadcast
-                this._socket.emit('secondarydevice_connect_to_token', this._sToken, this._dataManager.getMyPublicKey());
+                this._socket.emit(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECT, this._sToken, this._dataManager.getMyPublicKey());
             }
         }
     },
@@ -244,6 +248,7 @@ module.exports.prototype = {
             '<p>Your data is safe!</p>' +
             '<br>' +
             '<p>To start a new session, <a href="/">reload</a> this page!</p>';
+        
     },
 
 
@@ -468,13 +473,14 @@ module.exports.prototype = {
         if (this._bIsPrimaryDevice)
         {
             // a. configure
-            this._socket.on('token', this._onReceiveToken.bind(this));
+            this._socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_CONNECTED, this._onPrimaryDeviceConnected.bind(this));
+            this._socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_TOKEN_REFRESHED, this._onReceiveTokenRefreshed.bind(this));
             this._socket.on('token_not_found', this._onPrimaryDeviceTokenNotFound.bind(this));
         }
         else
         {
             // a. configure
-            this._socket.on('token_not_found', this._onSecondaryDeviceTokenNotFound.bind(this));
+            this._socket.on(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECT_TOKEN_NOT_FOUND, this._onSecondaryDeviceTokenNotFound.bind(this));
             this._socket.on(ManualConnectEvents.prototype.MANUALCODE_NOT_FOUND, this._onManualCodeNotFound.bind(this));
             this._socket.on(ManualConnectEvents.prototype.MANUALCODE_EXPIRED, this._onManualCodeExpired.bind(this));
         }
@@ -551,23 +557,44 @@ module.exports.prototype = {
 
 
     /**
-     * Handle event `token`
+     * Handle event `PRIMARYDEVICE_CONNECTED`
      * @param sToken
+     * @param nTokenLifetime
+     * @param sDeviceID
      * @private
      */
-    _onReceiveToken: function (sToken)
+    _onPrimaryDeviceConnected: function(sDeviceID, sToken, nTokenLifetime)
     {
         // 1. store
-        this._sToken = sToken;
+        this._sDeviceID = sDeviceID;
 
         // 2. create
-        this._connector = new Connector(window.location.protocol + '//' + window.location.hostname + '/' + this._sToken);
+        this._connector = new Connector(sToken, nTokenLifetime);
 
         // 3. configure
         this._connector.addEventListener(ManualConnectEvents.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
+        this._connector.addEventListener(ConnectorEvents.prototype.REQUEST_TOKEN_REFRESH, this._onRequestTokenRefresh.bind(this));
 
         // 4. show
         this._connector.show();
+    },
+
+    _onRequestTokenRefresh: function()
+    {
+        // 1. request
+        this._socket.emit(ConnectorEvents.prototype.PRIMARYDEVICE_REQUEST_TOKEN_REFRESH, this._sDeviceID);
+    },
+
+    /**
+     * Handle event `PRIMARYDEVICE_TOKEN_REFRESHED`
+     * @param sToken
+     * @param nTokenLifetime
+     * @private
+     */
+    _onReceiveTokenRefreshed: function(sToken, nTokenLifetime)
+    {
+        // 2. create
+        this._connector.setToken(sToken, nTokenLifetime);
     },
 
     /**
@@ -600,7 +627,7 @@ module.exports.prototype = {
 
     /**
      * Handle event `secondarydevice_connected`
-     * @param sSenderPublicKey
+     * @param sSecondaryPublicKey
      * @private
      */
     _onSecondaryDeviceConnected: function(sSecondaryPublicKey)

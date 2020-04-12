@@ -15,7 +15,6 @@ const Module_SocketIO = require('socket.io');
 const Module_Express = require('express');
 const Module_GenerateUniqueID = require('generate-unique-id');
 const Module_GeneratePassword = require("generate-password");
-const Module_MongoDB = require("mongodb");
 const Module_LogToFile = require('log-to-file');
 
 // import core module
@@ -23,6 +22,10 @@ const CoreModule_Assert = require('assert');
 const CoreModule_Util = require('util');
 
 // import project classes
+const PairManager = require('./components/PairManager');
+const MongoDB = require('./components/MongoDB');
+const Logger = require('./components/Logger');
+const StartupInfo = require('./components/StartupInfo');
 const ToggleDirectionStates = require('./../client/components/ToggleDirectionButton/ToggleDirectionStates');
 const ToggleDirectionEvents = require('./../client/components/ToggleDirectionButton/ToggleDirectionEvents');
 const ManualConnectEvents = require('./../client/components/ManualConnectButton/ManualConnectEvents');
@@ -30,9 +33,13 @@ const ManualConnectEvents = require('./../client/components/ManualConnectButton/
 
 module.exports = {
 
+    // runtime modes
+    PRODUCTION: 'prod',
+    DEVELOPMENT: 'dev',
+
     // config
     _config: {
-        mode: 'prod',   // options: "prod" (no output)  | "dev" (output debugging comments)
+        mode: this.PRODUCTION,   // options: "prod" (no output)  | "dev" (output debugging comments)
         https: true,    // options: 'true' (runs on https)  | 'false' (runs on http)
         mongo: true,
         mongoauthenticate: true
@@ -42,49 +49,11 @@ module.exports = {
     // services
     _app: null,
     _server: null,
-    _io: null,
-    _mongo: null,
+    _socketIO: null,
 
-    // database
-    _db: null,
-    _dbCollection_sockets: null,
-    _dbCollection_pairs: null,
-    _dbCollection_manualcodes: null,
-    _dbCollection_exceptions: null,
-
-    // utils
-    _timerLog: null,
-    _timerManualCodes: null,
-
-    // data
-    _aActivePairs: [],
-    _aInactivePairs: [],
-    _aSockets: [],
-    _aManualCodes: [],
-
-    // logs
-    _aConnectedPairs: [],       // which pairs actually had two devices connected at one point
-    _aUsedPairs: [],            // which pairs where actually used to share data
-
-    // connection types
-    CONNECTIONTYPE_QR: 'qr',
-    CONNECTIONTYPE_MANUAL: 'manual',
-
-    // action types
-    _ACTIONTYPE_CREATED: 'created',
-    _ACTIONTYPE_DISCONNECTED: 'disconnected',
-    _ACTIONTYPE_TERMINATED: 'terminated',
-    _ACTIONTYPE_TOKEN_REQUEST: 'token_requested',
-    _ACTIONTYPE_ARCHIVED: 'archived',
-    _ACTIONTYPE_UNARCHIVED: 'unarchived',
-    _ACTIONTYPE_DATA: 'data',
-    _ACTIONTYPE_DATA_START: 'data_start',
-    _ACTIONTYPE_DATA_FINISH: 'data_finish',
-
-    _ACTIONTYPE_PRIMARYDEVICE_CONNECTED: 'primarydevice_connected',
-    _ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED: 'primarydevice_disconnected',
-    _ACTIONTYPE_SECONDARYDEVICE_CONNECTED: 'secondarydevice_connected',
-    _ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED: 'secondarydevice_disconnected',
+    // managers
+    _mongoManager: null,
+    _pairManager: null,
 
 
 
@@ -111,42 +80,51 @@ module.exports = {
         this._configFile = JSON.parse(jsonConfigFile);
 
 
-        // --- Mongo DB
-
-
+        // 4. boot up
         if (this._config.mongo)
         {
-            // 4. init
-            this._mongo = Module_MongoDB.MongoClient;
-
-            // init
-            let sMongoURL = 'mongodb://';
-
-
-            // compose
-            if (this._config.mongoauthenticate)
-            {
-                let sUsername = encodeURIComponent(this._configFile.mongodb.username.toString());
-                let sPassword = encodeURIComponent(this._configFile.mongodb.password.toString());
-
-                sMongoURL += sUsername + ':' + sPassword + '@';
-            }
-
-            sMongoURL += this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
-            if (this._config.mongoauthenticate) sMongoURL += '?authMechanism=SCRAM-SHA-1&authSource=' + this._configFile.mongodb.dbname;
-
-            // 6. connect
-            this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
+            this._startupMongoDB();
         }
+        else
+        {
+            this._startupSocketIO();
+        }
+    },
 
+    /**
+     * Startup MongoDB
+     * @private
+     */
+    _startupMongoDB: function()
+    {
+        // 1. init
+        this._mongoDB = new MongoDB(this._configFile, this._config);
 
+        // 2. configure
+        this._mongoDB.addEventListener(MongoDB.prototype.MONGODB_READY, this._onMongoDBReady.bind(this));
 
-        // --- Socket.IO
+    },
 
-        // 7. init
+    /**
+     * Handle MongoManager `MONGODB_READY`
+     * @private
+     */
+    _onMongoDBReady: function()
+    {
+        // 1. start
+        this._startupSocketIO();
+    },
+
+    /**
+     * Startup SocketIO
+     * @private
+     */
+    _startupSocketIO: function()
+    {
+        // 1. init
         if (this._config.https)
         {
-            // c. setup
+            // a. setup
             this._server = new Module_HTTPS.createServer({
                 key: Module_FS.readFileSync(this._configFile.ssl.key.toString(), 'utf8'),
                 cert: Module_FS.readFileSync(this._configFile.ssl.certificate.toString(), 'utf8')
@@ -161,394 +139,91 @@ module.exports = {
             this._server = new Module_HTTP.createServer(this._app, { pingTimeout: 60000 });
         }
 
-        // 8. setup
-        this._io = Module_SocketIO(this._server);
+        // 2. setup
+        this._socketIO = Module_SocketIO(this._server);
 
-        // 9. configure
-        this._io.on('connection', this._onUserConnect.bind(this));
+        // 3. configure
+        this._socketIO.on('connection', this._onSocketConnect.bind(this));
 
-        // 10. listen
-        this._server.listen(this._configFile.socketio.server.port, this._configFile.socketio.server.host, this._onSocketIOConnect.bind(this));
+        // 4. listen
+        this._server.listen(this._configFile.socketio.server.port, this._configFile.socketio.server.host, this._onSocketIOConnected.bind(this));
+    },
+
+
+    /**
+     * Handle SocketIO `connect`
+     * @private
+     */
+    _onSocketIOConnected: function()
+    {
+        // 1. startup
+        this._init();
     },
 
     /**
-     * Handle MongoDB connect
-     * @param err
-     * @param client
+     * Initialize application
      * @private
      */
-    _onMongoDBConnect: function(err, client)
+    _init: function()
     {
         // 1. init
-        const sMongoDBName = this._configFile.mongodb.dbname.toString();
-
-        // 2. validate
-        CoreModule_Assert.equal(null, err);
-
-        // 3. output
-        console.log("MongoDB connected on " + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString());
-        console.log();
-
-        // 4. setup
-        this._db = client.db(sMongoDBName);
-
-        // 5. store
-        this._dbCollection_sockets = this._db.collection('sockets');
-        this._dbCollection_pairs = this._db.collection('pairs');
-        this._dbCollection_manualcodes = this._db.collection('manualcodes');
-        this._dbCollection_exceptions = this._db.collection('exceptions');
-    },
-
-    _onSocketIOConnect: function()
-    {
-        // 1. cleanup
-        console.clear();
-
-        // 2. prepare
-        let aLines = [
-            '',
-            'CopyPaste.me - Frictionless sharing between devices',
-            'Created by The Social Code',
-            ' ',
-            '@author  Sebastian Kersten',
-            ' ',
-            'Please help keeping this service free by donating: https://paypal.me/thesocialcode',
-            ' ',
-            'listening on *:' + this._configFile.socketio.server.port + ' ' + JSON.stringify(this._config),
-            ''
-        ];
-
-        // 3. find max length
-        let nMaxLength = 0;
-        for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
-        {
-            // a. calculate
-            if (aLines[nLineIndex].length > nMaxLength) nMaxLength = aLines[nLineIndex].length;
-        }
-
-        // 4. build and output lines
-        for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
-        {
-            // a. build
-            if (aLines[nLineIndex].length === 0)
-            {
-                while(aLines[nLineIndex].length < nMaxLength) aLines[nLineIndex] += '-';
-                aLines[nLineIndex] = '----' + aLines[nLineIndex] + '----';
-            }
-            else
-            {
-                while(aLines[nLineIndex].length < nMaxLength) aLines[nLineIndex] += ' ';
-                aLines[nLineIndex] = '--- ' + aLines[nLineIndex] + ' ---';
-            }
-
-            // b. output
-            console.log(aLines[nLineIndex]);
-        }
-
-        // 5. output extra line
-        console.log();
-
-        // 6. output
-        this._timerLog = setInterval(this._logUsers.bind(this, 'Automated log'), 60 * 1000);
-    },
-
-    _onUserConnect: function(socket)
-    {
-        // 1. verify
-        if (this._aSockets['' + socket.id]) { this._log('Existing user reconnected (p.s. This should not be happening!)'); return; }
-
-        // 2. build
-        let socketData = {
-            socket: socket,
-            sToken: ''
-        };
-
-        // 3. store
-        this._aSockets['' + socket.id] = socketData;
-
-        // 4. configure
-        socket.on('disconnect', this._onUserDisconnect.bind(this, socket));
-        socket.on('primarydevice_request_token', this._onPrimaryDeviceRequestToken.bind(this, socket));
-        socket.on('primarydevice_reconnect_to_token', this._onPrimaryDeviceReconnectToToken.bind(this, socket));
-        socket.on('secondarydevice_connect_to_token', this._onSecondaryDeviceConnectToToken.bind(this, socket, false));
-        socket.on('secondarydevice_reconnect_to_token', this._onSecondaryDeviceConnectToToken.bind(this, socket, true));
-        socket.on('data', this._onData.bind(this, socket));
-        socket.on(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
-        socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE, this._onRequestManualCode.bind(this, socket));
-        socket.on(ManualConnectEvents.prototype.REQUEST_CONNECTION_BY_MANUALCODE, this._onRequestConnectionByManualCode.bind(this, socket));
-        socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE_HANDSHAKE, this._onRequestManualCodeHandshake.bind(this, socket));
-        socket.on(ManualConnectEvents.prototype.CONFIRM_MANUALCODE, this._onConfirmManualCode.bind(this, socket));
-
-
-        // --- log ---
-
-
-        // 5. debug
-        this._logUsers('User connected (socket.id = ' + socket.id + ')');
-
-        // 6. compose
-        let actionLog = {
-            created: new Date().getTime(),
-            socketId: socket.id,
-            connected: true,
-            data: {
-                token: '',
-            },
-            logs: [
-                { action: this._ACTIONTYPE_CREATED, timestamp: new Date().getTime() }
-            ]
-        };
-
-        // 7. store
-        this._dbCollection_sockets.insertOne(actionLog);
-    },
-
-    _onPrimaryDeviceRequestToken: function(primaryDeviceSocket, sPrimaryDevicePublicKey)
-    {
-        // 1. create
-        let sToken = Module_GenerateUniqueID({ length: 32 });
+        this._logger = new Logger(this._configFile.logtofile.file.toString(), this._config.mode === this.DEVELOPMENT);
 
         // 2. output
-        this._log('Initial Device with socket.id = ' + primaryDeviceSocket.id + ' requests token = ' + sToken);
+        new StartupInfo(this._logger, this._configFile, this._config, this._mongoDB.isRunning());
 
-        // 3. verify
-        if (this._aActivePairs['' + sToken] || !this._aSockets['' + primaryDeviceSocket.id]) return;
-
-        // 4. build
-        let pair = {
-            primaryDevice: primaryDeviceSocket,
-            primaryDevicePublicKey: sPrimaryDevicePublicKey,
-            secondaryDevice: null,
-            secondaryDevicePublicKey: '',
-            manualCode: '',
-            direction: ToggleDirectionStates.prototype.DEFAULT,
-            connectiontype: null,
-            states: {
-                connectionEstablished: false,
-                dataSent: false,
-            },
-            log: [
-                { action: this._ACTIONTYPE_CREATED, timestamp: new Date().toUTCString() }
-            ]
-        };
-
-        // 5. store
-        this._aActivePairs['' + sToken] = pair;
-
-
-
-
-        // 6. update
-        this._aSockets['' + primaryDeviceSocket.id].sToken = sToken;
-
-        // 7. send
-        primaryDeviceSocket.emit('token', sToken);
-
-
-        // --- log
-
-
-        // 8. output
-        this._logUsers('Initial Device requested token (socket.id = ' + primaryDeviceSocket.id + ')');
-
-
-        // 9. log
-        this._dbCollection_sockets.updateMany(
-            {
-                socketId: primaryDeviceSocket.id
-            },
-            {
-                $set: { "data.token" : sToken },
-                $push: { logs: { action: this._ACTIONTYPE_TOKEN_REQUEST, timestamp: new Date().getTime() } }
-            },
-            function(err, result)
-            {
-                CoreModule_Assert.equal(err, null);
-            }
-        );
-
-
-        // 10. compose
-        let actionLog = {
-            created: new Date().getTime(),
-            primaryDeviceSocketId: primaryDeviceSocket.id,
-            secondaryDeviceSocketId: null,
-            data: {
-                token: sToken,
-                connectiontype: null,
-                manualCode: null,
-                direction: pair.direction
-            },
-            states: {
-                connectionEstablished: pair.states.connectionEstablished,
-                dataSent: pair.states.dataSent,
-                archived: false
-            },
-            logs: [
-                { action: this._ACTIONTYPE_CREATED, timestamp: new Date().getTime() }
-            ]
-        };
-
-        // 11. store
-        this._dbCollection_pairs.insertOne(actionLog);
+        // 3. init
+        this._pairManager = new PairManager(this._mongoDB, this._logger);
     },
 
-    _onPrimaryDeviceReconnectToToken: function(primaryDeviceSocket, sToken)
+
+
+    // ----------------------------------------------------------------------------
+    // --- Sockets ----------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
+     * Handle socket `connect`
+     * @param socket
+     * @private
+     */
+    _onSocketConnect: function(socket)
     {
-        // 1. output
-        this._log('Primary device wants to reconnect to token ' + sToken);
+        // 1. store
+        this._pairManager.registerSocket(socket);
 
-
-        // #todo - Exception
-
-
-        // 2. load
-        let pair = this._getPairByToken(sToken);
-
-        // 3. validate
-        if (pair === false)
-        {
-            // a. output
-            this._log('Token = ' + sToken + ' not found for reconnecting primary device');
-
-            // b. send
-            primaryDeviceSocket.emit('token_not_found');
-
-            // c. exit
-            return;
-        }
-
-
-        // ---
-
-
-        // 4. validate
-        if (pair.primaryDevice)
-        {
-            // 1. output
-            this._log('Pair already has a primary device connected. sToken = ' + sToken);
-
-            // 2. warn
-            this._broadcastSecurityWarning(primaryDeviceSocket, pair, sToken);
-            return;
-        }
-
-
-        // ---
-
-
-        // 5. store
-        this._aActivePairs['' + sToken].primaryDevice = primaryDeviceSocket;
-
-        // 6. store
-        this._aSockets['' + primaryDeviceSocket.id].sToken = sToken;
-
-        // 7. send
-        primaryDeviceSocket.emit('token_reconnected');
-
-        // 8. send
-        if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_reconnected');
-
-        // 9. output
-        this._logUsers('Primary device reconnects to token (socket.id = ' + primaryDeviceSocket.id + ')');
-    },
-
-    _onSecondaryDeviceConnectToToken: function(secondaryDeviceSocket, bReconnect, sToken, sSecondaryDevicePublicKey)
-    {
-        // 1. prepare
-        sToken = '' + sToken;
-
-        // 1. output
-        this._log('Secondary device wants to connect to token ' + sToken);
-
-        // 2. load
-        let pair = this._getPairByToken(sToken);
-
-        // 3. validate
-        if (pair === false)
-        {
-            // a. send
-            secondaryDeviceSocket.emit('token_not_found');
-
-            // b. exit
-            return;
-        }
-
-        // 4. validate
-        if (pair.secondaryDevice)
-        {
-            // 1. output
-            this._log('Pair already has a second device connected. sToken = ' + sToken);
-
-            // 2. warn
-            this._broadcastSecurityWarning(secondaryDeviceSocket, pair, sToken);
-            return;
-        }
-
-        // 5. connect
-        this._connectSecondaryDeviceToPair(this.CONNECTIONTYPE_QR, pair, secondaryDeviceSocket, sSecondaryDevicePublicKey, sToken, bReconnect);
+        // 2. configure
+        socket.on('disconnect', this._onSocketDisconnect.bind(this, socket));
     },
 
     /**
-     * Connect secondary device to pair
-     * @param sConnectionType
-     * @param pair
-     * @param secondaryDeviceSocket
-     * @param sSecondaryDevicePublicKey
-     * @param sToken
-     * @param bReconnect
+     * Handle socket `disconnect`
+     * @param socket
      * @private
      */
-    _connectSecondaryDeviceToPair: function(sConnectionType, pair, secondaryDeviceSocket, sSecondaryDevicePublicKey, sToken, bReconnect)
+    _onSocketDisconnect: function(socket)
     {
-        // 1. store
-        this._aSockets['' + secondaryDeviceSocket.id].sToken = sToken;
+        // 1. register
+        let sSocketId = socket.id;
 
         // 2. store
-        pair.secondaryDevicePublicKey = sSecondaryDevicePublicKey;
-        pair.connectiontype = sConnectionType;
+        this._pairManager.unregisterSocket(socket);
 
+        // 3. clear configuration
+        //socket.off();
 
-        // --- communicate
-
-
-        // 3. select
-        switch(sConnectionType)
-        {
-            case this.CONNECTIONTYPE_QR:
-
-                // a. store
-                this._aActivePairs[sToken].secondaryDevice = secondaryDeviceSocket;
-
-                // b. send
-                secondaryDeviceSocket.emit('token_connected', pair.primaryDevicePublicKey, pair.direction);
-
-                // c. finish
-                this._finishConnection(sConnectionType, pair, sToken, bReconnect);
-                break;
-
-            case this.CONNECTIONTYPE_MANUAL:
-
-                // a. validate
-                if (this._aActivePairs[sToken].unconfirmedSecondaryDevice)
-                {
-                    // I. send
-                    this._broadcastSecurityWarning(secondaryDeviceSocket, pair, sToken);
-                    return;
-                }
-
-                // b. store
-                this._aActivePairs[sToken].unconfirmedSecondaryDevice = secondaryDeviceSocket;
-
-                // c. validate and send
-                if (pair.primaryDevice)
-                {
-                    // I. send
-                    pair.unconfirmedSecondaryDevice.emit(ManualConnectEvents.prototype.MANUALCODE_ACCEPTED);
-                }
-                break;
-        }
+        // 4. log
+        this._log('Socket.id = ' + sSocketId + ' has disconnected');
     },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Devices ----------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
 
     /**
      * Handle manualcode event `REQUEST_MANUALCODE_HANDSHAKE`
@@ -605,7 +280,7 @@ module.exports = {
         {
             // a. compose
             let actionLog = {
-                created: new Date().getTime(),
+                created: new Date().toUTCString(),
                 context: '_finishConnection',
                 what: 'bReconnect was true'
             };
@@ -637,7 +312,7 @@ module.exports = {
             },
             {
                 $set: { "states.connectionEstablished" : true },
-                $push: { logs: { action: this._ACTIONTYPE_SECONDARYDEVICE_CONNECTED, timestamp: new Date().getTime() } }
+                $push: { logs: { action: this._ACTIONTYPE_SECONDARYDEVICE_CONNECTED, timestamp: new Date().toUTCString() } }
             },
             function(err, result)
             {
@@ -646,154 +321,7 @@ module.exports = {
         );
     },
 
-    /**
-     * Handle socket `disconnect`
-     * @param socket
-     * @private
-     */
-    _onUserDisconnect: function(socket)
-    {
-        // 1. output
-        this._log('Socket.id = ' + socket.id + ' has disconnected');
 
-        // 2. validate
-        if (!this._aSockets['' + socket.id])
-        {
-            // a. compose
-            let actionLog = {
-                created: new Date().getTime(),
-                context: '_onUserDisconnect',
-                what: 'this._aSockets[socket.id] not found'
-            };
-
-            // 11. store
-            this._dbCollection_exceptions.insertOne(actionLog);
-
-            return;
-        }
-
-        // 3. load
-        let registeredSocket = this._aSockets['' + socket.id];
-
-        // 4. register
-        let sToken = registeredSocket.sToken;
-
-        // 5. cleanup
-        delete this._aSockets['' + socket.id];
-
-        // 6. validate
-        if (!sToken) return;
-
-        // 7. load
-        let pair = this._getPairByToken(sToken);
-
-        // 8. validate
-        if (pair === false) return;
-
-        // 9. validate
-        if (pair.primaryDevice && pair.primaryDevice.id === socket.id)
-        {
-            // a. cleanup
-            pair.primaryDevice = null;
-
-            // b. send
-            if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_disconnected');
-
-            // c. log
-            this._dbCollection_pairs.updateMany(
-                {
-                    "data.token": sToken
-                },
-                {
-                    $push: { logs: { action: this._ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED, timestamp: new Date().getTime() } }
-                },
-                function(err, result)
-                {
-                    CoreModule_Assert.equal(err, null);
-                }
-            );
-        }
-
-        // 10. validate
-        if (pair.secondaryDevice && pair.secondaryDevice.id === socket.id)
-        {
-            // a. cleanup
-            pair.secondaryDevice = null;
-
-            // b. send
-            if (pair.primaryDevice) pair.primaryDevice.emit('secondarydevice_disconnected');
-
-            // c. log
-            this._dbCollection_pairs.updateMany(
-                {
-                    "data.token": sToken
-                },
-                {
-                    $push: { logs: { action: this._ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED, timestamp: new Date().getTime() } }
-                },
-                function(err, result)
-                {
-                    CoreModule_Assert.equal(err, null);
-                }
-            );
-        }
-
-        // 11. validate
-        if (!pair.primaryDevice && !pair.secondaryDevice)
-        {
-            // a. move
-            this._aInactivePairs[sToken] = pair;
-
-            // b. clear
-            delete this._aActivePairs[sToken];
-
-            // c. store
-            pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
-
-            // d. log
-            this._dbCollection_pairs.updateMany(
-                {
-                    "data.token": sToken
-                },
-                {
-                    $set: { "states.archived" : true },
-                    $push: { logs: { action: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().getTime() } }
-                },
-                function(err, result)
-                {
-                    CoreModule_Assert.equal(err, null);
-                }
-            );
-        }
-
-
-        // --- log ---
-
-
-        // 12. output
-        this._logUsers('User disconnected (socket.id = ' + socket.id + ')');
-
-        // 13. update
-        this._dbCollection_sockets.updateMany(
-            {
-                socketId: socket.id
-            },
-            {
-                $set: { "connected" : false },
-                $push: { logs: { action: this._ACTIONTYPE_DISCONNECTED, timestamp: new Date().toUTCString() } }
-            },
-            function(err, result)
-            {
-                CoreModule_Assert.equal(err, null);
-                //console.log('result', result);
-                //CoreModule_Assert.equal(1, result.result.n);
-                //console.log("Updated the document ");
-                //callback(result);
-            }
-        );
-
-
-    },
 
     _onData: function(socket, encryptedData)
     {
@@ -885,7 +413,7 @@ module.exports = {
                 $set: { "states.dataSent" : true },
                 $push: { logs: {
                         type: this._ACTIONTYPE_DATA,
-                        timestamp: new Date().getTime(),
+                        timestamp: new Date().toUTCString(),
                         contentType: encryptedData.sType,
                         direction: pair.direction
                     } }
@@ -1070,38 +598,6 @@ module.exports = {
         }
     },
 
-    _broadcastSecurityWarning: function(requestingSocket, pair, sToken)
-    {
-        // 1. broadcast breach to current user
-        requestingSocket.emit('security_compromised');
-
-        // 2. cleanup
-        delete this._aSockets['' + requestingSocket.id];
-
-        // 3. verify
-        if (pair.primaryDevice)
-        {
-            // a. send
-            pair.primaryDevice.emit('security_compromised');
-
-            // b. cleanup
-            delete this._aSockets['' + pair.primaryDevice.id];
-        }
-
-        // 4. verify
-        if (pair.secondaryDevice)
-        {
-            // a. send
-            pair.secondaryDevice.emit('security_compromised');
-
-            // b. cleanup
-            delete this._aSockets['' + pair.secondaryDevice.id];
-        }
-
-        // 5. clear
-        delete this._aActivePairs['' + sToken];
-    },
-
     _getPairBySocket: function(socket)
     {
         // 1. load
@@ -1173,44 +669,6 @@ module.exports = {
     {
         // 1. output when in dev mode
         if (this._config.mode === 'dev') if (console) console.log.apply(this, arguments);
-    },
-
-    _logUsers: function(sTitle)
-    {
-        // 1. compose
-        let sOutput = '' + '\n' +
-            'Usage: ' + sTitle + '\n' +
-            '=========================' + '\n' +
-            'Number of sockets:' + Object.keys(this._aSockets).length + '\n' +
-            'Number of active pairs:' + Object.keys(this._aActivePairs).length + '\n' +
-            'Number of inactive pairs:' + Object.keys(this._aInactivePairs).length + '\n' +
-            '---' + '\n' +
-            'Number of pairs that established connection between both devices:' + Object.keys(this._aConnectedPairs).length + '\n' +
-            'Number of pairs that have been used to send data:' + Object.keys(this._aUsedPairs).length;
-
-        // 2. output
-        if (this._configFile.logtofile.file.toString()) Module_LogToFile(sOutput, this._configFile.logtofile.file.toString());
-
-        // 2. verify
-        if (this._config.mode !== 'dev') return;
-
-        // 3. output
-        console.log('');
-        console.log('Users: ' + sTitle);
-        console.log('Sockets');
-        console.log('=========================');
-        console.log(this._aSockets);
-        console.log('');
-        console.log('Active pairs');
-        console.log('-------------------------');
-        console.log(this._aActivePairs);
-        console.log('');
-        console.log('Inactive pairs');
-        console.log('-------------------------');
-        console.log(this._aInactivePairs);
-        //console.log(CoreModule_Util.inspect(this._aInactivePairs, false, null, true));
-        console.log('');
-        console.log('');
     }
 
 };

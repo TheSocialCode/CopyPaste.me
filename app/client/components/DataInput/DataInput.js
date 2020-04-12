@@ -12,7 +12,7 @@ const SocketIO = require('socket.io-client');
 const Module_Crypto = require('asymmetric-crypto');
 
 // import extenders
-const EventDispatcherExtender = require('./../../extenders/EventDispatcherExtender');
+const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
 
 
 module.exports = function()

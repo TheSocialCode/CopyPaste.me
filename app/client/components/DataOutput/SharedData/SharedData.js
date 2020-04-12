@@ -8,7 +8,7 @@
 
 
 // import extenders
-const EventDispatcherExtender = require('./../../../extenders/EventDispatcherExtender');
+const EventDispatcherExtender = require('./../../../../common/extenders/EventDispatcherExtender');
 
 // import helpers
 const Module_FileSaver = require('file-saver');

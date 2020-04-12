@@ -30,7 +30,7 @@ module.exports = {
 
     // database
     _db: null,
-    _dbCollection_sockets: null,
+    //_dbCollection_sockets: null,
     _dbCollection_pairs: null,
     _dbCollection_manualcodes: null,
 
@@ -183,7 +183,7 @@ module.exports = {
         this._db = client.db(sMongoDBName);
 
         // 5. store
-        this._dbCollection_sockets = this._db.collection('sockets');
+        //this._dbCollection_sockets = this._db.collection('sockets');
         this._dbCollection_pairs = this._db.collection('pairs');
         this._dbCollection_manualcodes = this._db.collection('manualcodes');
 

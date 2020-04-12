@@ -11,18 +11,22 @@
 const QRCodeGenerator = require('qrcode-generator');
 const ManualConnectButton = require('./../ManualConnectButton/ManualConnectButton');
 const ManualConnectEvents = require('./../ManualConnectButton/ManualConnectEvents');
+const ConnectorEvents = require('./../Connector/ConnectorEvents');
 
 // import extenders
-const EventDispatcherExtender = require('./../../extenders/EventDispatcherExtender');
+const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
 
 
-module.exports = function(sTokenURL)
+module.exports = function(sToken, nTokenLifetime)
 {
     // start
-    this.__construct(sTokenURL);
+    this.__construct(sToken, nTokenLifetime);
 };
 
 module.exports.prototype = {
+
+    // data
+    _sTokenURL: null,
 
     // components
     _qrcode: null,
@@ -39,6 +43,7 @@ module.exports.prototype = {
     _elConnectURL: null,
 
     // utils
+    _timerTokenExpires: null,
     _timerManualCodeCountdown: null,
 
     // states
@@ -59,10 +64,14 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (sTokenURL)
+    __construct: function (sToken, nTokenLifetime)
     {
         // 1. extend
         new EventDispatcherExtender(this);
+
+
+        // ---
+
 
         // 2. init
         this._sCurrentState = this.STATE_QR;
@@ -77,13 +86,8 @@ module.exports.prototype = {
         this._elManualCodeCountdown = this._elRoot.querySelector('[data-mimoto-id="countdown"]');
         this._elConnectURL = this._elBack.querySelector('[data-mimoto-id="connect_url"]');
 
-        // 4. configure
-        var typeNumber = 4;
-        var errorCorrectionLevel = 'L';
-        var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
-        qr.addData(sTokenURL);
-        qr.make();
-        this._elContainer.innerHTML = qr.createImgTag(5);
+        // 4. setup
+        this.setToken(sToken, nTokenLifetime);
 
         // 5. configure
         this._elContainer.addEventListener(
@@ -92,13 +96,13 @@ module.exports.prototype = {
             {
                 // copy to clipboard
                 let elHelperTextArea = document.createElement('textarea');
-                elHelperTextArea.value = sTokenURL;
+                elHelperTextArea.value = this._sTokenURL;
                 document.body.appendChild(elHelperTextArea);
                 elHelperTextArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(elHelperTextArea);
 
-            }.bind(this, sTokenURL)
+            }.bind(this)
         );
 
         // 6. init
@@ -117,6 +121,28 @@ module.exports.prototype = {
     // --- Public methods ---------------------------------------------------------
     // ----------------------------------------------------------------------------
 
+
+    setToken: function(sToken, nTokenLifetime)
+    {
+        // 1. compose
+        this._sTokenURL = window.location.protocol + '//' + window.location.hostname + '/' + sToken;
+
+        // 2. setup
+        var typeNumber = 4;
+        var errorCorrectionLevel = 'L';
+        var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
+        qr.addData(this._sTokenURL);
+        qr.make();
+        this._elContainer.innerHTML = qr.createImgTag(5);
+
+        // 3. start
+        this._timerTokenExpires = setTimeout(this._onTimerTokenExpires.bind(this), nTokenLifetime);
+    },
+
+    _onTimerTokenExpires: function()
+    {
+        this.dispatchEvent(ConnectorEvents.prototype.REQUEST_TOKEN_REFRESH)
+    },
 
     setManualCode: function(manualCode)
     {
@@ -179,6 +205,10 @@ module.exports.prototype = {
 
         // 2. toggle visibility
         this._manualConnectButton.hide();
+
+        // 3. cleanup
+        if (this._timerTokenExpires) clearTimeout(this._timerTokenExpires);
+        if (this._timerManualCodeCountdown) clearInterval(this._timerManualCodeCountdown);
     },
 
 

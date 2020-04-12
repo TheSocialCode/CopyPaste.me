@@ -8,7 +8,7 @@
 
 
 // import extenders
-const EventDispatcherExtender = require('./../extenders/EventDispatcherExtender');
+const EventDispatcherExtender = require('./../../common/extenders/EventDispatcherExtender');
 
 // import utils
 const Module_Crypto = require('asymmetric-crypto');

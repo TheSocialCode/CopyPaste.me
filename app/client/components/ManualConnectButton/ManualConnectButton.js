@@ -11,7 +11,7 @@
 const ManualConnectEvents = require('./ManualConnectEvents');
 
 // import extenders
-const EventDispatcherExtender = require('./../../extenders/EventDispatcherExtender');
+const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
 
 
 module.exports = function()
