@@ -7,6 +7,9 @@
 'use strict';
 
 
+// import utils
+const Module_GenerateUniqueID = require('generate-unique-id');
+
 
 module.exports = function(socket)
 {
@@ -16,9 +19,12 @@ module.exports = function(socket)
 
 module.exports.prototype = {
 
+    // settings
+    _sDeviceID: null,
+
     // data
     _socket: null,
-    _sDeviceID: null,
+    _sSocketID: null,
     _sPairID: null,
 
 
@@ -34,6 +40,9 @@ module.exports.prototype = {
     {
         // 1. store
         this._socket = socket;
+
+        // 2. init
+        this._sDeviceID = Module_GenerateUniqueID({ length: 32 });
     },
 
 
@@ -47,22 +56,35 @@ module.exports.prototype = {
      * Get device ID
      * @returns string
      */
-    getDeviceID: function() { return this._sValue; },
+    getID: function() { return this._sDeviceID; },
 
     /**
-     * Set device ID
+     * Get socket ID
+     * @returns string
      */
-    setDeviceID: function(sValue) { this._sValue = sValue },
-
+    getSocketID: function() { return this._socket.id; },
 
     /**
-     * Get Pair ID
+     * Get socket
+     * @returns object
+     */
+    getSocket: function() { return this._socket; },
+
+    /**
+     * Set socket
+     * @param value
+     */
+    updateSocket: function(value) { this._socket = value },
+
+    /**
+     * Get pair ID
      * @returns string
      */
     getPairID: function() { return this._sPairID; },
 
     /**
-     * Set Pair ID
+     * Set pair ID
+     * @para, sValue
      */
     setPairID: function(sValue) { this._sPairID = sValue }
 

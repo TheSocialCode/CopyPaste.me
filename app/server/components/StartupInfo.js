@@ -12,17 +12,13 @@
 const Module_LogToFile = require('log-to-file');
 
 
-module.exports = function(logger, configFile, config, bHasMongoDB)
+module.exports = function(configFile, config, bHasMongoDB)
 {
     // start
-    this.__construct(logger, configFile, config, bHasMongoDB);
+    this.__construct(configFile, config, bHasMongoDB);
 };
 
 module.exports.prototype = {
-
-    // services
-    _logger: null,
-
 
 
     // ----------------------------------------------------------------------------
@@ -33,19 +29,12 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (logger, configFile, config, bHasMongoDB)
+    __construct: function (configFile, config, bHasMongoDB)
     {
-        // 1. store
-        this._logger = logger;
-
-
-        // ---
-
-
-        // 2. cleanup
+        // 1. cleanup
         console.clear();
 
-        // 3. prepare
+        // 2. prepare
         let aLines = [
             '',
             'CopyPaste.me - Frictionless sharing between devices',
@@ -58,21 +47,21 @@ module.exports.prototype = {
             'listening on *:' + configFile.socketio.server.port + ' ' + JSON.stringify(config),
         ];
 
-        // 4. verify
+        // 3. verify
         if (bHasMongoDB)
         {
             // a. compose
             aLines.push(' ', 'MongoDB connected on ' + configFile.mongodb.host.toString() + ':' + configFile.mongodb.port.toString());
         }
 
-        // 5. prepare
+        // 4. prepare
         aLines.push('');
 
 
         // ---
 
 
-        // 6. find max length
+        // 5. find max length
         let nMaxLength = 0;
         for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
         {
@@ -80,10 +69,10 @@ module.exports.prototype = {
             if (aLines[nLineIndex].length > nMaxLength) nMaxLength = aLines[nLineIndex].length;
         }
 
-        // 7. init
+        // 6. init
         let sLogOutput = '\n';
 
-        // 8. build and output lines
+        // 7. build and output lines
         for (let nLineIndex = 0; nLineIndex < aLines.length; nLineIndex++)
         {
             // a. build
@@ -99,20 +88,20 @@ module.exports.prototype = {
             }
 
             // b. output
-            this._logger.log(aLines[nLineIndex], true);
+            this.Mimoto.logger.log(aLines[nLineIndex], true);
 
             // c. compose
             sLogOutput += aLines[nLineIndex] + '\n';
         }
 
-        // 9. output extra line
-        this._logger.log('', true);
+        // 8. output extra line
+        this.Mimoto.logger.log('', true);
 
-        // 10. compose
+        // 9. compose
         sLogOutput += '\n';
 
-        // 11. output to log
-        this._logger.logToFile(sLogOutput);
+        // 10. output to log
+        this.Mimoto.logger.logToFile(sLogOutput);
     }
 
 };

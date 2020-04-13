@@ -69,9 +69,7 @@ module.exports.prototype = {
         // 1. extend
         new EventDispatcherExtender(this);
 
-
         // ---
-
 
         // 2. init
         this._sCurrentState = this.STATE_QR;

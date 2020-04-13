@@ -27,7 +27,7 @@ module.exports.prototype = {
     _tsExpires: null,
 
     // settings
-    TOKEN_LIFETIME: 5000, //5 * 60 * 1000,
+    TOKEN_LIFETIME: 2 * 60 * 1000,
 
 
 

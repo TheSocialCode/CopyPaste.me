@@ -89,7 +89,7 @@ module.exports.prototype = {
         this._socket.on('connect_error', this._onSocketConnectError.bind(this));
         this._socket.on('disconnect', this._onSocketDisconnect.bind(this));
         this._socket.on('manualcode', this._onManualCode.bind(this));
-        this._socket.on('security_compromised', this._onSecurityCompromised.bind(this));
+        this._socket.on(ConnectorEvents.prototype.SECURITY_COMPROMISED, this._onSecurityCompromised.bind(this));
         this._socket.on('data', this._onData.bind(this));
 
         // 4. init
@@ -153,6 +153,8 @@ module.exports.prototype = {
      */
     _onSocketConnect: function ()
     {
+        console.log('# - CONNECT');
+
         // 1. hide
         this._alertMessage.hide();
 
@@ -160,7 +162,7 @@ module.exports.prototype = {
         if (this._bIsPrimaryDevice)
         {
             // a. validate
-            if (!this._sToken)
+            if (!this._sDeviceID)
             {
                 // I. request
                 this._socket.emit(ConnectorEvents.prototype.PRIMARYDEVICE_CONNECT, this._dataManager.getMyPublicKey());
@@ -173,11 +175,26 @@ module.exports.prototype = {
         }
         else
         {
+            console.log('# - SECONDARYDEVICE');
+
             // a. verify
             if (!this._bIsManualConnect)
             {
-                // I. broadcast
-                this._socket.emit(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECT, this._sToken, this._dataManager.getMyPublicKey());
+                // a. validate
+                if (!this._sDeviceID)
+                {
+                    console.log('# - CONNECT USING QR - what happened to RECONNECT');
+
+                    // I. broadcast
+                    this._socket.emit(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECT_BY_QR, this._dataManager.getMyPublicKey(), this._sToken);
+                }
+                else
+                {
+                    console.log('# - RECONNECT');
+
+                    // I. request
+                    this._socket.emit(ConnectorEvents.prototype.SECONDARYDEVICE_RECONNECT, this._sDeviceID);
+                }
             }
         }
     },
@@ -475,7 +492,7 @@ module.exports.prototype = {
             // a. configure
             this._socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_CONNECTED, this._onPrimaryDeviceConnected.bind(this));
             this._socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_TOKEN_REFRESHED, this._onReceiveTokenRefreshed.bind(this));
-            this._socket.on('token_not_found', this._onPrimaryDeviceTokenNotFound.bind(this));
+            this._socket.on(ConnectorEvents.prototype.RECONNECT_DEVICEID_NOT_FOUND, this._onPrimaryDeviceTokenNotFound.bind(this));
         }
         else
         {
@@ -486,7 +503,7 @@ module.exports.prototype = {
         }
 
         // 3. configure primary device
-        this._socket.on('secondarydevice_connected', this._onSecondaryDeviceConnected.bind(this));
+        this._socket.on(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECTED, this._onSecondaryDeviceConnected.bind(this));
         this._socket.on('secondarydevice_disconnected', this._onSecondaryDeviceDisconnected.bind(this));
         this._socket.on('secondarydevice_reconnected', this._onSecondaryDeviceReconnected.bind(this));
         this._socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE_CONFIRMATION, this._onRequestManualCodeConfirmation.bind(this));
@@ -496,7 +513,7 @@ module.exports.prototype = {
         this._socket.on(ManualConnectEvents.prototype.MANUALCODE_ACCEPTED, this._onSecondaryDeviceManualCodeAccepted.bind(this));
         this._socket.on(ManualConnectEvents.prototype.MANUALCODE_CONNECTED, this._onSecondaryDeviceConnectedManually.bind(this));
         this._socket.on('primarydevice_disconnected', this._onPrimaryDeviceDisconnected.bind(this));
-        this._socket.on('primarydevice_reconnected', this._onPrimaryDeviceReconnected.bind(this));
+        this._socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_RECONNECTED, this._onPrimaryDeviceReconnected.bind(this));
 
 
         // --- data output
@@ -557,7 +574,7 @@ module.exports.prototype = {
 
 
     /**
-     * Handle event `PRIMARYDEVICE_CONNECTED`
+     * Handle primary device event `PRIMARYDEVICE_CONNECTED`
      * @param sToken
      * @param nTokenLifetime
      * @param sDeviceID
@@ -577,6 +594,28 @@ module.exports.prototype = {
 
         // 4. show
         this._connector.show();
+    },
+
+    /**
+     * Handle primary device event ``
+     * @private
+     */
+    _onPrimaryDeviceDisconnected: function()
+    {
+        // 1. toggle visibility
+        this._dataOutput.hide();
+        this._toggleDirectionButton.hide();
+
+        // 2. output
+        this._alertMessage.show('The other device has been disconnected. Is it still online?');
+    },
+
+    _onPrimaryDeviceReconnected: function()
+    {
+        // 1. toggle visibility
+        this._alertMessage.hide();
+        this._dataOutput.show();
+        if (this._isOutputDevice()) this._toggleDirectionButton.show();
     },
 
     _onRequestTokenRefresh: function()
@@ -626,21 +665,34 @@ module.exports.prototype = {
     },
 
     /**
-     * Handle event `secondarydevice_connected`
-     * @param sSecondaryPublicKey
+     * Handle event `SECONDARYDEVICE_CONNECTED`
+     * @param sDeviceID
+     * @param sOtherDevicePublicKey
      * @private
      */
-    _onSecondaryDeviceConnected: function(sSecondaryPublicKey)
+    _onSecondaryDeviceConnected: function(sDeviceID, sOtherDevicePublicKey)
     {
         // 1. store
-        this._dataManager.setTheirPublicKey(sSecondaryPublicKey);
+        this._sDeviceID = sDeviceID;
 
-        // 2. toggle visibility
+        // 2. store
+        this._dataManager.setTheirPublicKey(sOtherDevicePublicKey);
+
+        // 3. toggle visibility
         this._alertMessage.hide();
-        this._connector.hide();
         if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
-        this._dataOutput.show();
-        if (this._isOutputDevice()) this._toggleDirectionButton.show();
+
+        // 4. toggle
+        if (this._isOutputDevice())
+        {
+            this._connector.hide();
+            this._dataOutput.show();
+            this._toggleDirectionButton.show();
+        }
+        else
+        {
+            this._dataInput.show();
+        }
     },
 
     /**
@@ -662,24 +714,6 @@ module.exports.prototype = {
      * @private
      */
     _onSecondaryDeviceReconnected: function()
-    {
-        // 1. toggle visibility
-        this._alertMessage.hide();
-        this._dataOutput.show();
-        if (this._isOutputDevice()) this._toggleDirectionButton.show();
-    },
-
-    _onPrimaryDeviceDisconnected: function()
-    {
-        // 1. toggle visibility
-        this._dataOutput.hide();
-        this._toggleDirectionButton.hide();
-
-        // 2. output
-        this._alertMessage.show('The other device has been disconnected. Is it still online?');
-    },
-
-    _onPrimaryDeviceReconnected: function()
     {
         // 1. toggle visibility
         this._alertMessage.hide();
