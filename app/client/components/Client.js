@@ -183,7 +183,7 @@ module.exports.prototype = {
                 // a. validate
                 if (!this._sDeviceID)
                 {
-                    console.log('# - CONNECT USING QR - what happened to RECONNECT');
+                    console.log('# - CONNECT');
 
                     // I. broadcast
                     this._socket.emit(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECT_BY_QR, this._dataManager.getMyPublicKey(), this._sToken);
@@ -215,6 +215,13 @@ module.exports.prototype = {
      */
     _onSocketConnectError: function(err)
     {
+        // 1. hide
+        this._dataInput.hide();
+        this._dataOutput.hide();
+        this._toggleDirectionButton.hide();
+        if (this._isOutputDevice()) this._connector.hide();
+
+        // 2. output
         this._alertMessage.show('Error connecting to server. Please try again!');
     },
 
@@ -241,23 +248,20 @@ module.exports.prototype = {
     _onSecurityCompromised: function()
     {
         // 1. cleanup
-        this._socket.removeAllListeners();
+        this._killConnection();
 
-        // 2. disconnect
-        delete this._socket;
-
-        // 3. disable interface
+        // 2. disable interface
         document.querySelector('[data-mimoto-id="component_Client"]').remove();
         document.querySelector('[data-mimoto-id="main-information"]').remove();
         document.querySelector('[data-mimoto-id="main-interface-header-background"]').remove();
 
-        // 4. swap logo
+        // 3. swap logo
         document.querySelector('[data-mimoto-id="logo"]').src = 'static/images/copypaste-logo-white.png';
 
-        // 5. show warning
+        // 4. show warning
         document.body.classList.add('security_compromised');
 
-        // 6. output warning
+        // 5. output warning
         document.querySelector('[data-mimoto-id="warning_security_compromised"]').innerHTML = '' +
             '<div class="warning_security_compromised_title">WARNING: Security compromised</div>' +
             '<p>It appears a third device tried to connect to your session.</p>' +
@@ -492,7 +496,7 @@ module.exports.prototype = {
             // a. configure
             this._socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_CONNECTED, this._onPrimaryDeviceConnected.bind(this));
             this._socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_TOKEN_REFRESHED, this._onReceiveTokenRefreshed.bind(this));
-            this._socket.on(ConnectorEvents.prototype.RECONNECT_DEVICEID_NOT_FOUND, this._onPrimaryDeviceTokenNotFound.bind(this));
+
         }
         else
         {
@@ -501,6 +505,10 @@ module.exports.prototype = {
             this._socket.on(ManualConnectEvents.prototype.MANUALCODE_NOT_FOUND, this._onManualCodeNotFound.bind(this));
             this._socket.on(ManualConnectEvents.prototype.MANUALCODE_EXPIRED, this._onManualCodeExpired.bind(this));
         }
+
+
+        this._socket.on(ConnectorEvents.prototype.RECONNECT_DEVICEID_NOT_FOUND, this._onDeviceIDNotFoundOnReconnect.bind(this));
+
 
         // 3. configure primary device
         this._socket.on(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECTED, this._onSecondaryDeviceConnected.bind(this));
@@ -637,16 +645,21 @@ module.exports.prototype = {
     },
 
     /**
-     * Handle event `token_not_found`
+     * Handle event `RECONNECT_DEVICEID_NOT_FOUND`
      * @private
      */
-    _onPrimaryDeviceTokenNotFound: function()
+    _onDeviceIDNotFoundOnReconnect: function()
     {
         // 1. hide
         this._dataInput.hide();
+        this._dataOutput.hide();
         this._toggleDirectionButton.hide();
+        if (this._isOutputDevice()) this._connector.hide();
 
-        // 2. output
+        // 2. cleanup
+        this._killConnection();
+
+        // 3. output
         this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to make a new connection.', true);
     },
 
@@ -660,7 +673,10 @@ module.exports.prototype = {
         this._dataInput.hide();
         this._toggleDirectionButton.hide();
 
-        // 2. output
+        // 2. cleanup
+        this._killConnection();
+
+        // 3. output
         this._alertMessage.show('The link you are trying to use is not working. Please try again.', true);
     },
 
@@ -806,5 +822,22 @@ module.exports.prototype = {
 
         // 2. send default
         return false;
+    },
+
+    /**
+     * Kill connection
+     * @private
+     */
+    _killConnection: function()
+    {
+        // 1. clear configuration
+        this._socket.removeAllListeners();
+
+        // 2. close
+        this._socket.disconnect();
+
+        // 3. cleanup
+        delete this._socket;
     }
+
 };

@@ -75,8 +75,8 @@ module.exports.prototype = {
         let device = new Device(socket);
 
         // 2. store
-        this._aDevicesBySocketID[socket.id.toString()] = device;
-        this._aDevicesByDeviceID[device.getID().toString()] = device;
+        this._aDevicesBySocketID[socket.id] = device;
+        this._aDevicesByDeviceID[device.getID()] = device;
     },
 
     /**
@@ -86,17 +86,17 @@ module.exports.prototype = {
     unregisterSocket: function(socket)
     {
         // 1. load
-        let device = this._aDevicesBySocketID[socket.id.toString()];
+        let device = this._aDevicesBySocketID[socket.id];
 
         // 2. move and set moment of expiry
-        this._aOfflineDevices[device.getID().toString()] = {
-            device: this._aDevicesByDeviceID[device.getID().toString()],
+        this._aOfflineDevices[device.getID()] = {
+            device: this._aDevicesByDeviceID[device.getID()],
             nExpires: new Date().getTime() + this.OFFLINE_DEVICE_LIFETIME
         };
 
         // 3. cleanup
-        delete this._aDevicesBySocketID[socket.id.toString()];
-        delete this._aDevicesByDeviceID[device.getID().toString()];
+        delete this._aDevicesBySocketID[socket.id];
+        delete this._aDevicesByDeviceID[device.getID()];
 
         // 4. broadcast
         this.dispatchEvent(this.DEVICE_OFFLINE, device);
@@ -110,17 +110,23 @@ module.exports.prototype = {
      */
     restoreAndMerge: function(originalDevice, newDevice)
     {
+        console.log('restoreAndMerge - original = ', originalDevice.getID(), 'new = ', newDevice.getID());
+
         // 1. transfer
         originalDevice.updateSocket(newDevice.getSocket());
 
-        // 2. copy
-        this._aDevicesBySocketID[newDevice.getSocketID().toString()] = originalDevice;
-        this._aDevicesByDeviceID[originalDevice.getID().toString()] = originalDevice;
+        // 2. cleanup
+        delete this._aDevicesBySocketID[newDevice.getSocketID()];
+        delete this._aDevicesByDeviceID[newDevice.getID()];
 
         // 3. cleanup
-        delete this._aOfflineDevices[originalDevice.getID().toString()];
+        delete this._aOfflineDevices[originalDevice.getID()];
 
-        // 4. send
+        // 4. copy
+        this._aDevicesBySocketID[originalDevice.getSocketID()] = originalDevice;
+        this._aDevicesByDeviceID[originalDevice.getID()] = originalDevice;
+
+        // 5. send
         return originalDevice;
     },
 
@@ -132,7 +138,7 @@ module.exports.prototype = {
     getDeviceBySocketID: function(sSocketID)
     {
         // 1. validate and send
-        return (this._aDevicesBySocketID[sSocketID.toString()]) ? this._aDevicesBySocketID[sSocketID.toString()] : false;
+        return (this._aDevicesBySocketID[sSocketID]) ? this._aDevicesBySocketID[sSocketID] : false;
     },
 
     /**
@@ -143,7 +149,7 @@ module.exports.prototype = {
     getDeviceByDeviceID: function(sDeviceID)
     {
         // 1. validate and send
-        return (this._aDevicesByDeviceID[sDeviceID.toString()]) ? this._aDevicesByDeviceID[sDeviceID.toString()] : false;
+        return (this._aDevicesByDeviceID[sDeviceID]) ? this._aDevicesByDeviceID[sDeviceID] : false;
     },
 
     /**
@@ -154,7 +160,7 @@ module.exports.prototype = {
     getOfflineDeviceByDeviceID: function(sDeviceID)
     {
         // 1. validate and send
-        return (this._aOfflineDevices[sDeviceID.toString()]) ? this._aOfflineDevices[sDeviceID.toString()].device : false;
+        return (this._aOfflineDevices[sDeviceID]) ? this._aOfflineDevices[sDeviceID].device : false;
     },
 
     // destroy: function(sDeviceID)

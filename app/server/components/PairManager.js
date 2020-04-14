@@ -52,7 +52,7 @@ module.exports.prototype = {
     _aUsedPairs: [],            // which pairs where actually used to share data
 
     // connection types
-    CONNECTIONTYPE_QR: 'qr',
+    CONNECTIONTYPE_QR: 'QR',
     CONNECTIONTYPE_MANUAL: 'manual',
 
 

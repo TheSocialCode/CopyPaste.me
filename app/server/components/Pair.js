@@ -186,14 +186,17 @@ module.exports.prototype = {
         this._sSecondaryDevicePublicKey = sPublicKey;
         this._sSecondaryDeviceID = device.getID();
 
+        // 3. store
+        device.setPairID(this.getID());
+
 
         // ---
 
 
-        // 3. toggle
+        // 4. toggle
         this._states.connectionEstablished = true;
 
-        // 4. store
+        // 5. store
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').updateOne(
             {
                 "id": this.getID()
@@ -212,7 +215,7 @@ module.exports.prototype = {
         // ---
 
 
-        // 3. success
+        // 6. success
         return true;
     },
 

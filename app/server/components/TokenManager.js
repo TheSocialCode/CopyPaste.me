@@ -152,9 +152,6 @@ module.exports.prototype = {
 
             // c. cleanup
             delete this._aTokens[sKey];
-
-            // d. broadcast
-            this.dispatchEvent(this.TOKEN_EXPIRED, token.getValue());
         }
     }
 

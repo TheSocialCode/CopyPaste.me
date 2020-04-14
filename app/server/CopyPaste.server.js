@@ -187,9 +187,6 @@ module.exports = {
 
         // 5. init
         this._tokenManager = new TokenManager();
-
-        // 6. configure
-        this._tokenManager.addEventListener(TokenManager.prototype.TOKEN_EXPIRED, this._tokenExpired.bind(this));
     },
 
 
@@ -255,7 +252,7 @@ module.exports = {
         this.Mimoto.logger.log('Socket.id = ' + socket.id + ' has disconnected');
 
         // 4. log
-        this._logUsers('Socket connected (socket.id = ' + socket.id + ')');
+        this._logUsers('Socket disconnected (socket.id = ' + socket.id + ')');
     },
 
 
@@ -333,6 +330,16 @@ module.exports = {
         // 1. load
         let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
         let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
+
+
+
+        // 1. if !originalDevice -> also check currents
+        // 2. zijn de devices leeg?
+
+
+        console.log('sDevice = `' + sDevice + '` (' +  sDeviceID + ') - originalDevice = ', originalDevice);
+
+
 
         // 2. validate
         if (!newDevice || !originalDevice)
@@ -456,6 +463,8 @@ module.exports = {
         // 3. validate or send error
         if (token === false)
         {
+            this.Mimoto.logger.log('SECONDARYDEVICE_CONNECT_TOKEN_NOT_FOUND for sTokenValue=`' + sTokenValue + '` from socket.id=`' + secondaryDeviceSocket.id + '`');
+
             // a. broadcast
             secondaryDeviceSocket.emit(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECT_TOKEN_NOT_FOUND);
 
@@ -470,7 +479,7 @@ module.exports = {
         if (!pair.connectSecondaryDevice(secondaryDeviceSocket, sSecondaryDevicePublicKey, device)) false;
 
         // 6. store
-        pair.setConnectionType(this.CONNECTIONTYPE_QR);
+        pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_QR);
 
         // 7. update
         secondaryDeviceSocket.emit(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECTED, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
@@ -483,10 +492,10 @@ module.exports = {
 
 
         // 9. log
-        this.Mimoto.logger.logToFile('Primary Device with socket.id = ' + secondaryDeviceSocket.id + ' requests token = ' + token.getValue());
+        this.Mimoto.logger.logToFile('Primary Device with socket.id = ' + secondaryDeviceSocket.id + ' requests connection to token = ' + token.getValue());
 
         // 10. output
-        this._logUsers('Primary Device with socket.id = ' + secondaryDeviceSocket.id + ' requests token = ' + token.getValue());
+        this._logUsers('Primary device with socket.id = ' + secondaryDeviceSocket.id + ' requests connection to token = ' + token.getValue());
     },
 
     /**
@@ -969,10 +978,6 @@ module.exports = {
     //     return pair;
     // },
 
-    _tokenExpired: function(sToken)
-    {
-        console.log('Token expired', sToken);
-    },
 
 
     _logUsers: function(sTitle)
