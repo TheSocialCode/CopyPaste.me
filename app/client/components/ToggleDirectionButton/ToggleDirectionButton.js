@@ -9,7 +9,6 @@
 
 // import
 const ToggleDirectionStates = require('./ToggleDirectionStates');
-const ToggleDirectionEvents = require('./ToggleDirectionEvents');
 
 // import extenders
 const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
@@ -27,6 +26,8 @@ module.exports.prototype = {
     _elRoot: null,
     _elButton: null,
 
+    // events
+    TOGGLE_DIRECTION: 'onToggleDirection',
 
 
     // ----------------------------------------------------------------------------
@@ -88,7 +89,7 @@ module.exports.prototype = {
     _onButtonClick: function(e)
     {
         // 1. broadcast
-        this.dispatchEvent(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION);
+        this.dispatchEvent(this.REQUEST_TOGGLE_DIRECTION);
     }
 
 };

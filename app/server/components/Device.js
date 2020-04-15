@@ -26,6 +26,12 @@ module.exports.prototype = {
     _socket: null,
     _sSocketID: null,
     _sPairID: null,
+    _sType: null,
+
+    // types
+    PRIMARYDEVICE: 'PRIMARYDEVICE',
+    SECONDARYDEVICE: 'SECONDARYDEVICE',
+
 
 
     // ----------------------------------------------------------------------------
@@ -86,6 +92,18 @@ module.exports.prototype = {
      * Set pair ID
      * @para, sValue
      */
-    setPairID: function(sValue) { this._sPairID = sValue }
+    setPairID: function(sValue) { this._sPairID = sValue },
+
+    /**
+     * Get type
+     * @returns string
+     */
+    getType: function() { return this._sType },
+
+    /**
+     * Set type
+     * @para, sValue
+     */
+    setType: function(sValue) { this._sType = sValue }
 
 };

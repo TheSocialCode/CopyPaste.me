@@ -22,6 +22,7 @@ const CoreModule_Assert = require('assert');
 const CoreModule_Util = require('util');
 
 // import project classes
+const Device = require('./components/Device');
 const DeviceManager = require('./components/DeviceManager');
 const Pair = require('./components/Pair');
 const PairManager = require('./components/PairManager');
@@ -30,7 +31,6 @@ const MongoDB = require('./components/MongoDB');
 const Logger = require('./components/Logger');
 const StartupInfo = require('./components/StartupInfo');
 const ToggleDirectionStates = require('./../client/components/ToggleDirectionButton/ToggleDirectionStates');
-const ToggleDirectionEvents = require('./../client/components/ToggleDirectionButton/ToggleDirectionEvents');
 const ManualConnectEvents = require('./../client/components/ManualConnectButton/ManualConnectEvents');
 const ConnectorEvents = require('./../client/components/Connector/ConnectorEvents');
 
@@ -209,20 +209,22 @@ module.exports = {
         // 2. configure - sockets
         socket.on('disconnect', this._onSocketDisconnect.bind(this, socket));
 
-        // 3. configure - paring - primary device
-        socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_CONNECT, this._onPrimaryDeviceConnect.bind(this, socket));
-        socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_RECONNECT, this._onPrimaryDeviceReconnect.bind(this, socket));
-        socket.on(ConnectorEvents.prototype.PRIMARYDEVICE_REQUEST_TOKEN_REFRESH, this._onPrimaryDeviceRequestFreshToken.bind(this, socket));
+        // 3. configure primary device
+        socket.on(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_CONNECT, this._onRequestPrimaryDeviceConnect.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_FRESH_TOKEN, this._onRequestPrimaryDeviceFreshToken.bind(this, socket));
 
-        // 4. configure - pairing - secondary device
-        socket.on(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECT_BY_QR, this._onSecondaryDeviceConnectByQR.bind(this, socket));
-        socket.on(ConnectorEvents.prototype.SECONDARYDEVICE_RECONNECT, this._onSecondaryDeviceReconnect.bind(this, socket));
+        // 4. configure secondary device
+        socket.on(ConnectorEvents.prototype.REQUEST_SECONDARYDEVICE_CONNECT_BY_QR, this._onSecondaryDeviceConnectByQR.bind(this, socket));
 
-        // 4. configure - data events
-        //socket.on('data', this._onData.bind(this, socket));
+        // 5. configure both devices
+        socket.on(ConnectorEvents.prototype.REQUEST_DEVICE_RECONNECT, this._onRequestDeviceReconnect.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.DATA, this._onData.bind(this, socket));
+
+
+
 
         // 5. configure - setting events
-        //socket.on(ToggleDirectionEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
 
         // 6. configure - handshake events
         //socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE, this._onRequestManualCode.bind(this, socket));
@@ -248,10 +250,125 @@ module.exports = {
         // 2. clear configuration
         socket.removeAllListeners();
 
-        // 3. log
-        this.Mimoto.logger.log('Socket.id = ' + socket.id + ' has disconnected');
 
-        // 4. log
+
+
+
+        // // 2. load
+        // let device = this._aDevicesBySocketID['' + socket.id];
+        //
+        // // 3. cleanup
+        // delete this._aDevicesBySocketID['' + socket.id];
+        // delete this._aDevicesByDeviceID['' + device.getDeviceID()];
+        //
+        // // 4. register
+        // let sPairID = device.getPairID();
+        //
+        // // 5. validate
+        // if (!sPairID) return;
+        //
+        // // 6. register
+        // let pair = this._aPairs['' + device.getPairID()];
+        //
+        // // 7. validate
+        // if (pair === false) return;
+        //
+        //
+        //
+        // return;
+        //
+        //
+        // // 9. validate
+        // if (pair.primaryDevice && pair.primaryDevice.id === socket.id)
+        // {
+        //     // a. cleanup
+        //     pair.primaryDevice = null;
+        //
+        //     // b. send
+        //     if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_disconnected');
+        //
+        //     // c. log
+        //     this._dbCollection_pairs.updateMany(
+        //         {
+        //             "data.token": sToken
+        //         },
+        //         {
+        //             $push: { logs: { action: this._ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED, timestamp: new Date().toUTCString() } }
+        //         },
+        //         function(err, result)
+        //         {
+        //             CoreModule_Assert.equal(err, null);
+        //         }
+        //     );
+        // }
+        //
+        // // 10. validate
+        // if (pair.secondaryDevice && pair.secondaryDevice.id === socket.id)
+        // {
+        //     // a. cleanup
+        //     pair.secondaryDevice = null;
+        //
+        //     // b. send
+        //     if (pair.primaryDevice) pair.primaryDevice.emit('secondarydevice_disconnected');
+        //
+        //     // c. log
+        //     this._dbCollection_pairs.updateMany(
+        //         {
+        //             "data.token": sToken
+        //         },
+        //         {
+        //             $push: { logs: { action: this._ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED, timestamp: new Date().toUTCString() } }
+        //         },
+        //         function(err, result)
+        //         {
+        //             CoreModule_Assert.equal(err, null);
+        //         }
+        //     );
+        // }
+        //
+        // // 11. validate
+        // if (!pair.primaryDevice && !pair.secondaryDevice)
+        // {
+        //     // a. move
+        //     this._aIdlePairs[sToken] = pair;
+        //
+        //     // b. clear
+        //     delete this._aPairs[sToken];
+        //
+        //     // c. store
+        //     pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
+        //
+        //     // d. log
+        //     this._dbCollection_pairs.updateMany(
+        //         {
+        //             "data.token": sToken
+        //         },
+        //         {
+        //             $set: { "states.archived" : true },
+        //             $push: { logs: { action: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } }
+        //         },
+        //         function(err, result)
+        //         {
+        //             CoreModule_Assert.equal(err, null);
+        //         }
+        //     );
+        // }
+        //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // 3. log
         this._logUsers('Socket disconnected (socket.id = ' + socket.id + ')');
     },
 
@@ -263,12 +380,12 @@ module.exports = {
 
 
     /**
-     * Handle primary device `PRIMARYDEVICE_CONNECT`
+     * Handle primary device `REQUEST_PRIMARYDEVICE_CONNECT`
      * @param primaryDeviceSocket
      * @param sPrimaryDevicePublicKey
      * @private
      */
-    _onPrimaryDeviceConnect: function(primaryDeviceSocket, sPrimaryDevicePublicKey)
+    _onRequestPrimaryDeviceConnect: function(primaryDeviceSocket, sPrimaryDevicePublicKey)
     {
         // 1. init
         let pair = this.Mimoto.pairManager.initPair(primaryDeviceSocket, sPrimaryDevicePublicKey);
@@ -277,69 +394,23 @@ module.exports = {
         let token = this._tokenManager.createToken(pair);
 
         // 3. send
-        pair.getPrimaryDevice().emit(ConnectorEvents.prototype.PRIMARYDEVICE_CONNECTED, pair.getPrimaryDeviceID(), token.getValue(), token.getLifetime());
+        pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_PRIMARYDEVICE_CONNECTED, pair.getPrimaryDeviceID(), token.getValue(), token.getLifetime());
 
-
-        // ---
-
-
-        // 4. log
-        this.Mimoto.logger.logToFile('Primary Device with socket.id = ' + primaryDeviceSocket.id + ' requests token = ' + token.getValue());
-
-        // 5. output
+        // 4. output
         this._logUsers('Primary Device with socket.id = ' + primaryDeviceSocket.id + ' requests token = ' + token.getValue());
     },
 
     /**
-     * Handle primary device `PRIMARYDEVICE_RECONNECT`
+     * Handle device `REQUEST_DEVICE_RECONNECT`
      * @param socket
      * @param sDeviceID
      * @private
      */
-    _onPrimaryDeviceReconnect: function(socket, sDeviceID)
-    {
-        console.log('PRIMARY DEVICE askes for new RECONNECT feature');
-
-        // 1. forward
-        this._reconnectDevice('primary', socket, sDeviceID);
-    },
-
-    /**
-     * Handle primary device `SECONDARYDEVICE_RECONNECT`
-     * @param socket
-     * @param sDeviceID
-     * @private
-     */
-    _onSecondaryDeviceReconnect: function(socket, sDeviceID)
-    {
-        console.log('SECONDARY DEVICE askes for new RECONNECT feature');
-
-        // 1. forward
-        this._reconnectDevice('secondary', socket, sDeviceID);
-    },
-
-    /**
-     * Reconnect to device
-     * @param sDevice
-     * @param socket
-     * @param sDeviceID
-     * @private
-     */
-    _reconnectDevice: function(sDevice, socket, sDeviceID)
+    _onRequestDeviceReconnect: function(socket, sDeviceID)
     {
         // 1. load
         let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
         let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
-
-
-
-        // 1. if !originalDevice -> also check currents
-        // 2. zijn de devices leeg?
-
-
-        console.log('sDevice = `' + sDevice + '` (' +  sDeviceID + ') - originalDevice = ', originalDevice);
-
-
 
         // 2. validate
         if (!newDevice || !originalDevice)
@@ -348,7 +419,7 @@ module.exports = {
             this.Mimoto.logger.log('No original device after server restart sDeviceID = ' + sDeviceID);
 
             // b. send
-            socket.emit(ConnectorEvents.prototype.RECONNECT_DEVICEID_NOT_FOUND);
+            socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
 
             // c. exit
             return;
@@ -356,6 +427,13 @@ module.exports = {
 
         // 3. restore and merge
         let device = this.Mimoto.deviceManager.restoreAndMerge(originalDevice, newDevice);
+
+
+
+        console.log('sDevice = `' + device.getType() + '` (' +  sDeviceID + ') - originalDevice = ', originalDevice);
+
+
+
 
         // 4. load
         let pair = this.Mimoto.pairManager.getPairByDeviceID(sDeviceID);
@@ -367,32 +445,32 @@ module.exports = {
             this.Mimoto.logger.log('No pair connected to sDeviceID = ' + sDeviceID);
 
             // b. send
-            socket.emit(ConnectorEvents.prototype.RECONNECT_DEVICEID_NOT_FOUND);
+            socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
 
             // c. exit
             return;
         }
 
         // 6. select
-        switch(sDevice)
+        switch(device.getType())
         {
-            case 'primary':
+            case Device.prototype.PRIMARYDEVICE:
 
                 // a. store
                 if (!pair.reconnectPrimaryDevice(device)) return;
 
                 // b. send
-                if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.PRIMARYDEVICE_RECONNECTED);
+                if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_RECONNECTED);
 
                 break;
 
-            case 'secondary':
+            case Device.prototype.SECONDARYDEVICE:
 
                 // a. store
                 if (!pair.reconnectSecondaryDevice(device)) return;
 
                 // b. send
-                if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.SECONDARYDEVICE_RECONNECTED);
+                if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_RECONNECTED);
 
                 break;
 
@@ -405,22 +483,19 @@ module.exports = {
         // ---
 
 
-        // 7. log
-        this.Mimoto.logger.logToFile('Device `' + sDevice + '` with sDeviceID = `' + sDeviceID + '` reconnected to pair (socket.id = ' + socket.id + ')');
-
         // 8. output
-        this._logUsers('Device `' + sDevice + '` with sDeviceID = `' + sDeviceID + '` reconnected to pair (socket.id = ' + socket.id + ')');
+        this._logUsers('Device `' + device.getType() + '` with sDeviceID = `' + sDeviceID + '` reconnected to pair (socket.id = ' + socket.id + ')');
     },
 
 
 
     /**
-     * Handle primary device `PRIMARYDEVICE_REQUEST_TOKEN_REFRESH`
+     * Handle primary device `REQUEST_PRIMARYDEVICE_FRESH_TOKEN`
      * @param socket
      * @param sDeviceID
      * @private
      */
-    _onPrimaryDeviceRequestFreshToken: function(socket, sDeviceID)
+    _onRequestPrimaryDeviceFreshToken: function(socket, sDeviceID)
     {
         // 1. load
         let pair = this.Mimoto.pairManager.getPairByDeviceID(sDeviceID);
@@ -432,7 +507,7 @@ module.exports = {
         let token = this._tokenManager.createToken(pair);
 
         // 4. send
-        pair.getPrimaryDevice().emit(ConnectorEvents.prototype.PRIMARYDEVICE_TOKEN_REFRESHED, token.getValue(), token.getLifetime());
+        pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_PRIMARYDEVICE_FRESH_TOKEN, token.getValue(), token.getLifetime());
     },
 
 
@@ -451,9 +526,6 @@ module.exports = {
      */
     _onSecondaryDeviceConnectByQR: function(secondaryDeviceSocket, sSecondaryDevicePublicKey, sTokenValue)
     {
-        console.log('#._onSecondaryDeviceConnectByQR');
-
-
         // 1. load
         let device = this.Mimoto.deviceManager.getDeviceBySocketID(secondaryDeviceSocket.id);
 
@@ -466,7 +538,7 @@ module.exports = {
             this.Mimoto.logger.log('SECONDARYDEVICE_CONNECT_TOKEN_NOT_FOUND for sTokenValue=`' + sTokenValue + '` from socket.id=`' + secondaryDeviceSocket.id + '`');
 
             // a. broadcast
-            secondaryDeviceSocket.emit(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECT_TOKEN_NOT_FOUND);
+            secondaryDeviceSocket.emit(ConnectorEvents.prototype.ERROR_SECONDARYDEVICE_CONNECT_BY_QR_TOKEN_NOT_FOUND);
 
             // b. exit
             return;
@@ -482,19 +554,20 @@ module.exports = {
         pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_QR);
 
         // 7. update
-        secondaryDeviceSocket.emit(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECTED, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
+        secondaryDeviceSocket.emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_QR, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
+
+
+
+
+        // 1. OTHERDEVICE_CONNECTED
+
+
+
 
         // 8. send
-        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.SECONDARYDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey());
+        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey());
 
-
-        // ---
-
-
-        // 9. log
-        this.Mimoto.logger.logToFile('Primary Device with socket.id = ' + secondaryDeviceSocket.id + ' requests connection to token = ' + token.getValue());
-
-        // 10. output
+        // 9. output
         this._logUsers('Primary device with socket.id = ' + secondaryDeviceSocket.id + ' requests connection to token = ' + token.getValue());
     },
 
@@ -750,8 +823,8 @@ module.exports = {
         pair.direction = (pair.direction === ToggleDirectionStates.prototype.DEFAULT) ? ToggleDirectionStates.prototype.SWAPPED : ToggleDirectionStates.prototype.DEFAULT;
 
         // 4. send
-        pair.primaryDevice.emit(ToggleDirectionEvents.prototype.TOGGLE_DIRECTION, pair.direction);
-        pair.secondaryDevice.emit(ToggleDirectionEvents.prototype.TOGGLE_DIRECTION, pair.direction);
+        pair.primaryDevice.emit(ConnectorEvents.prototype.REQUEST_TOGGLE_DIRECTION, pair.direction);
+        pair.secondaryDevice.emit(ConnectorEvents.prototype.REQUEST_TOGGLE_DIRECTION, pair.direction);
     },
 
     /**
@@ -987,15 +1060,19 @@ module.exports = {
             sTitle + '\n' +
             '=========================' + '\n' +
             'Number of sockets:' + this.Mimoto.deviceManager.getNumberOfDevices() + '\n' +
-            'Number of active pairs:' + this.Mimoto.pairManager.getNumberOfActivePairs() + '\n' +
-            'Number of inactive pairs:' + this.Mimoto.pairManager.getNumberOfInactivePairs() + '\n' +
+            'Number of pairs:' + this.Mimoto.pairManager.getNumberOfActivePairs() + '\n' +
+            'Number of idle pairs:' + this.Mimoto.pairManager.getNumberOfIdlePairs() + '\n' +
             //'---' + '\n' +
             //'Number of pairs that established connection between both devices:' + Object.keys(this._aConnectedPairs).length + '\n' +
             //'Number of pairs that have been used to send data:' + Object.keys(this._aUsedPairs).length +
             '\n';
 
-        // 2. output
+        // 2. output to file
         this.Mimoto.logger.logToFile(sOutput);
+
+        // 3. output to console
+        this.Mimoto.logger.log(sOutput);
+
 
         // 3. output
         this.Mimoto.logger.log('');
@@ -1003,6 +1080,9 @@ module.exports = {
         this.Mimoto.logger.log('Devices by socket ID');
         this.Mimoto.logger.log('=========================');
         this.Mimoto.logger.log(this.Mimoto.deviceManager.getAllDevicesBySocketID());
+
+
+
         this.Mimoto.logger.log('Devices by device ID');
         this.Mimoto.logger.log('=========================');
         this.Mimoto.logger.log(this.Mimoto.deviceManager.getAllDevicesByDeviceID());
@@ -1010,11 +1090,11 @@ module.exports = {
         this.Mimoto.logger.log('=========================');
         this.Mimoto.logger.log(this.Mimoto.deviceManager.getAllOfflineDevices());
         this.Mimoto.logger.log('=========================');
-        this.Mimoto.logger.log('Active pairs');
+        this.Mimoto.logger.log('Pairs');
         this.Mimoto.logger.log('-------------------------');
         this.Mimoto.logger.log(this.Mimoto.pairManager.getActivePairs());
         this.Mimoto.logger.log('');
-        // this.Mimoto.logger.log('Inactive pairs');
+        // this.Mimoto.logger.log('Idle pairs');
         // this.Mimoto.logger.log('-------------------------');
         // this.Mimoto.logger.log(this._aInactivePairs);
         //this.Mimoto.logger.log(CoreModule_Util.inspect(this._aInactivePairs, false, null, true));

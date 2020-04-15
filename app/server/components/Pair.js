@@ -8,6 +8,7 @@
 
 
 // import project classes
+const Device = require('./Device');
 const Pair = require('./Pair');
 const Utils = require('./../utils/Utils');
 const ConnectorEvents = require('./../../client/components/Connector/ConnectorEvents');
@@ -55,19 +56,20 @@ module.exports.prototype = {
     },
 
     // action types
-    ACTIONTYPE_CREATED: 'created',
-    ACTIONTYPE_DISCONNECTED: 'disconnected',
-    ACTIONTYPE_TERMINATED: 'terminated',
-    ACTIONTYPE_TOKEN_REQUEST: 'token_requested',
-    ACTIONTYPE_ARCHIVED: 'archived',
-    ACTIONTYPE_UNARCHIVED: 'unarchived',
-    ACTIONTYPE_DATA: 'data',
-    ACTIONTYPE_DATA_START: 'data_start',
-    ACTIONTYPE_DATA_FINISH: 'data_finish',
-    ACTIONTYPE_PRIMARYDEVICE_CONNECTED: 'primarydevice_connected',
-    ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED: 'primarydevice_disconnected',
-    ACTIONTYPE_SECONDARYDEVICE_CONNECTED: 'secondarydevice_connected',
-    ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED: 'secondarydevice_disconnected',
+    ACTIONTYPE_CREATED: 'CREATED',
+    ACTIONTYPE_DISCONNECTED: 'DISCONNECTED',
+    ACTIONTYPE_TERMINATED: 'TERMINDATED',
+    ACTIONTYPE_TOKEN_REQUEST: 'TOKEN_REQUESTED',
+    ACTIONTYPE_ARCHIVED: 'ARCHIVED',
+    ACTIONTYPE_UNARCHIVED: 'UNARCHIVED',
+    ACTIONTYPE_DATA: 'DATA',
+    ACTIONTYPE_DATA_START: 'DATA_START',
+    ACTIONTYPE_DATA_FINISH: 'DATA_FINISH',
+    ACTIONTYPE_PRIMARYDEVICE_CONNECTED: 'PRIMARYDEVICE_CONNECTED',
+    ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED: 'PRIMARYDEVICE_DISCONNECTED',
+    ACTIONTYPE_SECONDARYDEVICE_CONNECTED: 'SECONDARYDEVICE_CONNECTED',
+    ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED: 'SECONDARYDEVICE_DISCONNECTED',
+    ACTIONTYPE_SECURITYCOMPROMISED: 'SECURITY_COMPROMISED',
 
 
 
@@ -107,7 +109,6 @@ module.exports.prototype = {
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').insertOne(
             {
                 id: this._sPairID,
-                created: Utils.prototype.buildDate(),
                 data: {
                     connectiontype: null,
                     direction: this._sDirection
@@ -120,7 +121,7 @@ module.exports.prototype = {
 
                 },
                 logs: [
-                    { action: this.ACTIONTYPE_CREATED, timestamp: Utils.prototype.buildDate() }
+                    { action: this.ACTIONTYPE_CREATED }
                 ]
             }
         );
@@ -143,13 +144,10 @@ module.exports.prototype = {
         // 1. validate
         if (this.hasPrimaryDevice() || (this.getPrimaryDeviceID() && this.getPrimaryDeviceID() !== device.getID()))
         {
-            // a. output
-            this.Mimoto.logger.log('Pair already has a primary device connected. sPairID = ' + this.getID());
+            // a. act
+            this._handlePossibleSecurityBreach(device, 'primary');
 
-            // b. broadcast
-            this.dispatchEvent(ConnectorEvents.prototype.SECURITY_COMPROMISED, device, this);
-
-            // c. error
+            // b. error
             return false;
         }
 
@@ -171,13 +169,10 @@ module.exports.prototype = {
         // 1. validate
         if (this.hasSecondaryDevice() || (this.getSecondaryDeviceID() && this.getSecondaryDeviceID() !== device.getID()))
         {
-            // a. output
-            this.Mimoto.logger.log('Pair already has a secondary device connected. sPairID = ' + this.getID());
+            // a. act
+            this._handlePossibleSecurityBreach(device, 'secondary');
 
-            // b. broadcast
-            this.dispatchEvent(ConnectorEvents.prototype.SECURITY_COMPROMISED, device, this);
-
-            // c. error
+            // b. error
             return false;
         }
 
@@ -188,6 +183,7 @@ module.exports.prototype = {
 
         // 3. store
         device.setPairID(this.getID());
+        device.setType(Device.prototype.SECONDARYDEVICE);
 
 
         // ---
@@ -203,7 +199,7 @@ module.exports.prototype = {
             },
             {
                 $set: { "states.connectionEstablished" : this._states.connectionEstablished },
-                $push: { logs: { action: this.ACTIONTYPE_SECONDARYDEVICE_CONNECTED, timestamp: new Date().toUTCString() } }
+                $push: { logs: { action: this.ACTIONTYPE_SECONDARYDEVICE_CONNECTED } }
             },
             function(err, result)
             {
@@ -229,13 +225,10 @@ module.exports.prototype = {
         // 1. validate
         if (this.hasSecondaryDevice() || (this.getSecondaryDeviceID() && this.getSecondaryDeviceID() !== device.getID()))
         {
-            // a. output
-            this.Mimoto.logger.log('Pair already has a secondary device connected. sPairID = ' + this.getID());
+            // a. act
+            this._handlePossibleSecurityBreach(device, 'secondary');
 
-            // b. broadcast
-            this.dispatchEvent(ConnectorEvents.prototype.SECURITY_COMPROMISED, device, this);
-
-            // c. error
+            // b. error
             return false;
         }
 
@@ -389,6 +382,49 @@ module.exports.prototype = {
     setDirection: function(sValue)
     {
         this._sPrimaryDevicePublicKey = sValue;
+    },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Private functions ------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
+     * Handle possible security breach
+     * @param device
+     * @private
+     */
+    _handlePossibleSecurityBreach: function(device, sDeviceLabel)
+    {
+        // 1. output
+        this.Mimoto.logger.log('Pair already has a ' + sDeviceLabel + ' device connected. sPairID = ' + this.getID());
+
+        // 2. broadcast
+        this.dispatchEvent(ConnectorEvents.prototype.SECURITY_COMPROMISED, device, this);
+
+
+        // ---
+
+
+        // 3. toggle
+        this._states.securityCompromised = true;
+
+        // 4. store
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+            {
+                "id": this.getID()
+            },
+            {
+                $set: { "states.securityCompromised" : this._states.securityCompromised },
+                $push: { logs: { action: this.ACTIONTYPE_SECURITYCOMPROMISED } }
+            },
+            function(err, result)
+            {
+                CoreModule_Assert.equal(err, null);
+            }
+        );
     }
 
 };

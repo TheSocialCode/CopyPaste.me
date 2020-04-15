@@ -110,8 +110,6 @@ module.exports.prototype = {
      */
     restoreAndMerge: function(originalDevice, newDevice)
     {
-        console.log('restoreAndMerge - original = ', originalDevice.getID(), 'new = ', newDevice.getID());
-
         // 1. transfer
         originalDevice.updateSocket(newDevice.getSocket());
 

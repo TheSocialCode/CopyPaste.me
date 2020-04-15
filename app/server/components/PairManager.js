@@ -109,6 +109,7 @@ module.exports.prototype = {
 
         // 6. store
         device.setPairID(pair.getID());
+        device.setType(Device.prototype.PRIMARYDEVICE);
 
         // 7. send
         return pair;
@@ -157,9 +158,25 @@ module.exports.prototype = {
         // 2. verify
         if (!pair) return;
 
-        // 3. cleanup
-        if (pair.getPrimaryDeviceID() === device.getID()) pair.clearPrimaryDevice();
-        if (pair.getSecondaryDeviceID() === device.getID()) pair.clearSecondaryDevice();
+        // 3. verify
+        if (pair.getPrimaryDeviceID() === device.getID())
+        {
+            // a. cleanup
+            pair.clearPrimaryDevice();
+
+            // b. report
+            if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_DISCONNECTED);
+        }
+
+        // 4. verify
+        if (pair.getSecondaryDeviceID() === device.getID())
+        {
+            // a. cleanup
+            pair.clearSecondaryDevice();
+
+            // b. report
+            if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_DISCONNECTED);
+        }
     },
 
     /**
@@ -266,10 +283,10 @@ module.exports.prototype = {
     },
 
     /**
-     * Get number of inactive pairs
+     * Get number of idle pairs
      * @returns number
      */
-    getNumberOfInactivePairs: function()
+    getNumberOfIdlePairs: function()
     {
         return Object.keys(this._aIdlePairs).length;
     },
@@ -280,118 +297,3 @@ module.exports.prototype = {
     }
 
 };
-
-
-
-// unregisterSocket: function(socket)
-// {
-    // // 1. clear configuration
-    // socket.removeAllListeners();
-    //
-    // // 2. load
-    // let device = this._aDevicesBySocketID['' + socket.id];
-    //
-    // // 3. cleanup
-    // delete this._aDevicesBySocketID['' + socket.id];
-    // delete this._aDevicesByDeviceID['' + device.getDeviceID()];
-    //
-    // // 4. register
-    // let sPairID = device.getPairID();
-    //
-    // // 5. validate
-    // if (!sPairID) return;
-    //
-    // // 6. register
-    // let pair = this._aPairs['' + device.getPairID()];
-    //
-    // // 7. validate
-    // if (pair === false) return;
-    //
-    //
-    //
-    // return;
-    //
-    //
-    // // 9. validate
-    // if (pair.primaryDevice && pair.primaryDevice.id === socket.id)
-    // {
-    //     // a. cleanup
-    //     pair.primaryDevice = null;
-    //
-    //     // b. send
-    //     if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_disconnected');
-    //
-    //     // c. log
-    //     this._dbCollection_pairs.updateMany(
-    //         {
-    //             "data.token": sToken
-    //         },
-    //         {
-    //             $push: { logs: { action: this._ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED, timestamp: new Date().toUTCString() } }
-    //         },
-    //         function(err, result)
-    //         {
-    //             CoreModule_Assert.equal(err, null);
-    //         }
-    //     );
-    // }
-    //
-    // // 10. validate
-    // if (pair.secondaryDevice && pair.secondaryDevice.id === socket.id)
-    // {
-    //     // a. cleanup
-    //     pair.secondaryDevice = null;
-    //
-    //     // b. send
-    //     if (pair.primaryDevice) pair.primaryDevice.emit('secondarydevice_disconnected');
-    //
-    //     // c. log
-    //     this._dbCollection_pairs.updateMany(
-    //         {
-    //             "data.token": sToken
-    //         },
-    //         {
-    //             $push: { logs: { action: this._ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED, timestamp: new Date().toUTCString() } }
-    //         },
-    //         function(err, result)
-    //         {
-    //             CoreModule_Assert.equal(err, null);
-    //         }
-    //     );
-    // }
-    //
-    // // 11. validate
-    // if (!pair.primaryDevice && !pair.secondaryDevice)
-    // {
-    //     // a. move
-    //     this._aIdlePairs[sToken] = pair;
-    //
-    //     // b. clear
-    //     delete this._aPairs[sToken];
-    //
-    //     // c. store
-    //     pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
-    //
-    //     // d. log
-    //     this._dbCollection_pairs.updateMany(
-    //         {
-    //             "data.token": sToken
-    //         },
-    //         {
-    //             $set: { "states.archived" : true },
-    //             $push: { logs: { action: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } }
-    //         },
-    //         function(err, result)
-    //         {
-    //             CoreModule_Assert.equal(err, null);
-    //         }
-    //     );
-    // }
-    //
-    //
-    // // --- log ---
-    //
-    //
-    // // 12. output
-    // this._logUsers('User disconnected (socket.id = ' + socket.id + ')');
-//},

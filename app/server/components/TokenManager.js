@@ -114,15 +114,11 @@ module.exports.prototype = {
         // 2. register
         let token = this._aTokens['' + sTokenValue];
 
-        // 3. validate
-        if (!token.isValid())
-        {
-            // a. cleanup
-            delete this._aTokens['' + sTokenValue];
+        // 3. cleanup (use once)
+        delete this._aTokens['' + sTokenValue];
 
-            // b. respond
-            return false;
-        }
+        // 3. validate or return error
+        if (!token.isValid()) return false;
 
         // 4. send
         return token;

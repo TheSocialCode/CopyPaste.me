@@ -54,6 +54,10 @@ module.exports.prototype = {
     // data
     _manualCode: null,
 
+    // events
+    REQUEST_TOKEN_REFRESH: 'REQUEST_TOKEN_REFRESH',
+    REQUEST_TOGGLE_MANUALCONNECT: 'REQUEST_TOGGLE_MANUALCONNECT',
+
 
 
     // ----------------------------------------------------------------------------
@@ -120,6 +124,11 @@ module.exports.prototype = {
     // ----------------------------------------------------------------------------
 
 
+    /**
+     * Set token
+     * @param sToken
+     * @param nTokenLifetime
+     */
     setToken: function(sToken, nTokenLifetime)
     {
         // 1. compose
@@ -137,10 +146,21 @@ module.exports.prototype = {
         this._timerTokenExpires = setTimeout(this._onTimerTokenExpires.bind(this), nTokenLifetime);
     },
 
+    /**
+     * Handle timer `token expires`
+     * @private
+     */
     _onTimerTokenExpires: function()
     {
-        this.dispatchEvent(ConnectorEvents.prototype.REQUEST_TOKEN_REFRESH)
+        this.dispatchEvent(this.REQUEST_TOKEN_REFRESH);
     },
+
+
+
+
+
+
+
 
     setManualCode: function(manualCode)
     {

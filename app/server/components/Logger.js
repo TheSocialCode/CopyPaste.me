@@ -23,6 +23,7 @@ module.exports.prototype = {
     // data
     _sLogFile: null,
     _bOutputToConsole: false,
+    _bBlockOutput: false,
 
 
     // ----------------------------------------------------------------------------
@@ -53,10 +54,13 @@ module.exports.prototype = {
      */
     log: function(sOutput, bForceOutput)
     {
-        // 1. validate
+        // 1. verify
+        if (this._bBlockOutput) return;
+
+        // 2. validate
         if (!this._bOutputToConsole && !bForceOutput) return;
 
-        // 2. verify and output
+        // 3. verify and output
         if (console && console.log) console.log(sOutput);
     },
 
@@ -66,8 +70,29 @@ module.exports.prototype = {
      */
     logToFile: function(sOutput)
     {
-        // 1. verify and output
+        // 1. verify
+        if (this._bBlockOutput) return;
+
+        // 2. verify and output
         if (this._sLogFile) Module_LogToFile(sOutput, this._sLogFile);
+    },
+
+    /**
+     * Block output
+     */
+    blockOutput: function()
+    {
+        // 1. toggle
+        this._bBlockOutput = true;
+    },
+
+    /**
+     * Unblock output
+     */
+    unblockOutput: function()
+    {
+        // 1. toggle
+        this._bBlockOutput = false;
     }
 
 };
