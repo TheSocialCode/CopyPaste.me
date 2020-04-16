@@ -811,20 +811,25 @@ module.exports = {
         );
     },
 
+    /**
+     * Handle `REQUEST_TOGGLE_DIRECTION`
+     * @param socket
+     * @private
+     */
     _onRequestToggleDirection: function(socket)
     {
         // 1. load
-        let pair = this._getPairBySocket(socket);
+        let pair = this.Mimoto.pairManager.getPairBySocketID(socket.id);
 
         // 2. validate
-        if (pair === false || !pair.primaryDevice || !pair.secondaryDevice) return;
+        if (pair === false) return;
 
         // 3. toggle
-        pair.direction = (pair.direction === ToggleDirectionStates.prototype.DEFAULT) ? ToggleDirectionStates.prototype.SWAPPED : ToggleDirectionStates.prototype.DEFAULT;
+        pair.toggleDirection();
 
         // 4. send
-        pair.primaryDevice.emit(ConnectorEvents.prototype.REQUEST_TOGGLE_DIRECTION, pair.direction);
-        pair.secondaryDevice.emit(ConnectorEvents.prototype.REQUEST_TOGGLE_DIRECTION, pair.direction);
+        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_TOGGLE_DIRECTION, pair.getDirection());
+        if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_TOGGLE_DIRECTION, pair.getDirection());
     },
 
     /**
@@ -983,74 +988,6 @@ module.exports = {
             this._timerManualCodes = null;
         }
     },
-
-    // _getPairBySocket: function(socket)
-    // {
-    //     // 1. load
-    //     let sToken = this._getTokenBySocket(socket);
-    //
-    //     // 2. validate
-    //     if (sToken === false) return false;
-    //
-    //     // 3. load and send
-    //     return this._getPairByToken(sToken);
-    // },
-    //
-    // _getTokenBySocket: function(socket)
-    // {
-    //     // 1. validate
-    //     if (!this._aSockets['' + socket.id]) return;
-    //
-    //     // 2. load
-    //     let registeredSocket = this._aSockets['' + socket.id];
-    //
-    //     // 3. register
-    //     let sToken = registeredSocket.sToken;
-    //
-    //     // 4. validate
-    //     if (!sToken) return false;
-    //
-    //     // 5. load and send
-    //     return sToken;
-    // },
-    //
-    // _getPairByToken: function(sToken)
-    // {
-    //     // 1. prepare
-    //     sToken = '' + sToken;
-    //
-    //     // 2. init
-    //     let pair = false;
-    //
-    //     // 3. locate
-    //     if (this._aActivePairs[sToken])
-    //     {
-    //         // a. register
-    //         pair = this._aActivePairs[sToken];
-    //     }
-    //     else
-    //     {
-    //         // a. validate
-    //         if (this._aInactivePairs[sToken])
-    //         {
-    //             // I. register
-    //             pair = this._aInactivePairs[sToken];
-    //
-    //             // II. move
-    //             this._aActivePairs[sToken] = pair;
-    //
-    //             // II. clear
-    //             delete this._aInactivePairs[sToken];
-    //
-    //             // IV. store
-    //             pair.log.push( { type: this._ACTIONTYPE_UNARCHIVED, timestamp: new Date().toUTCString() } );
-    //         }
-    //     }
-    //
-    //     // 4. send
-    //     return pair;
-    // },
-
 
 
     _logUsers: function(sTitle)

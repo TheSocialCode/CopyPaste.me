@@ -50,5 +50,6 @@ module.exports.prototype = {
 
     // functionality
     REQUEST_TOGGLE_DIRECTION: 'REQUEST_TOGGLE_DIRECTION',
+    UPDATE_TOGGLE_DIRECTION: 'UPDATE_TOGGLE_DIRECTION',
 
 };

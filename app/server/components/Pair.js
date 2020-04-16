@@ -372,7 +372,7 @@ module.exports.prototype = {
      */
     getDirection: function()
     {
-        return this._sPrimaryDevicePublicKey;
+        return this._sDirection;
     },
 
     /**
@@ -381,7 +381,15 @@ module.exports.prototype = {
      */
     setDirection: function(sValue)
     {
-        this._sPrimaryDevicePublicKey = sValue;
+        this._sDirection = sValue;
+    },
+
+    /**
+     * Toggle pair's communication direction
+     */
+    toggleDirection: function()
+    {
+        this._sDirection = (this._sDirection === ToggleDirectionStates.prototype.DEFAULT) ? ToggleDirectionStates.prototype.SWAPPED : ToggleDirectionStates.prototype.DEFAULT;
     },
 
 

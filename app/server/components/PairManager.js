@@ -138,6 +138,29 @@ module.exports.prototype = {
         return pair;
     },
 
+    /**
+     * Get pair by socket ID
+     * @param sSocketID
+     * @returns {boolean}
+     */
+    getPairBySocketID: function(sSocketID)
+    {
+        // 1. load
+        let device = this.Mimoto.deviceManager.getDeviceBySocketID(sSocketID);
+
+        // 2. validate
+        if (device === false || !device.getPairID()) return false;
+
+        // 3. load
+        let pair = this._aPairs['' + device.getPairID()];
+
+        // 4. validate
+        if (!pair) return false;
+
+        // 5. send
+        return pair;
+    },
+
 
 
     // ----------------------------------------------------------------------------

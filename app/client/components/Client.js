@@ -237,10 +237,10 @@ module.exports.prototype = {
         this._toggleDirectionButton = new ToggleDirectionButton();
 
         // 10. configure
-        this._socket.on(ConnectorEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onToggleDirection.bind(this));
+        this._socket.on(ConnectorEvents.prototype.UPDATE_TOGGLE_DIRECTION, this._onUpdateToggleDirection.bind(this));
 
         // 11. configure
-        this._toggleDirectionButton.addEventListener(ToggleDirectionButton.prototype.TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this));
+        this._toggleDirectionButton.addEventListener(ToggleDirectionButton.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this));
 
 
         // --- manual connect
@@ -399,7 +399,7 @@ module.exports.prototype = {
     },
 
     /**
-     * Handle event `request_toggle_direction`
+     * Handle event `REQUEST_TOGGLE_DIRECTION`
      * @private
      */
     _onRequestToggleDirection: function()
@@ -521,58 +521,6 @@ module.exports.prototype = {
         // 3. forward
         this._onSecondaryDeviceConnectedToToken(sPrimaryDevicePublicKey, sDirection);
     },
-
-    /**
-     * Handle event `toggle_direction`
-     * @param sDirection
-     * @private
-     */
-    _onToggleDirection: function(sDirection)
-    {
-        // 1. store
-        this._sDirection = sDirection;
-
-        // 2. verify
-        if (sDirection !== ToggleDirectionStates.prototype.SWAPPED)
-        {
-            // a. toggle visibility
-            if (this._bIsPrimaryDevice)
-            {
-                this._toggleDirectionButton.show();
-                this._dataInput.hide();
-                this._dataOutput.unmute();
-                this._dataOutput.show();
-            }
-            else
-            {
-                this._toggleDirectionButton.hide();
-                this._dataInput.show();
-                this._dataOutput.mute();
-                this._dataOutput.hide();
-            }
-        }
-        else
-        {
-            // a. toggle visibility
-            if (this._bIsPrimaryDevice)
-            {
-                this._toggleDirectionButton.hide();
-                this._dataInput.show();
-                this._dataOutput.mute();
-                this._dataOutput.hide();
-            }
-            else
-            {
-                this._toggleDirectionButton.show();
-                this._dataInput.hide();
-                this._dataOutput.unmute();
-                this._dataOutput.show();
-            }
-        }
-    },
-
-
-
 
 
 
@@ -758,6 +706,58 @@ module.exports.prototype = {
             this._dataInput.show();
         }
     },
+
+    /**
+     * Handle event `UPDATE_TOGGLE_DIRECTION`
+     * @param sDirection
+     * @private
+     */
+    _onUpdateToggleDirection: function(sDirection)
+    {
+        // 1. store
+        this._sDirection = sDirection;
+
+        // 2. verify
+        if (sDirection !== ToggleDirectionStates.prototype.SWAPPED)
+        {
+            // a. toggle visibility
+            if (this._bIsPrimaryDevice)
+            {
+                this._toggleDirectionButton.show();
+                this._dataInput.hide();
+                this._dataOutput.unmute();
+                this._dataOutput.show();
+            }
+            else
+            {
+                this._toggleDirectionButton.hide();
+                this._dataInput.show();
+                this._dataOutput.mute();
+                this._dataOutput.hide();
+            }
+        }
+        else
+        {
+            // a. toggle visibility
+            if (this._bIsPrimaryDevice)
+            {
+                this._toggleDirectionButton.hide();
+                this._dataInput.show();
+                this._dataOutput.mute();
+                this._dataOutput.hide();
+            }
+            else
+            {
+                this._toggleDirectionButton.show();
+                this._dataInput.hide();
+                this._dataOutput.unmute();
+                this._dataOutput.show();
+            }
+        }
+    },
+
+
+
 
     /**
      * Handle PackageManager event `DATA_READY_FOR TRANSFER`

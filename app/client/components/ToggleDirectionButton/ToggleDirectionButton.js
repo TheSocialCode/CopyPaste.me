@@ -27,7 +27,7 @@ module.exports.prototype = {
     _elButton: null,
 
     // events
-    TOGGLE_DIRECTION: 'onToggleDirection',
+    REQUEST_TOGGLE_DIRECTION: 'REQUEST_TOGGLE_DIRECTION',
 
 
     // ----------------------------------------------------------------------------
