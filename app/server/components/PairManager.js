@@ -99,6 +99,9 @@ module.exports.prototype = {
         let pair = new Pair(primaryDeviceSocket, sPrimaryDevicePublicKey, device.getID());
 
         // 3. configure
+        pair.addEventListener(Pair.prototype.ACTIVE, this._onPairActive.bind(this, pair));
+        pair.addEventListener(Pair.prototype.IDLE, this._onPairIdle.bind(this, pair));
+        pair.addEventListener(Pair.prototype.EXPIRED, this._onPairExpired.bind(this, pair));
         pair.addEventListener(ConnectorEvents.prototype.ERROR_SECURITY_COMPROMISED, this._onPairSecurityCompromised.bind(this));
 
         // 4. store
@@ -226,6 +229,12 @@ module.exports.prototype = {
 
     },
 
+    /**
+     * Handle pair `ERROR_SECURITY_COMPROMISED`
+     * @param requestingDevice
+     * @param pair
+     * @private
+     */
     _onPairSecurityCompromised: function(requestingDevice, pair)
     {
         // 1. warn
@@ -269,6 +278,9 @@ module.exports.prototype = {
         if (!pair) return;
 
 
+
+
+
         // if (pair.getPrimaryDeviceID())
         // {
         //     this.Mimoto.deviceManager.
@@ -278,6 +290,11 @@ module.exports.prototype = {
         
         //(inactivepars = subset)
         //aIdlePairs = subset 
+
+
+        // 1. cleanup
+        if (this._aPairs[pair.getID()]) delete this._aPairs[pair.getID()];
+        if (this._aIdlePairs[pair.getID()]) delete this._aIdlePairs[pair.getID()];
 
 
 
@@ -317,6 +334,52 @@ module.exports.prototype = {
     getActivePairs: function()
     {
         return this._aPairs;
+    },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Private functions ------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
+     * Handle pair `ACTIVE`
+     * @param pair
+     * @private
+     */
+    _onPairActive: function(pair)
+    {
+        // 1. cleanup
+        if (this._aIdlePairs[pair.getID()]) delete this._aIdlePairs[pair.getID()];
+    },
+
+    /**
+     * Handle pair `IDLE`
+     * @param pair
+     * @private
+     */
+    _onPairIdle: function(pair)
+    {
+        // 1. store
+        if (!this._aIdlePairs[pair.getID()]) this._aIdlePairs[pair.getID()] = pair;
+    },
+
+    /**
+     * Handle pair `EXPIRED`
+     * @param pair
+     * @private
+     */
+    _onPairExpired: function(pair)
+    {
+        // 1. report
+        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.NOTIFICATION_PAIR_EXPIRED);
+
+        // 2. report
+        if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.NOTIFICATION_PAIR_EXPIRED);
+
+        // 3. cleanup
+        this.destroy(pair.getID());
     }
 
 };

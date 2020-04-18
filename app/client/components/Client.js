@@ -175,23 +175,20 @@ module.exports.prototype = {
             this._socket.on(ConnectorEvents.prototype.ERROR_SECONDARYDEVICE_CONNECT_BY_QR_TOKEN_NOT_FOUND, this._onErrorSecondaryDeviceConnectByQRTokenNotFound.bind(this));
             this._socket.on(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_QR, this._onUpdateSecondaryDeviceConnectedByQR.bind(this));
             this._socket.on(ConnectorEvents.prototype.ERROR_SECONDARYDEVICE_CONNECT_BY_MANUALCODE_TOKEN_NOT_FOUND, this._onErrorSecondaryDeviceConnectByManualCodeTokenNotFound.bind(this));
-
-
             this._socket.on(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_MANUALCODE_ACCEPTED, this._onUpdateSecondaryDeviceManualCodeAccepted.bind(this));
-
-
-
             this._socket.on(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_MANUALCODE, this._onUpdateSecondaryDeviceConnectedByManualCode.bind(this));
-
         }
 
         // 3. configure
-        this._socket.on(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND, this._onErrorDeviceReconnectDeviceIDNotFound.bind(this));
-        this._socket.on(ConnectorEvents.prototype.ERROR_SECURITY_COMPROMISED, this._onErrorSecurityCompromised.bind(this));
+
         this._socket.on(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_DISCONNECTED, this._onUpdateOtherDeviceDisconnected.bind(this));
         this._socket.on(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_RECONNECTED, this._onUpdateOtherDeviceReconnected.bind(this));
         this._socket.on(ConnectorEvents.prototype.RECEIVE_DATA, this._onReceiveData.bind(this));
 
+        // 4. configure security
+        this._socket.on(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND, this._onErrorDeviceReconnectDeviceIDNotFound.bind(this));
+        this._socket.on(ConnectorEvents.prototype.ERROR_SECURITY_COMPROMISED, this._onErrorSecurityCompromised.bind(this));
+        this._socket.on(ConnectorEvents.prototype.NOTIFICATION_PAIR_EXPIRED, this._onDeviceNotificationPairExpired.bind(this));
 
 
         // --- data output
@@ -795,6 +792,27 @@ module.exports.prototype = {
     // --- Private functions - Security -------------------------------------------
     // ----------------------------------------------------------------------------
 
+
+    /**
+     * Handle device `NOTIFICATION_PAIR_EXPIRED`
+     * @private
+     */
+    _onDeviceNotificationPairExpired: function()
+    {
+        // 1. toggle visibility
+        if (this._connector) this._connector.hide();
+        if (this._manualConnectInput) this._manualConnectInput.hide();
+        if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
+        if (this._dataOutput) this._dataOutput.hide();
+        if (this._dataInput) this._dataInput.hide();
+        if (this._toggleDirectionButton) this._toggleDirectionButton.hide();
+
+        // 2. cleanup
+        this._killConnection();
+
+        // 3. output
+        this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to make a new connection.', true);
+    },
 
     /**
      * Handle event `ERROR_SECURITY_COMPROMISED`

@@ -36,6 +36,7 @@ module.exports.prototype = {
     // settings
     _sPairID: null,
     _nCreated: 0,
+    _bIsActive: false,
 
     // devices
     _primaryDeviceSocket: null,
@@ -51,14 +52,7 @@ module.exports.prototype = {
 
     // config
     _sDirection: '',
-    _sConnectionType: null,
-
-    _states: {
-        connectionEstablished: false,
-        securityCompromised: false,
-        dataSent: false,
-        archived: false
-    },
+    //_sConnectionType: null,
 
     // action types
     ACTIONTYPE_CREATED: 'CREATED',
@@ -77,6 +71,18 @@ module.exports.prototype = {
     ACTIONTYPE_SECONDARYDEVICE_CONNECTED_INVITE: 'SECONDARYDEVICE_CONNECTED_INVITE',
     ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED: 'SECONDARYDEVICE_DISCONNECTED',
     ACTIONTYPE_SECURITYCOMPROMISED: 'SECURITY_COMPROMISED',
+
+    // utils
+    _timerExpiration: null,
+
+    // settings
+    MAX_IDLE_TIME: 24 * 60 * 60 * 1000,
+
+    // events
+    ACTIVE: 'ACTIVE',
+    IDLE: 'IDLE',
+    EXPIRED: 'EXPIRED',
+
 
 
 
@@ -108,18 +114,22 @@ module.exports.prototype = {
         this._sPrimaryDevicePublicKey = sPublicKey;
         this._sPrimaryDeviceID = sDeviceID;
 
+        // 4. update
+        this._updateExpirationDate();
+
 
         // ---
 
-        // 4. store
+
+        // 5. store
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').insertOne(
             {
                 id: this._sPairID,
                 states: {
-                    connectionEstablished: this._states.connectionEstablished,
-                    securityCompromised: this._states.securityCompromised,
-                    dataSent: this._states.dataSent,
-                    archived: this._states.archived,
+                    connectionEstablished: false,
+                    securityCompromised: false,
+                    dataSent: false,
+                    archived: false
                 }
             }
         );
@@ -152,7 +162,10 @@ module.exports.prototype = {
         // 2. replace
         this._primaryDeviceSocket = device.getSocket();
 
-        // 3. success
+        // 3. update
+        this._updateExpirationDate();
+
+        // 4. success
         return true;
     },
 
@@ -184,12 +197,12 @@ module.exports.prototype = {
         device.setPairID(this.getID());
         device.setType(Device.prototype.SECONDARYDEVICE);
 
+        // 4. update
+        this._updateExpirationDate();
+
 
         // ---
 
-
-        // 4. toggle
-        this._states.connectionEstablished = true;
 
         // 5. init
         let sAction = '';
@@ -208,7 +221,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "states.connectionEstablished" : this._states.connectionEstablished },
+                $set: { "states.connectionEstablished" : true },
                 $push: { logs: { action: sAction, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)
@@ -245,7 +258,10 @@ module.exports.prototype = {
         // 2. replace
         this._secondaryDeviceSocket = device.getSocket();
 
-        // 3. success
+        // 3. update
+        this._updateExpirationDate();
+
+        // 4. success
         return true;
     },
 
@@ -276,7 +292,7 @@ module.exports.prototype = {
         let device = this.Mimoto.deviceManager.getDeviceByDeviceID(this._sSecondaryDeviceID);
 
         // 2. convert
-        this.connectSecondaryDevice(this._unconfirmedSecondaryDeviceSocket, this._sSecondaryDevicePublicKey, device, Token.prototype.TYPE_MANUALCODE)
+        this.connectSecondaryDevice(this._unconfirmedSecondaryDeviceSocket, this._sSecondaryDevicePublicKey, device, Token.prototype.TYPE_MANUALCODE);
 
         // 3. cleanup
         delete this._unconfirmedSecondaryDeviceSocket;
@@ -349,6 +365,9 @@ module.exports.prototype = {
     {
         // 1. cleanup
         delete this._primaryDeviceSocket;
+
+        // 2. update
+        this._updateExpirationDate();
     },
 
     /**
@@ -408,17 +427,20 @@ module.exports.prototype = {
     {
         // 1. send
         delete this._secondaryDeviceSocket;
+
+        // 2. update
+        this._updateExpirationDate();
     },
 
     /**
      * Set connection type
      * @param sValue
      */
-    setConnectionType: function(sValue)
-    {
-        // 1. store
-        this._sConnectionType = sValue;
-    },
+    // setConnectionType: function(sValue)
+    // {
+    //     // 1. store
+    //     this._sConnectionType = sValue;
+    // },
 
     /**
      * Get pair's communication direction
@@ -477,10 +499,7 @@ module.exports.prototype = {
         // ---
 
 
-        // 4. toggle
-        this._states.dataSent = true;
-
-        // 5. log start of data
+        // 4. log start of data
         if (encryptedData.packageNumber === 0)
         {
             // a. log
@@ -489,7 +508,7 @@ module.exports.prototype = {
                     "id": this.getID()
                 },
                 {
-                    $set: { "states.dataSent" : this._states.dataSent },
+                    $set: { "states.dataSent": true },
                     $push: { logs: {
                             type: this.ACTIONTYPE_DATA_START,
                             id: encryptedData.id,
@@ -506,7 +525,7 @@ module.exports.prototype = {
             );
         }
 
-        // 6. log end of data
+        // 5. log end of data
         if (encryptedData.packageNumber === encryptedData.packageCount - 1)
         {
             // a. log
@@ -537,8 +556,58 @@ module.exports.prototype = {
 
 
     /**
+     * Update expiration date
+     * @private
+     */
+    _updateExpirationDate: function()
+    {
+        // 1. cleanup
+        if (this._timerExpiration) clearTimeout(this._timerExpiration);
+
+        // 2. setup
+        if (this.hasPrimaryDevice() && this.hasSecondaryDevice())
+        {
+            // a. broadcast
+            this.dispatchEvent(this.ACTIVE);
+        }
+        else
+        {
+            // a. setup
+            this._timerExpiration = setTimeout(this._onHandleExpiration.bind(this), this.MAX_IDLE_TIME);
+
+            // b. broadcast
+            this.dispatchEvent(this.IDLE);
+        }
+    },
+
+    /**
+     * Handle expiration timer `MAX_IDLE_TIME`
+     * @private
+     */
+    _onHandleExpiration: function()
+    {
+        // 1. store
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+            {
+                "id": this.getID()
+            },
+            {
+                $set: { "states.archived": true }
+            },
+            function(err, result)
+            {
+                CoreModule_Assert.equal(err, null);
+            }
+        );
+
+        // 2. broadcast
+        this.dispatchEvent(this.EXPIRED);
+    },
+
+    /**
      * Handle possible security breach
      * @param device
+     * @param sDeviceLabel
      * @private
      */
     _handlePossibleSecurityBreach: function(device, sDeviceLabel)
@@ -553,16 +622,13 @@ module.exports.prototype = {
         // ---
 
 
-        // 3. toggle
-        this._states.securityCompromised = true;
-
-        // 4. store
+        // 3. store
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').updateOne(
             {
                 "id": this.getID()
             },
             {
-                $set: { "states.securityCompromised" : this._states.securityCompromised },
+                $set: { "states.securityCompromised": true },
                 $push: { logs: { action: this.ACTIONTYPE_SECURITYCOMPROMISED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)

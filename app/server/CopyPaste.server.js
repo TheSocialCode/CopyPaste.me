@@ -219,18 +219,14 @@ module.exports = {
         socket.on(ConnectorEvents.prototype.REQUEST_DEVICE_RECONNECT, this._onRequestDeviceReconnect.bind(this, socket));
         socket.on(ConnectorEvents.prototype.SEND_DATA, this._onSendData.bind(this, socket));
 
-
-
-
-        // 5. configure - setting events
+        // 6. configure - setting events
         socket.on(ConnectorEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
 
-        // 6. configure - handshake events
+        // 7. configure - handshake events
         socket.on(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_MANUALCODE, this._onRequestPrimaryDeviceManualCode.bind(this, socket));
         socket.on(ConnectorEvents.prototype.REQUEST_SECONDARYDEVICE_CONNECT_BY_MANUALCODE, this._onRequestSecondaryDeviceConnectByManualCode.bind(this, socket));
         socket.on(ConnectorEvents.prototype.REQUEST_SECONDARYDEVICE_MANUALCODE_HANDSHAKE, this._onRequestSecondaryDeviceManualCodeHandshake.bind(this, socket));
         socket.on(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_MANUALCODE_CONFIRMED, this._onRequestPrimaryDeviceManualCodeConfirmed.bind(this, socket));
-
 
         // 8. log
         this._logUsers('Socket connected (socket.id = ' + socket.id + ')');
@@ -532,7 +528,7 @@ module.exports = {
         if (!pair.connectSecondaryDevice(socket, sPublicKey, device, token.getType())) return false;
 
         // 6. store
-        pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_QR);
+        //pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_QR);
 
         // 7. update
         socket.emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_QR, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
@@ -612,7 +608,7 @@ module.exports = {
         pair.registerUnconfirmedSecondaryDevice(socket, sPublicKey, device, token.getType());
 
         // 6. store
-        pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_MANUALCODE);
+        //pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_MANUALCODE);
 
         // 7. update
         socket.emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_MANUALCODE_ACCEPTED, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
@@ -670,7 +666,6 @@ module.exports = {
 
         // 6. output
         this._logUsers('Secondary device connected by manual code (socket.id = ' + pair.getSecondaryDevice().id + ')');
-
     },
 
 

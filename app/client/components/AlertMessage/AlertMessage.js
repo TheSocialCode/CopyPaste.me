@@ -28,7 +28,7 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (socket, sToken)
+    __construct: function ()
     {
         // 1. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_AlertMessage"]');
