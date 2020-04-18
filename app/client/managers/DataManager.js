@@ -106,6 +106,7 @@ module.exports.prototype = {
         // 5. setup
         dataToTransfer.id = Module_GenerateUniqueID({ length: 32 });
         dataToTransfer.packageCount = Math.ceil(sJSONValueToTransfer.length / this._nSizePerPackage);
+        dataToTransfer.totalSize = sJSONValueToTransfer.length;
 
         // 6. split
         for (let nPackageIndex = 0; nPackageIndex < dataToTransfer.packageCount; nPackageIndex++)

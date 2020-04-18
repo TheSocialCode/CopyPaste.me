@@ -53,7 +53,7 @@ module.exports.prototype = {
 
     // connection types
     CONNECTIONTYPE_QR: 'QR',
-    CONNECTIONTYPE_MANUAL: 'manual',
+    CONNECTIONTYPE_MANUALCODE: 'MANUALCODE',
 
 
 
@@ -99,7 +99,7 @@ module.exports.prototype = {
         let pair = new Pair(primaryDeviceSocket, sPrimaryDevicePublicKey, device.getID());
 
         // 3. configure
-        pair.addEventListener(ConnectorEvents.prototype.SECURITY_COMPROMISED, this._onPairSecurityCompromised.bind(this));
+        pair.addEventListener(ConnectorEvents.prototype.ERROR_SECURITY_COMPROMISED, this._onPairSecurityCompromised.bind(this));
 
         // 4. store
         this._aPairs['' + pair.getID()] = pair;
@@ -247,13 +247,13 @@ module.exports.prototype = {
         let requestingSocket = requestingDevice.getSocket();
         
         // 2. verify and broadcast
-        if (requestingSocket) requestingSocket.emit(ConnectorEvents.prototype.SECURITY_COMPROMISED);
+        if (requestingSocket) requestingSocket.emit(ConnectorEvents.prototype.ERROR_SECURITY_COMPROMISED);
         
         // 3. verify and broadcast
-        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.SECURITY_COMPROMISED);
+        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.ERROR_SECURITY_COMPROMISED);
 
         // 4. verify and broadcast
-        if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.SECURITY_COMPROMISED);
+        if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.ERROR_SECURITY_COMPROMISED);
     },
 
     /**

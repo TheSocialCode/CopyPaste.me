@@ -7,9 +7,6 @@
 'use strict';
 
 
-// import
-const ManualConnectEvents = require('./../ManualConnectButton/ManualConnectEvents');
-
 // import extenders
 const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
 
@@ -29,7 +26,7 @@ module.exports.prototype = {
     _elButtonConnect: null,
 
     // events
-    REQUEST_CONFIRM_HANDSHAKE: 'onRequestConfirmHandshake',
+    REQUEST_CONFIRM_HANDSHAKE: 'REQUEST_CONFIRM_HANDSHAKE',
 
 
 

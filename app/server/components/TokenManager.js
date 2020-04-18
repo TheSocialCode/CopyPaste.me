@@ -49,9 +49,7 @@ module.exports.prototype = {
         // 1. extend
         new EventDispatcherExtender(this);
 
-
         // ---
-
 
         // 2. store
         this._aSockets = aSockets;
@@ -69,15 +67,17 @@ module.exports.prototype = {
 
     /**
      * Create token
+     * @param pair
+     * @param sTokenType
      * @returns object
      */
-    createToken: function(pair)
+    createToken: function(pair, sTokenType)
     {
         // 1. init
         let bCreated = false;
 
         // 2. create
-        let token = new Token(pair);
+        let token = new Token(pair, sTokenType);
 
         // 3. validate
         while (!bCreated)
@@ -94,7 +94,7 @@ module.exports.prototype = {
             else
             {
                 // I. re-create
-                token = new Token();
+                token = new Token(pair, sTokenType);
             }
         }
 

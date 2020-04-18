@@ -403,10 +403,12 @@ module.exports.prototype = {
         if (sType === this.DATATYPE_IMAGE || !sType)
         {
             this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview"]').classList.remove('data_input_image_preview-visible');
+            this._elInputImageInputfield.value = null;
         }
         if (sType === this.DATATYPE_DOCUMENT || !sType)
         {
             this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_preview"]').classList.remove('data_input_document_preview-visible');
+            this._elInputDocumentInputfield.value = null;
         }
     },
 

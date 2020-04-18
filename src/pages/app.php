@@ -17,7 +17,7 @@
                         <div class="component_QR_manualurl_url"><a href="/connect" target="_blank"><span data-mimoto-id="connect_url">https://copypaste.me</span>/connect</a></div>
                         <div class="component_QR_manualurl_guidance">and enter<br>the following code:</div>
                         <div data-mimoto-id="manualcode" class="component_QR_manualurl_code"></div>
-                        <div data-mimoto-id="countdown" class="component_QR_manualurl_validity">(valid for 2:40 minutes)</div>
+                        <div data-mimoto-id="countdown" class="component_QR_manualurl_validity"></div>
                     </div>
                 </div>
             </div>

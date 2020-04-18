@@ -7,9 +7,6 @@
 'use strict';
 
 
-// import
-const ManualConnectEvents = require('./../ManualConnectButton/ManualConnectEvents');
-
 // import extenders
 const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
 
@@ -45,7 +42,7 @@ module.exports.prototype = {
     _sAllowedCharacters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789',
 
     // events
-    REQUEST_CONNECTION_USING_MANUALCODE: 'onRequestConnectionUsingManualCode',
+    REQUEST_CONNECT_BY_MANUALCODE: 'REQUEST_CONNECT_BY_MANUALCODE',
 
 
 
@@ -393,7 +390,7 @@ module.exports.prototype = {
             this._bIsInitialInput = false;
 
             // b. broadcast
-            this.dispatchEvent(this.REQUEST_CONNECTION_USING_MANUALCODE, this._sCode);
+            this.dispatchEvent(this.REQUEST_CONNECT_BY_MANUALCODE, this._sCode);
         }
         else
         {

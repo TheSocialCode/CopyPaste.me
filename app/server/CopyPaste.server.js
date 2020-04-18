@@ -14,7 +14,6 @@ const Module_HTTPS = require('https');
 const Module_SocketIO = require('socket.io');
 const Module_Express = require('express');
 const Module_GenerateUniqueID = require('generate-unique-id');
-const Module_GeneratePassword = require("generate-password");
 const Module_LogToFile = require('log-to-file');
 
 // import core module
@@ -26,12 +25,12 @@ const Device = require('./components/Device');
 const DeviceManager = require('./components/DeviceManager');
 const Pair = require('./components/Pair');
 const PairManager = require('./components/PairManager');
+const Token = require('./components/Token');
 const TokenManager = require('./components/TokenManager');
 const MongoDB = require('./components/MongoDB');
 const Logger = require('./components/Logger');
 const StartupInfo = require('./components/StartupInfo');
 const ToggleDirectionStates = require('./../client/components/ToggleDirectionButton/ToggleDirectionStates');
-const ManualConnectEvents = require('./../client/components/ManualConnectButton/ManualConnectEvents');
 const ConnectorEvents = require('./../client/components/Connector/ConnectorEvents');
 
 
@@ -214,11 +213,11 @@ module.exports = {
         socket.on(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_FRESH_TOKEN, this._onRequestPrimaryDeviceFreshToken.bind(this, socket));
 
         // 4. configure secondary device
-        socket.on(ConnectorEvents.prototype.REQUEST_SECONDARYDEVICE_CONNECT_BY_QR, this._onSecondaryDeviceConnectByQR.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.REQUEST_SECONDARYDEVICE_CONNECT_BY_QR, this._onRequestSecondaryDeviceConnectByQR.bind(this, socket));
 
         // 5. configure both devices
         socket.on(ConnectorEvents.prototype.REQUEST_DEVICE_RECONNECT, this._onRequestDeviceReconnect.bind(this, socket));
-        socket.on(ConnectorEvents.prototype.DATA, this._onData.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.SEND_DATA, this._onSendData.bind(this, socket));
 
 
 
@@ -227,10 +226,10 @@ module.exports = {
         socket.on(ConnectorEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
 
         // 6. configure - handshake events
-        //socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE, this._onRequestManualCode.bind(this, socket));
-        //socket.on(ManualConnectEvents.prototype.REQUEST_CONNECTION_BY_MANUALCODE, this._onRequestConnectionByManualCode.bind(this, socket));
-        //socket.on(ManualConnectEvents.prototype.REQUEST_MANUALCODE_HANDSHAKE, this._onRequestManualCodeHandshake.bind(this, socket));
-        //socket.on(ManualConnectEvents.prototype.CONFIRM_MANUALCODE, this._onConfirmManualCode.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_MANUALCODE, this._onRequestPrimaryDeviceManualCode.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.REQUEST_SECONDARYDEVICE_CONNECT_BY_MANUALCODE, this._onRequestSecondaryDeviceConnectByManualCode.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.REQUEST_SECONDARYDEVICE_MANUALCODE_HANDSHAKE, this._onRequestSecondaryDeviceManualCodeHandshake.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_MANUALCODE_CONFIRMED, this._onRequestPrimaryDeviceManualCodeConfirmed.bind(this, socket));
 
 
         // 8. log
@@ -358,16 +357,6 @@ module.exports = {
 
 
 
-
-
-
-
-
-
-
-
-
-
         // 3. log
         this._logUsers('Socket disconnected (socket.id = ' + socket.id + ')');
     },
@@ -391,7 +380,7 @@ module.exports = {
         let pair = this.Mimoto.pairManager.initPair(primaryDeviceSocket, sPrimaryDevicePublicKey);
 
         // 2. create
-        let token = this._tokenManager.createToken(pair);
+        let token = this._tokenManager.createToken(pair, Token.prototype.TYPE_QR);
 
         // 3. send
         pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_PRIMARYDEVICE_CONNECTED, pair.getPrimaryDeviceID(), token.getValue(), token.getLifetime());
@@ -427,13 +416,6 @@ module.exports = {
 
         // 3. restore and merge
         let device = this.Mimoto.deviceManager.restoreAndMerge(originalDevice, newDevice);
-
-
-
-        console.log('sDevice = `' + device.getType() + '` (' +  sDeviceID + ') - originalDevice = ', originalDevice);
-
-
-
 
         // 4. load
         let pair = this.Mimoto.pairManager.getPairByDeviceID(sDeviceID);
@@ -492,19 +474,18 @@ module.exports = {
     /**
      * Handle primary device `REQUEST_PRIMARYDEVICE_FRESH_TOKEN`
      * @param socket
-     * @param sDeviceID
      * @private
      */
-    _onRequestPrimaryDeviceFreshToken: function(socket, sDeviceID)
+    _onRequestPrimaryDeviceFreshToken: function(socket)
     {
         // 1. load
-        let pair = this.Mimoto.pairManager.getPairByDeviceID(sDeviceID);
+        let pair = this.Mimoto.pairManager.getPairBySocketID(socket.id);
 
         // 2. validate
         if (pair === false) return;
 
         // 3. refresh
-        let token = this._tokenManager.createToken(pair);
+        let token = this._tokenManager.createToken(pair, Token.prototype.TYPE_QR);
 
         // 4. send
         pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_PRIMARYDEVICE_FRESH_TOKEN, token.getValue(), token.getLifetime());
@@ -518,16 +499,16 @@ module.exports = {
 
 
     /**
-     * Handle secondary device `SECONDARYDEVICE_CONNECT_BY_QR`
-     * @param secondaryDeviceSocket
+     * Handle secondary device `REQUEST_SECONDARYDEVICE_CONNECT_BY_QR`
+     * @param socket
      * @param sTokenValue
-     * @param sSecondaryDevicePublicKey
+     * @param sPublicKey
      * @private
      */
-    _onSecondaryDeviceConnectByQR: function(secondaryDeviceSocket, sSecondaryDevicePublicKey, sTokenValue)
+    _onRequestSecondaryDeviceConnectByQR: function(socket, sPublicKey, sTokenValue)
     {
         // 1. load
-        let device = this.Mimoto.deviceManager.getDeviceBySocketID(secondaryDeviceSocket.id);
+        let device = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
 
         // 2. load
         let token = this._tokenManager.getToken(sTokenValue);
@@ -535,10 +516,10 @@ module.exports = {
         // 3. validate or send error
         if (token === false)
         {
-            this.Mimoto.logger.log('SECONDARYDEVICE_CONNECT_TOKEN_NOT_FOUND for sTokenValue=`' + sTokenValue + '` from socket.id=`' + secondaryDeviceSocket.id + '`');
+            this.Mimoto.logger.log('SECONDARYDEVICE_CONNECT_TOKEN_NOT_FOUND for sTokenValue=`' + sTokenValue + '` from socket.id=`' + socket.id + '`');
 
             // a. broadcast
-            secondaryDeviceSocket.emit(ConnectorEvents.prototype.ERROR_SECONDARYDEVICE_CONNECT_BY_QR_TOKEN_NOT_FOUND);
+            socket.emit(ConnectorEvents.prototype.ERROR_SECONDARYDEVICE_CONNECT_BY_QR_TOKEN_NOT_FOUND);
 
             // b. exit
             return;
@@ -548,268 +529,156 @@ module.exports = {
         let pair = token.getPair();
 
         // 5. validate
-        if (!pair.connectSecondaryDevice(secondaryDeviceSocket, sSecondaryDevicePublicKey, device)) false;
+        if (!pair.connectSecondaryDevice(socket, sPublicKey, device, token.getType())) return false;
 
         // 6. store
         pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_QR);
 
         // 7. update
-        secondaryDeviceSocket.emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_QR, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
-
-
-
-
-        // 1. OTHERDEVICE_CONNECTED
-
-
-
+        socket.emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_QR, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
 
         // 8. send
         if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey());
 
         // 9. output
-        this._logUsers('Primary device with socket.id = ' + secondaryDeviceSocket.id + ' requests connection to token = ' + token.getValue());
-    },
-
-    /**
-     * Connect secondary device to pair
-     * @param sConnectionType
-     * @param pair
-     * @param secondaryDeviceSocket
-     * @param sSecondaryDevicePublicKey
-     * @param sToken
-     * @param bReconnect
-     * @private
-     */
-    _connectSecondaryDeviceToPair: function(sConnectionType, pair, secondaryDeviceSocket, sSecondaryDevicePublicKey, sToken, bReconnect)
-    {
-        // 1. store
-        //this._aDevicesBySocketID['' + secondaryDeviceSocket.id].sToken = sToken;
-        this._aDevicesByDeviceID['' + secondaryDeviceSocket.id] = this._aDevicesBySocketID['' + secondaryDeviceSocket.id];
-
-        // 2. store
-        pair.secondaryDevicePublicKey = sSecondaryDevicePublicKey;
-        pair.connectiontype = sConnectionType;
-
-
-        // --- communicate
-
-
-        // 3. select
-        switch(sConnectionType)
-        {
-            // case this.CONNECTIONTYPE_QR:
-            //
-            //     // // a. store
-            //     // this._aActivePairs[sToken].secondaryDevice = secondaryDeviceSocket;
-            //     //
-            //     // // b. send
-            //     // secondaryDeviceSocket.emit('token_connected', pair.primaryDevicePublicKey, pair.direction);
-            //     //
-            //     // // c. finish
-            //     // this._finishConnection(sConnectionType, pair, sToken, bReconnect);
-            //     break;
-
-            case this.CONNECTIONTYPE_MANUAL:
-
-                // a. validate
-                if (this._aActivePairs[sToken].unconfirmedSecondaryDevice)
-                {
-                    // I. send
-                    this._broadcastSecurityWarning(secondaryDeviceSocket, pair, sToken);
-                    return;
-                }
-
-                // b. store
-                this._aActivePairs[sToken].unconfirmedSecondaryDevice = secondaryDeviceSocket;
-
-                // c. validate and send
-                if (pair.primaryDevice)
-                {
-                    // I. send
-                    pair.unconfirmedSecondaryDevice.emit(ManualConnectEvents.prototype.MANUALCODE_ACCEPTED);
-                }
-                break;
-        }
+        this._logUsers('Secondary device with socket.id = ' + socket.id + ' requests connection to token = ' + token.getValue());
     },
 
 
 
-
-
-
+    // ----------------------------------------------------------------------------
+    // --- Private functions - Manual code ----------------------------------------
+    // ----------------------------------------------------------------------------
 
 
     /**
-     * Handle manualcode event `REQUEST_MANUALCODE_HANDSHAKE`
+     * Handle 'REQUEST_PRIMARYDEVICE_MANUALCODE'
+     * @param socket
      * @private
      */
-    _onRequestManualCodeHandshake: function(secondaryDeviceSocket, sCode)
+    _onRequestPrimaryDeviceManualCode: function(socket)
     {
         // 1. load
-        let pair = this._getPairBySocket(secondaryDeviceSocket);
+        let pair = this.Mimoto.pairManager.getPairBySocketID(socket.id);
+
+        // 2. validate
+        if (pair === false) return;
+
+        // 3. refresh
+        let token = this._tokenManager.createToken(pair, Token.prototype.TYPE_MANUALCODE);
+
+        // 4. send
+        socket.emit(ConnectorEvents.prototype.UPDATE_PRIMARYDEVICE_MANUALCODE, token.getValue(), token.getLifetime());
+
+
+        // ---
+
+
+        // 5. output
+        this.Mimoto.logger.log('Socket.id = ' + socket.id + ' has requested manual code');
+    },
+
+    /**
+     * Handle event 'REQUEST_SECONDARYDEVICE_CONNECT_BY_MANUALCODE'
+     * @param socket
+     * @param sPublicKey
+     * @param sManualCode
+     * @private
+     */
+    _onRequestSecondaryDeviceConnectByManualCode: function(socket, sPublicKey, sManualCode)
+    {
+        // 1. load
+        let device = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
+
+        // 2. load
+        let token = this._tokenManager.getToken(sManualCode);
+
+        // 3. validate or send error
+        if (token === false)
+        {
+            this.Mimoto.logger.log('ERROR_SECONDARYDEVICE_CONNECT_BY_MANUALCODE_TOKEN_NOT_FOUND for sManualCode=`' + sManualCode + '` from socket.id=`' + socket.id + '`');
+
+            // a. broadcast
+            socket.emit(ConnectorEvents.prototype.ERROR_SECONDARYDEVICE_CONNECT_BY_MANUALCODE_TOKEN_NOT_FOUND);
+
+            // b. exit
+            return;
+        }
+
+        // 4. load
+        let pair = token.getPair();
+
+        // 5. validate
+        pair.registerUnconfirmedSecondaryDevice(socket, sPublicKey, device, token.getType());
+
+        // 6. store
+        pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_MANUALCODE);
+
+        // 7. update
+        socket.emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_MANUALCODE_ACCEPTED, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
+
+
+        // ---
+
+
+        // 8. output
+        this._logUsers('Secondary device with socket.id = ' + socket.id + ' requests connection to manual code = ' + token.getValue());
+    },
+
+    /**
+     * Handle `REQUEST_SECONDARYDEVICE_MANUALCODE_HANDSHAKE`
+     * @param socket
+     * @param sConfirmationCode
+     * @private
+     */
+    _onRequestSecondaryDeviceManualCodeHandshake: function(socket, sConfirmationCode)
+    {
+        // 1. load
+        let pair = this.Mimoto.pairManager.getPairBySocketID(socket.id);
 
         // 2. validate
         if (pair === false) return;
 
         // 3. send
-        pair.primaryDevice.emit(ManualConnectEvents.prototype.REQUEST_MANUALCODE_CONFIRMATION, sCode);
+        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_MANUALCODE_CONFIRMATION, sConfirmationCode);
     },
 
     /**
-     * Handle manualcode event `CONFIRM_MANUALCODE`
+     * Handle manualcode event `REQUEST_PRIMARYDEVICE_MANUALCODE_CONFIRMED`
      * @private
      */
-    _onConfirmManualCode: function(primaryDeviceSocket)
+    _onRequestPrimaryDeviceManualCodeConfirmed: function(socket)
     {
         // 1. load
-        let pair = this._getPairBySocket(primaryDeviceSocket);
+        let pair = this.Mimoto.pairManager.getPairBySocketID(socket.id);
 
         // 2. validate
         if (pair === false) return;
 
-        // 3. move
-        pair.secondaryDevice = pair.unconfirmedSecondaryDevice;
+        // 3. transfer
+        pair.confirmUnconfirmedSecondaryDevice();
 
-        // 4. cleanup
-        delete pair.unconfirmedSecondaryDevice;
+        // 4. send
+        pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_MANUALCODE, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
 
         // 5. send
-        pair.secondaryDevice.emit(ManualConnectEvents.prototype.MANUALCODE_CONNECTED, pair.primaryDevicePublicKey, pair.direction, this._aSockets['' + primaryDeviceSocket.id].sToken);
-
-        // 6. finish
-        this._finishConnection(this.CONNECTIONTYPE_MANUAL, pair, this._aSockets['' + primaryDeviceSocket.id].sToken);
-    },
-
-    /**
-     * Finish connection
-     * @param sConnectionType
-     * @param pair
-     * @param sToken
-     * @param bReconnect
-     * @private
-     */
-    _finishConnection: function(sConnectionType, pair, sToken, bReconnect)
-    {
-
-        // 1. send
-        if (pair.primaryDevice) pair.primaryDevice.emit((bReconnect) ? 'secondarydevice_reconnected' : 'secondarydevice_connected', pair.secondaryDevicePublicKey);
-
-        // 3. store
-        if (!this._aConnectedPairs[sToken]) this._aConnectedPairs[sToken] = true;
+        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey());
 
 
         // --- log ---
 
 
-        // 4. output
-        this._logUsers('Secondary device ' + ((bReconnect) ? 're' : '' ) + ' connects `' + sConnectionType + '` (socket.id = ' + pair.secondaryDevice.id + ')');
+        // 6. output
+        this._logUsers('Secondary device connected by manual code (socket.id = ' + pair.getSecondaryDevice().id + ')');
 
     },
 
 
 
-    _onData: function(socket, encryptedData)
-    {
-        // 1. output
-        this.Mimoto.logger.log('Socket.id = ' + socket.id + ' has shared data');
+    // ----------------------------------------------------------------------------
+    // --- Private functions - Settings -------------------------------------------
+    // ----------------------------------------------------------------------------
 
-        if (this._configFile.logtofile.file.toString())
-        {
-            let sOutput = '------' + '\n' +
-                'encryptedData = ' + encryptedData + '\n' +
-                '------' + '\n' +
-                '' + '\n';
-
-            Module_LogToFile(sOutput, this._configFile.logtofile.file.toString());
-        }
-
-        // 2. load
-        let sToken = this._getTokenBySocket(socket);
-
-        // 3. validate
-        if (sToken === false) return;
-
-        // 4. load
-        let pair = this._getPairByToken(sToken);
-
-        // 5. validate
-        if (pair === false) return;
-        if (pair.direction === ToggleDirectionStates.prototype.SWAPPED)
-        {
-            if (!pair.secondaryDevice) return;
-        }
-        else
-        {
-            if (!pair.primaryDevice) return;
-        }
-
-        // 6. register
-        let receivingSocket = (pair.direction === ToggleDirectionStates.prototype.SWAPPED) ? pair.secondaryDevice : pair.primaryDevice;
-
-        // 7. send
-        receivingSocket.emit('data', encryptedData);
-
-        // 8. log
-        if (encryptedData.packageNumber === 0)
-        {
-            pair.log.push(
-                {
-                    type: this._ACTIONTYPE_DATA_START,
-                    timestamp: new Date().toUTCString(),
-                    contentType:encryptedData.sType,
-                    direction:pair.direction
-                }
-            );
-        }
-
-        // 9. log
-        if (encryptedData.packageNumber === encryptedData.packageCount)
-        {
-            pair.log.push(
-                {
-                    type: this._ACTIONTYPE_DATA_FINISH,
-                    timestamp: new Date().toUTCString(),
-                    contentType:encryptedData.sType,
-                    direction:pair.direction
-                }
-            );
-        }
-
-
-        // --- log
-
-
-        // 10. update
-        pair.states.dataSent = true;
-
-        // 12. store
-        if (!this._aUsedPairs[sToken]) this._aUsedPairs[sToken] = true;
-
-        // 13. output
-        this._logUsers('Data shared (socket.id = ' + socket.id + ')');
-
-
-        // 13. log
-        this._dbCollection_pairs.updateMany(
-            {
-                "data.token": sToken
-            },
-            {
-                $set: { "states.dataSent" : true },
-                $push: { logs: {
-                        type: this._ACTIONTYPE_DATA,
-                        timestamp: new Date().toUTCString(),
-                        contentType: encryptedData.sType,
-                        direction: pair.direction
-                    } }
-            },
-            function(err, result)
-            {
-                CoreModule_Assert.equal(err, null);
-            }
-        );
-    },
 
     /**
      * Handle `REQUEST_TOGGLE_DIRECTION`
@@ -832,164 +701,43 @@ module.exports = {
         if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_TOGGLE_DIRECTION, pair.getDirection());
     },
 
+
+
+    // ----------------------------------------------------------------------------
+    // --- Private functions - Data -----------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
     /**
-     * Handle request event 'REQUEST_MANUALCODE'
-     * @param primaryDeviceSocket
+     * Handle device `SEND_DATA`
+     * @param socket
+     * @param encryptedData
      * @private
      */
-    _onRequestManualCode: function(primaryDeviceSocket)
+    _onSendData: function(socket, encryptedData)
     {
-        // 1. output
-        this.Mimoto.logger.log('Socket.id = ' + primaryDeviceSocket.id + ' has requested manual code');
+        // 1. load
+        let pair = this.Mimoto.pairManager.getPairBySocketID(socket.id);
 
-        // 2. load
-        let sToken = this._getTokenBySocket(primaryDeviceSocket);
-
-        // 3. validate
-        if (sToken === false) return;
-
-        // 4. load
-        let pair = this._getPairByToken(sToken);
-
-        // 5. validate
+        // 2. validate
         if (pair === false) return;
 
-        // 4. create and store
-        pair.manualCode = this._createManualCode();
-
-        // 5. send
-        primaryDeviceSocket.emit('manualcode', pair.manualCode);
-
-        // 6. store
-        pair.manualCode.sToken = sToken;
+        // 3. forward
+        pair.sendData(encryptedData);
     },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Private functions - Logging --------------------------------------------
+    // ----------------------------------------------------------------------------
+
 
     /**
-     * Handle event 'REQUEST_CONNECTION_BY_MANUALCODE'
+     * Log users (for debugging purposes only)
+     * @param sTitle
      * @private
      */
-    _onRequestConnectionByManualCode: function(secondaryDeviceSocket, sManualCode, sSecondaryDevicePublicKey)
-    {
-        // 1. validate
-        if (!this._aManualCodes[sManualCode])
-        {
-            // a. send
-            secondaryDeviceSocket.emit(ManualConnectEvents.prototype.MANUALCODE_NOT_FOUND);
-
-            // b. exit
-            return;
-        }
-
-        // 2. register
-        let manualCode = this._aManualCodes[sManualCode];
-
-        // 3. validate
-        if (manualCode.expires < new Date().getTime())
-        {
-            // a. send
-            secondaryDeviceSocket.emit(ManualConnectEvents.prototype.MANUALCODE_EXPIRED);
-
-            // b. exit
-            return;
-        }
-
-        // 4. invalidate
-        delete this._aManualCodes[sManualCode];
-
-
-        // --- connect
-
-
-        // 5. load
-        let pair = this._getPairByToken(manualCode.sToken);
-
-        // 6. validate
-        if (pair === false) return;
-
-        // 7. connect
-        this._connectSecondaryDeviceToPair(this.CONNECTIONTYPE_MANUAL, pair, secondaryDeviceSocket, sSecondaryDevicePublicKey, manualCode.sToken);
-    },
-
-    /**
-     * Create manual code
-     * @private
-     */
-    _createManualCode: function()
-    {
-        // 1. init
-        let manualCode = null;
-        let sManualCode = null;
-        let bManualCodeFound = false;
-
-        // 2. run
-        while(!bManualCodeFound)
-        {
-            // a. create
-            sManualCode = Module_GeneratePassword.generate({
-                length: 6,
-                numbers: true,
-                lowercase: false,
-                uppercase: true,
-                excludeSimilarCharacters: true,
-                exclude: 'i'
-            });
-
-            // b. validate
-            if (!this._aManualCodes[sManualCode])
-            {
-                // I. setup
-                let nCreated = new Date().getTime();
-
-                // II. build
-                manualCode = {                      // ### ManualConnect
-                    created: nCreated,
-                    expires: nCreated + 5 * 60 * 1000,
-                    code: sManualCode
-                };
-
-                // III. store
-                this._aManualCodes[sManualCode] = manualCode;
-
-                // IV. toggle
-                bManualCodeFound = true;
-            }
-        }
-
-        // 3. verify or start
-        if (!this._timerManualCodes) this._timerManualCodes = setInterval(this._cleanupManualCodes.bind(this), 1000);
-
-        // 4. send
-        return manualCode;
-    },
-
-    /**
-     * Cleanup manual code
-     * @private
-     */
-    _cleanupManualCodes: function()
-    {
-        // 1. register
-        let nNow = new Date().getTime();
-
-        // 2. verify all
-        for (let sManualCode in this._aManualCodes)
-        {
-            // a. validate
-            if (this._aManualCodes[sManualCode].expires > nNow) continue;
-
-            // b. remove
-            delete this._aManualCodes[sManualCode];
-        }
-
-        // 3. verify or cleanup
-        if (Object.keys(this._aManualCodes).length === 0)
-        {
-            clearInterval(this._timerManualCodes);
-            this._timerManualCodes = null;
-        }
-    },
-
-
     _logUsers: function(sTitle)
     {
         // 1. compose

@@ -7,9 +7,6 @@
 'use strict';
 
 
-// import
-const ManualConnectEvents = require('./ManualConnectEvents');
-
 // import extenders
 const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
 
@@ -25,6 +22,9 @@ module.exports.prototype = {
     // views
     _elRoot: null,
     _elButton: null,
+
+    // events
+    REQUEST_TOGGLE_MANUALCONNECT: 'REQUEST_TOGGLE_MANUALCONNECT',
 
 
     // ----------------------------------------------------------------------------
@@ -89,7 +89,7 @@ module.exports.prototype = {
         this._elRoot.classList.toggle('flip');
 
         // 2. broadcast
-        this.dispatchEvent(ManualConnectEvents.prototype.REQUEST_TOGGLE_MANUALCONNECT);
+        this.dispatchEvent(this.REQUEST_TOGGLE_MANUALCONNECT);
     }
 
 };

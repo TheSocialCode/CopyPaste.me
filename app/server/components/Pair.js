@@ -10,6 +10,7 @@
 // import project classes
 const Device = require('./Device');
 const Pair = require('./Pair');
+const Token = require('./Token');
 const Utils = require('./../utils/Utils');
 const ConnectorEvents = require('./../../client/components/Connector/ConnectorEvents');
 const ToggleDirectionStates = require('./../../client/components/ToggleDirectionButton/ToggleDirectionStates');
@@ -34,6 +35,7 @@ module.exports.prototype = {
 
     // settings
     _sPairID: null,
+    _nCreated: 0,
 
     // devices
     _primaryDeviceSocket: null,
@@ -43,6 +45,9 @@ module.exports.prototype = {
     _secondaryDeviceSocket: null,
     _sSecondaryDevicePublicKey: null,
     _sSecondaryDeviceID: null,
+
+    // connect by manualcode
+    _unconfirmedSecondaryDeviceSocket: null,
 
     // config
     _sDirection: '',
@@ -67,7 +72,9 @@ module.exports.prototype = {
     ACTIONTYPE_DATA_FINISH: 'DATA_FINISH',
     ACTIONTYPE_PRIMARYDEVICE_CONNECTED: 'PRIMARYDEVICE_CONNECTED',
     ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED: 'PRIMARYDEVICE_DISCONNECTED',
-    ACTIONTYPE_SECONDARYDEVICE_CONNECTED: 'SECONDARYDEVICE_CONNECTED',
+    ACTIONTYPE_SECONDARYDEVICE_CONNECTED_QR: 'SECONDARYDEVICE_CONNECTED_QR',
+    ACTIONTYPE_SECONDARYDEVICE_CONNECTED_MANUALCODE: 'SECONDARYDEVICE_CONNECTED_MANUALCODE',
+    ACTIONTYPE_SECONDARYDEVICE_CONNECTED_INVITE: 'SECONDARYDEVICE_CONNECTED_INVITE',
     ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED: 'SECONDARYDEVICE_DISCONNECTED',
     ACTIONTYPE_SECURITYCOMPROMISED: 'SECURITY_COMPROMISED',
 
@@ -92,12 +99,11 @@ module.exports.prototype = {
         // ---
 
         // 2. init
+        this._sPairID = Module_GenerateUniqueID({ length: 32 });
+        this._nCreated = new Date().getTime();
         this._sDirection = ToggleDirectionStates.prototype.DEFAULT;
 
-        // 3. set id
-        this._sPairID = Module_GenerateUniqueID({ length: 32 });
-
-        // 4. store
+        // 3. store
         this._primaryDeviceSocket = socket;
         this._sPrimaryDevicePublicKey = sPublicKey;
         this._sPrimaryDeviceID = sDeviceID;
@@ -105,24 +111,16 @@ module.exports.prototype = {
 
         // ---
 
-        // 5. store
+        // 4. store
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').insertOne(
             {
                 id: this._sPairID,
-                data: {
-                    connectiontype: null,
-                    direction: this._sDirection
-                },
                 states: {
                     connectionEstablished: this._states.connectionEstablished,
                     securityCompromised: this._states.securityCompromised,
                     dataSent: this._states.dataSent,
                     archived: this._states.archived,
-
-                },
-                logs: [
-                    { action: this.ACTIONTYPE_CREATED }
-                ]
+                }
             }
         );
     },
@@ -163,8 +161,9 @@ module.exports.prototype = {
      * @param socket
      * @param sPublicKey
      * @param device
+     * @param sConnectionType
      */
-    connectSecondaryDevice: function(socket, sPublicKey, device)
+    connectSecondaryDevice: function(socket, sPublicKey, device, sConnectionType)
     {
         // 1. validate
         if (this.hasSecondaryDevice() || (this.getSecondaryDeviceID() && this.getSecondaryDeviceID() !== device.getID()))
@@ -192,14 +191,25 @@ module.exports.prototype = {
         // 4. toggle
         this._states.connectionEstablished = true;
 
-        // 5. store
+        // 5. init
+        let sAction = '';
+
+        // 6. prepare
+        switch(sConnectionType)
+        {
+            case Token.prototype.TYPE_QR: sAction = this.ACTIONTYPE_SECONDARYDEVICE_CONNECTED_QR; break;
+            case Token.prototype.TYPE_MANUALCODE: sAction = this.ACTIONTYPE_SECONDARYDEVICE_CONNECTED_MANUALCODE; break;
+            case Token.prototype.TYPE_INVITE: sAction = this.ACTIONTYPE_SECONDARYDEVICE_CONNECTED_INVITE; break;
+        }
+
+        // 7. store
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').updateOne(
             {
                 "id": this.getID()
             },
             {
                 $set: { "states.connectionEstablished" : this._states.connectionEstablished },
-                $push: { logs: { action: this.ACTIONTYPE_SECONDARYDEVICE_CONNECTED } }
+                $push: { logs: { action: sAction, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)
             {
@@ -211,7 +221,7 @@ module.exports.prototype = {
         // ---
 
 
-        // 6. success
+        // 8. success
         return true;
     },
 
@@ -240,6 +250,39 @@ module.exports.prototype = {
     },
 
     /**
+     * Register unconfirmed secondary device socket (used in manualcode connection)
+     * @param socket
+     * @param sPublicKey
+     * @param device
+     */
+    registerUnconfirmedSecondaryDevice: function(socket, sPublicKey, device)
+    {
+        // 1. store
+        this._unconfirmedSecondaryDeviceSocket = socket;
+        this._sSecondaryDevicePublicKey = sPublicKey;
+        this._sSecondaryDeviceID = device.getID();
+
+        // 2. setup
+        device.setPairID(this.getID());
+        device.setType(Device.prototype.SECONDARYDEVICE);
+    },
+
+    /**
+     * Confirm unconfirmed secondary device socket (used in manualcode connection)
+     */
+    confirmUnconfirmedSecondaryDevice: function()
+    {
+        // 1. load
+        let device = this.Mimoto.deviceManager.getDeviceByDeviceID(this._sSecondaryDeviceID);
+
+        // 2. convert
+        this.connectSecondaryDevice(this._unconfirmedSecondaryDeviceSocket, this._sSecondaryDevicePublicKey, device, Token.prototype.TYPE_MANUALCODE)
+
+        // 3. cleanup
+        delete this._unconfirmedSecondaryDeviceSocket;
+    },
+
+    /**
      * Get pair's ID
      * @returns string
      */
@@ -265,6 +308,7 @@ module.exports.prototype = {
      */
     getPrimaryDevice: function()
     {
+        // 1. send
         return this._primaryDeviceSocket;
     },
 
@@ -274,6 +318,7 @@ module.exports.prototype = {
      */
     getPrimaryDeviceID: function()
     {
+        // 1. send
         return this._sPrimaryDeviceID;
     },
 
@@ -283,6 +328,7 @@ module.exports.prototype = {
      */
     getPrimaryDevicePublicKey: function()
     {
+        // 1. send
         return this._sPrimaryDevicePublicKey;
     },
 
@@ -292,6 +338,7 @@ module.exports.prototype = {
      */
     setPrimaryDeviceID: function(sValue)
     {
+        // 1. store
         this._sPrimaryDeviceID = sValue;
     },
 
@@ -300,6 +347,7 @@ module.exports.prototype = {
      */
     clearPrimaryDevice: function()
     {
+        // 1. cleanup
         delete this._primaryDeviceSocket;
     },
 
@@ -319,6 +367,7 @@ module.exports.prototype = {
      */
     getSecondaryDevice: function()
     {
+        // 1. send
         return this._secondaryDeviceSocket;
     },
 
@@ -328,6 +377,7 @@ module.exports.prototype = {
      */
     getSecondaryDeviceID: function()
     {
+        // 1. send
         return this._sSecondaryDeviceID;
     },
 
@@ -337,6 +387,7 @@ module.exports.prototype = {
      */
     getSecondaryDevicePublicKey: function()
     {
+        // 1. send
         return this._sSecondaryDevicePublicKey;
     },
 
@@ -346,6 +397,7 @@ module.exports.prototype = {
      */
     setSecondaryDeviceID: function(sValue)
     {
+        // 1. store
         this._sSecondaryDeviceID = sValue;
     },
 
@@ -354,6 +406,7 @@ module.exports.prototype = {
      */
     clearSecondaryDevice: function()
     {
+        // 1. send
         delete this._secondaryDeviceSocket;
     },
 
@@ -363,6 +416,7 @@ module.exports.prototype = {
      */
     setConnectionType: function(sValue)
     {
+        // 1. store
         this._sConnectionType = sValue;
     },
 
@@ -372,6 +426,7 @@ module.exports.prototype = {
      */
     getDirection: function()
     {
+        // 1. send
         return this._sDirection;
     },
 
@@ -381,6 +436,7 @@ module.exports.prototype = {
      */
     setDirection: function(sValue)
     {
+        // 1. store
         this._sDirection = sValue;
     },
 
@@ -389,7 +445,88 @@ module.exports.prototype = {
      */
     toggleDirection: function()
     {
+        // 1. toggle
         this._sDirection = (this._sDirection === ToggleDirectionStates.prototype.DEFAULT) ? ToggleDirectionStates.prototype.SWAPPED : ToggleDirectionStates.prototype.DEFAULT;
+    },
+
+    /**
+     * Send data
+     * @param encryptedData
+     */
+    sendData: function(encryptedData)
+    {
+        // 1. verify
+        if (this.getDirection() === ToggleDirectionStates.prototype.SWAPPED)
+        {
+            // a. verify or exit
+            if (!this.hasSecondaryDevice()) return;
+        }
+        else
+        {
+            // a. verify or exit
+            if (!this.hasPrimaryDevice()) return;
+        }
+
+        // 2. register
+        let receiverSocket = (this.getDirection() === ToggleDirectionStates.prototype.SWAPPED) ? this.getSecondaryDevice() : this.getPrimaryDevice();
+
+        // 3. send
+        receiverSocket.emit(ConnectorEvents.prototype.RECEIVE_DATA, encryptedData);
+
+
+        // ---
+
+
+        // 4. toggle
+        this._states.dataSent = true;
+
+        // 5. log start of data
+        if (encryptedData.packageNumber === 0)
+        {
+            // a. log
+            this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+                {
+                    "id": this.getID()
+                },
+                {
+                    $set: { "states.dataSent" : this._states.dataSent },
+                    $push: { logs: {
+                            type: this.ACTIONTYPE_DATA_START,
+                            id: encryptedData.id,
+                            contentType: encryptedData.sType,
+                            totalSize: encryptedData.totalSize,
+                            direction: this.getDirection(),
+                            timeSinceStart: Utils.prototype.since(this._nCreated)
+                        } }
+                },
+                function(err, result)
+                {
+                    CoreModule_Assert.equal(err, null);
+                }
+            );
+        }
+
+        // 6. log end of data
+        if (encryptedData.packageNumber === encryptedData.packageCount - 1)
+        {
+            // a. log
+            this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+                {
+                    "id": this.getID()
+                },
+                {
+                    $push: { logs: {
+                            type: this.ACTIONTYPE_DATA_FINISH,
+                            id: encryptedData.id,
+                            timeSinceStart: Utils.prototype.since(this._nCreated)
+                        } }
+                },
+                function(err, result)
+                {
+                    CoreModule_Assert.equal(err, null);
+                }
+            );
+        }
     },
 
 
@@ -410,7 +547,7 @@ module.exports.prototype = {
         this.Mimoto.logger.log('Pair already has a ' + sDeviceLabel + ' device connected. sPairID = ' + this.getID());
 
         // 2. broadcast
-        this.dispatchEvent(ConnectorEvents.prototype.SECURITY_COMPROMISED, device, this);
+        this.dispatchEvent(ConnectorEvents.prototype.ERROR_SECURITY_COMPROMISED, device, this);
 
 
         // ---
@@ -426,7 +563,7 @@ module.exports.prototype = {
             },
             {
                 $set: { "states.securityCompromised" : this._states.securityCompromised },
-                $push: { logs: { action: this.ACTIONTYPE_SECURITYCOMPROMISED } }
+                $push: { logs: { action: this.ACTIONTYPE_SECURITYCOMPROMISED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)
             {

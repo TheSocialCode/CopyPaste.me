@@ -10,8 +10,6 @@
 // import
 const QRCodeGenerator = require('qrcode-generator');
 const ManualConnectButton = require('./../ManualConnectButton/ManualConnectButton');
-const ManualConnectEvents = require('./../ManualConnectButton/ManualConnectEvents');
-const ConnectorEvents = require('./../Connector/ConnectorEvents');
 
 // import extenders
 const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
@@ -56,7 +54,7 @@ module.exports.prototype = {
 
     // events
     REQUEST_TOKEN_REFRESH: 'REQUEST_TOKEN_REFRESH',
-    REQUEST_TOGGLE_MANUALCONNECT: 'REQUEST_TOGGLE_MANUALCONNECT',
+    REQUEST_MANUALCODE: 'REQUEST_MANUALCODE',
 
 
 
@@ -111,7 +109,7 @@ module.exports.prototype = {
         this._manualConnectButton = new ManualConnectButton();
 
         // 7. configure
-        this._manualConnectButton.addEventListener(ManualConnectEvents.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
+        this._manualConnectButton.addEventListener(ManualConnectButton.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
 
         // 8. output
         this._elConnectURL.innerText = window.location.protocol + '//' + window.location.hostname;
@@ -155,24 +153,22 @@ module.exports.prototype = {
         this.dispatchEvent(this.REQUEST_TOKEN_REFRESH);
     },
 
-
-
-
-
-
-
-
-    setManualCode: function(manualCode)
+    /**
+     * Set manual code
+     * @param sToken
+     * @param nTokenLifetime
+     */
+    setManualCode: function(sToken, nTokenLifetime)
     {
         // 1. store
-        this._manualCode = manualCode;
+        this._manualCode = {};
 
         // 2. output
-        this._elManualCode.innerText = manualCode.code.substr(0, 3) + '-' + manualCode.code.substr(3);
+        this._elManualCode.innerText = sToken.substr(0, 3) + '-' + sToken.substr(3);
 
         // 3. setup
         this._manualCode.localCreated = new Date().getTime();
-        this._manualCode.localExpires = this._manualCode.localCreated + (this._manualCode.expires - this._manualCode.created);
+        this._manualCode.localExpires = this._manualCode.localCreated + nTokenLifetime;
 
         // 4. reset
         this._manualCode.almostExpired = false;
@@ -182,7 +178,7 @@ module.exports.prototype = {
         this._updateExpirationLabel();
 
         // 6. start
-        this._timerManualCodeCountdown = setInterval(this._onTimerManualCodeCountdown.bind(this), 1000);
+        this._timerManualCodeCountdown = setInterval(this._onTimerManualCodeCountdown.bind(this), 100);
     },
 
     /**
@@ -265,7 +261,7 @@ module.exports.prototype = {
      */
     _requestNewManualCode: function()
     {
-        this.dispatchEvent(ManualConnectEvents.prototype.REQUEST_TOGGLE_MANUALCONNECT);
+        this.dispatchEvent(this.REQUEST_MANUALCODE);
     },
 
     /**
