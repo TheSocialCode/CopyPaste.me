@@ -245,114 +245,6 @@ module.exports = {
         // 2. clear configuration
         socket.removeAllListeners();
 
-
-
-
-
-        // // 2. load
-        // let device = this._aDevicesBySocketID['' + socket.id];
-        //
-        // // 3. cleanup
-        // delete this._aDevicesBySocketID['' + socket.id];
-        // delete this._aDevicesByDeviceID['' + device.getDeviceID()];
-        //
-        // // 4. register
-        // let sPairID = device.getPairID();
-        //
-        // // 5. validate
-        // if (!sPairID) return;
-        //
-        // // 6. register
-        // let pair = this._aPairs['' + device.getPairID()];
-        //
-        // // 7. validate
-        // if (pair === false) return;
-        //
-        //
-        //
-        // return;
-        //
-        //
-        // // 9. validate
-        // if (pair.primaryDevice && pair.primaryDevice.id === socket.id)
-        // {
-        //     // a. cleanup
-        //     pair.primaryDevice = null;
-        //
-        //     // b. send
-        //     if (pair.secondaryDevice) pair.secondaryDevice.emit('primarydevice_disconnected');
-        //
-        //     // c. log
-        //     this._dbCollection_pairs.updateMany(
-        //         {
-        //             "data.token": sToken
-        //         },
-        //         {
-        //             $push: { logs: { action: this._ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED, timestamp: new Date().toUTCString() } }
-        //         },
-        //         function(err, result)
-        //         {
-        //             CoreModule_Assert.equal(err, null);
-        //         }
-        //     );
-        // }
-        //
-        // // 10. validate
-        // if (pair.secondaryDevice && pair.secondaryDevice.id === socket.id)
-        // {
-        //     // a. cleanup
-        //     pair.secondaryDevice = null;
-        //
-        //     // b. send
-        //     if (pair.primaryDevice) pair.primaryDevice.emit('secondarydevice_disconnected');
-        //
-        //     // c. log
-        //     this._dbCollection_pairs.updateMany(
-        //         {
-        //             "data.token": sToken
-        //         },
-        //         {
-        //             $push: { logs: { action: this._ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED, timestamp: new Date().toUTCString() } }
-        //         },
-        //         function(err, result)
-        //         {
-        //             CoreModule_Assert.equal(err, null);
-        //         }
-        //     );
-        // }
-        //
-        // // 11. validate
-        // if (!pair.primaryDevice && !pair.secondaryDevice)
-        // {
-        //     // a. move
-        //     this._aIdlePairs[sToken] = pair;
-        //
-        //     // b. clear
-        //     delete this._aPairs[sToken];
-        //
-        //     // c. store
-        //     pair.log.push( { type: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } );
-        //
-        //     // d. log
-        //     this._dbCollection_pairs.updateMany(
-        //         {
-        //             "data.token": sToken
-        //         },
-        //         {
-        //             $set: { "states.archived" : true },
-        //             $push: { logs: { action: this._ACTIONTYPE_ARCHIVED, timestamp: new Date().toUTCString() } }
-        //         },
-        //         function(err, result)
-        //         {
-        //             CoreModule_Assert.equal(err, null);
-        //         }
-        //     );
-        // }
-        //
-
-
-
-
         // 3. log
         this._logUsers('Socket disconnected (socket.id = ' + socket.id + ')');
     },
@@ -651,11 +543,21 @@ module.exports = {
         // 2. validate
         if (pair === false) return;
 
-        // 3. transfer
-        pair.confirmUnconfirmedSecondaryDevice();
+        // 3. transfer and validate
+        if (!pair.confirmUnconfirmedSecondaryDevice())
+        {
+            // a. notify
+            socket.emit(ConnectorEvents.prototype.ERROR_PRIMARYDEVICE_CONNECT_BY_MANUALCODE_SECONDARYDEVICE_NOT_FOUND);
+
+            // b. output
+            this._logUsers('Secondary device NOt connected by manual code because it`s not there anymore');
+
+            // c. exit
+            return;
+        }
 
         // 4. send
-        pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_MANUALCODE, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
+        if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_MANUALCODE, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
 
         // 5. send
         if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey());
@@ -755,11 +657,16 @@ module.exports = {
 
 
         // 3. output
-        this.Mimoto.logger.log('');
-        this.Mimoto.logger.log(sTitle);
-        this.Mimoto.logger.log('Devices by socket ID');
-        this.Mimoto.logger.log('=========================');
-        this.Mimoto.logger.log(this.Mimoto.deviceManager.getAllDevicesBySocketID());
+        this.Mimoto.logger.logToFile('');
+        this.Mimoto.logger.logToFile('');
+        this.Mimoto.logger.logToFile(sTitle);
+        this.Mimoto.logger.logToFile(sTitle);
+        this.Mimoto.logger.logToFile('Devices by socket ID');
+        this.Mimoto.logger.logToFile('Devices by socket ID');
+        this.Mimoto.logger.logToFile('=========================');
+        this.Mimoto.logger.logToFile('=========================');
+        this.Mimoto.logger.logToFile(this.Mimoto.deviceManager.getAllDevicesBySocketID());
+        this.Mimoto.logger.logToFile(this.Mimoto.deviceManager.getAllDevicesBySocketID());
 
 
 

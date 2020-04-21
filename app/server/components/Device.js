@@ -68,7 +68,7 @@ module.exports.prototype = {
      * Get socket ID
      * @returns string
      */
-    getSocketID: function() { return this._socket.id; },
+    getSocketID: function() { return (this._socket) ? this._socket.id : false; },
 
     /**
      * Get socket

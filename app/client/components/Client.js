@@ -168,6 +168,7 @@ module.exports.prototype = {
             this._socket.on(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, this._onUpdateOtherDeviceConnected.bind(this));
             this._socket.on(ConnectorEvents.prototype.UPDATE_PRIMARYDEVICE_MANUALCODE, this._onUpdatePrimaryDeviceManualCode.bind(this));
             this._socket.on(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_MANUALCODE_CONFIRMATION, this._onRequestPrimaryDeviceManualCodeConfirmation.bind(this));
+            this._socket.on(ConnectorEvents.prototype.ERROR_PRIMARYDEVICE_CONNECT_BY_MANUALCODE_SECONDARYDEVICE_NOT_FOUND, this._onErrorPrimaryDeviceConnectByManualCodeSecondaryDeviceNotFound.bind(this));
         }
         else
         {
@@ -188,7 +189,7 @@ module.exports.prototype = {
         // 4. configure security
         this._socket.on(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND, this._onErrorDeviceReconnectDeviceIDNotFound.bind(this));
         this._socket.on(ConnectorEvents.prototype.ERROR_SECURITY_COMPROMISED, this._onErrorSecurityCompromised.bind(this));
-        this._socket.on(ConnectorEvents.prototype.NOTIFICATION_PAIR_EXPIRED, this._onDeviceNotificationPairExpired.bind(this));
+        this._socket.on(ConnectorEvents.prototype.NOTIFICATION_SESSION_EXPIRED, this._onDeviceNotificationSessionExpired.bind(this));
 
 
         // --- data output
@@ -295,13 +296,13 @@ module.exports.prototype = {
     _onSocketConnectError: function(err)
     {
         // 1. hide
-        this._dataInput.hide();
-        this._dataOutput.hide();
-        this._toggleDirectionButton.hide();
-        if (this._isOutputDevice()) this._connector.hide();
+        if (this._dataInput) this._dataInput.hide();
+        if (this._dataOutput) this._dataOutput.hide();
+        if (this._toggleDirectionButton) this._toggleDirectionButton.hide();
+        if (this._isOutputDevice()) if (this._connector) this._connector.hide();
 
         // 2. output
-        this._alertMessage.show('Error connecting to server. Please try again!');
+        if (this._alertMessage) this._alertMessage.show('Error connecting to server. Please try again!');
     },
 
     /**
@@ -399,7 +400,7 @@ module.exports.prototype = {
         this._killConnection();
 
         // 3. output
-        this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to make a new connection.', true);
+        this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to start a new connection.', true);
     },
 
     /**
@@ -645,7 +646,23 @@ module.exports.prototype = {
     _ManualConnectHandshakeRequestConfirmHandshake: function()
     {
         // 1. request
-        this._socket.emit(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_MANUALCODE_CONFIRMED);
+        if (this._socket) this._socket.emit(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_MANUALCODE_CONFIRMED);
+    },
+
+    /**
+     * Handle primary device `ERROR_PRIMARYDEVICE_CONNECT_BY_MANUALCODE_SECONDARYDEVICE_NOT_FOUND`
+     * @private
+     */
+    _onErrorPrimaryDeviceConnectByManualCodeSecondaryDeviceNotFound: function()
+    {
+        // 1. cleanup
+        this._killConnection();
+
+        // 2. cleanup
+        if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
+
+        // 3. notify
+        this._alertMessage.show('Oops, we lost the other device :/ <a href="/">Reload</a> this page to start a new connection.', true);
     },
 
     /**
@@ -794,10 +811,10 @@ module.exports.prototype = {
 
 
     /**
-     * Handle device `NOTIFICATION_PAIR_EXPIRED`
+     * Handle device `NOTIFICATION_SESSION_EXPIRED`
      * @private
      */
-    _onDeviceNotificationPairExpired: function()
+    _onDeviceNotificationSessionExpired: function()
     {
         // 1. toggle visibility
         if (this._connector) this._connector.hide();
@@ -811,7 +828,7 @@ module.exports.prototype = {
         this._killConnection();
 
         // 3. output
-        this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to make a new connection.', true);
+        this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to start a new connection.', true);
     },
 
     /**

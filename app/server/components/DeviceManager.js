@@ -9,9 +9,12 @@
 
 // import project classes
 const Device = require('./Device');
+const ConnectorEvents = require('./../../client/components/Connector/ConnectorEvents');
 
 // import extenders
 const EventDispatcherExtender = require('./../../common/extenders/EventDispatcherExtender');
+
+
 
 
 module.exports = function()
@@ -35,7 +38,7 @@ module.exports.prototype = {
     DEVICE_REMOVED: 'DEVICE_REMOVED',
 
     // config
-    OFFLINE_DEVICE_LIFETIME: 2 * 60 * 1000, //24 * 60 * 60 * 1000,
+    OFFLINE_DEVICE_LIFETIME: 0.5 * 60 * 60 * 1000,
 
 
 
@@ -161,13 +164,34 @@ module.exports.prototype = {
         return (this._aOfflineDevices[sDeviceID]) ? this._aOfflineDevices[sDeviceID].device : false;
     },
 
-    // destroy: function(sDeviceID)
-    // {
-    //
-    //
-    //     // d. broadcast
-    //     this.dispatchEvent(this.DEVICE_REMOVED, offlineDeviceData.device);
-    // }
+    /**
+     * Destroy device
+     * @param sDeviceID
+     */
+    destroy: function(sDeviceID)
+    {
+        // 1. load
+        let device = this.getDeviceByDeviceID(sDeviceID);
+
+        // 2. validate
+        if (!device) return;
+
+        // 3. load
+        let socket = device.getSocket();
+
+        // 4. broadcast
+        if (socket)
+        {
+            socket.emit(ConnectorEvents.prototype.NOTIFICATION_SESSION_EXPIRED);
+
+            // b. cleanup
+            delete this._aDevicesBySocketID[socket.id];
+        }
+
+        // 5. cleanup
+        delete this._aOfflineDevices[sDeviceID];
+        delete this._aDevicesByDeviceID[sDeviceID];
+    },
 
 
 
@@ -187,6 +211,9 @@ module.exports.prototype = {
         {
             // a. register
             let offlineDeviceData = this._aOfflineDevices[sKey];
+
+            // b.
+            if (offlineDeviceData.device && offlineDeviceData.device.getPairID()) continue;
 
             // b. validate
             if (offlineDeviceData.nExpires >= new Date().getTime()) continue;

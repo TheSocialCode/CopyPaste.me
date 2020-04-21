@@ -36,7 +36,7 @@ module.exports.prototype = {
     // settings
     _sPairID: null,
     _nCreated: 0,
-    _bIsActive: false,
+    _bIsActive: true,
 
     // devices
     _primaryDeviceSocket: null,
@@ -66,23 +66,28 @@ module.exports.prototype = {
     ACTIONTYPE_DATA_FINISH: 'DATA_FINISH',
     ACTIONTYPE_PRIMARYDEVICE_CONNECTED: 'PRIMARYDEVICE_CONNECTED',
     ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED: 'PRIMARYDEVICE_DISCONNECTED',
+    ACTIONTYPE_PRIMARYDEVICE_RECONNECTED: 'PRIMARYDEVICE_RECONNECTED',
+
     ACTIONTYPE_SECONDARYDEVICE_CONNECTED_QR: 'SECONDARYDEVICE_CONNECTED_QR',
     ACTIONTYPE_SECONDARYDEVICE_CONNECTED_MANUALCODE: 'SECONDARYDEVICE_CONNECTED_MANUALCODE',
     ACTIONTYPE_SECONDARYDEVICE_CONNECTED_INVITE: 'SECONDARYDEVICE_CONNECTED_INVITE',
     ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED: 'SECONDARYDEVICE_DISCONNECTED',
+    ACTIONTYPE_SECONDARYDEVICE_RECONNECTED: 'SECONDARYDEVICE_RECONNECTED',
     ACTIONTYPE_SECURITYCOMPROMISED: 'SECURITY_COMPROMISED',
 
     // utils
     _timerExpiration: null,
 
     // settings
-    MAX_IDLE_TIME: 24 * 60 * 60 * 1000,
+    MAX_IDLE_TIME: 0.5 * 60 * 60 * 1000,
 
     // events
     ACTIVE: 'ACTIVE',
     IDLE: 'IDLE',
     EXPIRED: 'EXPIRED',
 
+    // logs
+    _aTransferTimes: [],
 
 
 
@@ -114,25 +119,30 @@ module.exports.prototype = {
         this._sPrimaryDevicePublicKey = sPublicKey;
         this._sPrimaryDeviceID = sDeviceID;
 
-        // 4. update
-        this._updateExpirationDate();
+
+        // ---
+
+
+        // 4. store
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').insertOne(
+            {
+                id: this._sPairID,
+                states: {
+                    active: this._bIsActive,
+                    connected: false,
+                    used: false,
+                    compromised: false,
+                    archived: false
+                }
+            }
+        );
 
 
         // ---
 
 
-        // 5. store
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').insertOne(
-            {
-                id: this._sPairID,
-                states: {
-                    connectionEstablished: false,
-                    securityCompromised: false,
-                    dataSent: false,
-                    archived: false
-                }
-            }
-        );
+        // 5. update
+        this._updateExpirationDate();
     },
 
 
@@ -221,7 +231,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "states.connectionEstablished" : true },
+                $set: { "states.connected" : true },
                 $push: { logs: { action: sAction, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)
@@ -291,11 +301,17 @@ module.exports.prototype = {
         // 1. load
         let device = this.Mimoto.deviceManager.getDeviceByDeviceID(this._sSecondaryDeviceID);
 
-        // 2. convert
+        // 2. validate
+        if (!device) return false;
+
+        // 3. convert
         this.connectSecondaryDevice(this._unconfirmedSecondaryDeviceSocket, this._sSecondaryDevicePublicKey, device, Token.prototype.TYPE_MANUALCODE);
 
-        // 3. cleanup
+        // 4. cleanup
         delete this._unconfirmedSecondaryDeviceSocket;
+
+        // 5. success
+        return true;
     },
 
     /**
@@ -502,20 +518,24 @@ module.exports.prototype = {
         // 4. log start of data
         if (encryptedData.packageNumber === 0)
         {
-            // a. log
+            // a. store
+            this._aTransferTimes[encryptedData.id] = Utils.prototype.since(this._nCreated);
+
+            // b. log
             this.Mimoto.mongoDB.getCollection('pairs').updateOne(
                 {
                     "id": this.getID()
                 },
                 {
-                    $set: { "states.dataSent": true },
+                    $set: { "states.used": true },
                     $push: { logs: {
-                            type: this.ACTIONTYPE_DATA_START,
+                            action: this.ACTIONTYPE_DATA,
                             id: encryptedData.id,
                             contentType: encryptedData.sType,
                             totalSize: encryptedData.totalSize,
                             direction: this.getDirection(),
-                            timeSinceStart: Utils.prototype.since(this._nCreated)
+                            timeSinceStart: this._aTransferTimes[encryptedData.id],
+                            finished: (encryptedData.packageNumber === encryptedData.packageCount - 1)
                         } }
                 },
                 function(err, result)
@@ -526,25 +546,27 @@ module.exports.prototype = {
         }
 
         // 5. log end of data
-        if (encryptedData.packageNumber === encryptedData.packageCount - 1)
+        if (encryptedData.packageCount > 1 && encryptedData.packageNumber === encryptedData.packageCount - 1)
         {
             // a. log
             this.Mimoto.mongoDB.getCollection('pairs').updateOne(
                 {
-                    "id": this.getID()
+                    "id": this.getID(), "logs.action": this.ACTIONTYPE_DATA, "logs.id": encryptedData.id
                 },
                 {
-                    $push: { logs: {
-                            type: this.ACTIONTYPE_DATA_FINISH,
-                            id: encryptedData.id,
-                            timeSinceStart: Utils.prototype.since(this._nCreated)
-                        } }
+                    $set: {
+                        "logs.$.finished": true,
+                        "logs.$.duration": Utils.prototype.since(this._nCreated) - this._aTransferTimes[encryptedData.id]
+                    }
                 },
-                function(err, result)
+                function(err, result, encryptedData)
                 {
                     CoreModule_Assert.equal(err, null);
                 }
             );
+
+            // b. cleanup
+            delete this._aTransferTimes[encryptedData.id];
         }
     },
 
@@ -564,19 +586,45 @@ module.exports.prototype = {
         // 1. cleanup
         if (this._timerExpiration) clearTimeout(this._timerExpiration);
 
-        // 2. setup
-        if (this.hasPrimaryDevice() && this.hasSecondaryDevice())
-        {
-            // a. broadcast
-            this.dispatchEvent(this.ACTIVE);
-        }
-        else
-        {
-            // a. setup
-            this._timerExpiration = setTimeout(this._onHandleExpiration.bind(this), this.MAX_IDLE_TIME);
+        // 2. define
+        let bNewState = (this.hasPrimaryDevice() || this.hasSecondaryDevice());
+        let bStateHasChanged = (this._bIsActive !== bNewState);
 
-            // b. broadcast
-            this.dispatchEvent(this.IDLE);
+        // 3. toggle
+        this._bIsActive = bNewState;
+
+
+        // 3. verify
+        if (bStateHasChanged)
+        {
+            // a. store
+            if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+                {
+                    "id": this.getID()
+                },
+                {
+                    $set: { "states.active" : this._bIsActive }
+                },
+                function(err, result)
+                {
+                    CoreModule_Assert.equal(err, null);
+                }
+            );
+
+            // b. update
+            if (this._bIsActive )
+            {
+                // a. broadcast
+                this.dispatchEvent(this.ACTIVE);
+            }
+            else
+            {
+                // a. setup
+                this._timerExpiration = setTimeout(this._onHandleExpiration.bind(this), this.MAX_IDLE_TIME);
+
+                // b. broadcast
+                this.dispatchEvent(this.IDLE);
+            }
         }
     },
 
@@ -628,7 +676,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "states.securityCompromised": true },
+                $set: { "states.compromised": true },
                 $push: { logs: { action: this.ACTIONTYPE_SECURITYCOMPROMISED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)

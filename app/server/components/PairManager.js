@@ -277,39 +277,15 @@ module.exports.prototype = {
         // 2. verify
         if (!pair) return;
 
-
-
-
-
-        // if (pair.getPrimaryDeviceID())
-        // {
-        //     this.Mimoto.deviceManager.
-        // }
-        
-        // activepairts -> allpairs
-        
-        //(inactivepars = subset)
-        //aIdlePairs = subset 
-
-
-        // 1. cleanup
+        // 3. cleanup
         if (this._aPairs[pair.getID()]) delete this._aPairs[pair.getID()];
         if (this._aIdlePairs[pair.getID()]) delete this._aIdlePairs[pair.getID()];
 
-
-
-        // 3. cleanup connected devices;
-
-        // delete this._aDevicesBySocketID['' + pair.primaryDevice.id];
-        // delete this._aDevicesByDeviceID['' + pair.getPrimaryDeviceID()];
-        // delete this._aDevicesBySocketID['' + pair.secondaryDevice.id];
-        // delete this._aDevicesByDeviceID['' + pair.getSecondaryDeviceID()];
-
-
-
-
-
         // 4. cleanup
+        this.Mimoto.deviceManager.destroy(pair.getPrimaryDeviceID());
+        this.Mimoto.deviceManager.destroy(pair.getSecondaryDeviceID());
+
+        // 5. cleanup
         delete this._aPairs['' + sPairID];
     },
 
@@ -372,11 +348,13 @@ module.exports.prototype = {
      */
     _onPairExpired: function(pair)
     {
-        // 1. report
-        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.NOTIFICATION_PAIR_EXPIRED);
+        // 1. load
+        let primaryDevice = this.Mimoto.deviceManager.getDeviceByDeviceID(pair.getPrimaryDeviceID());
+        let secondaryDevice = this.Mimoto.deviceManager.getDeviceByDeviceID(pair.getSecondaryDeviceID());
 
-        // 2. report
-        if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.NOTIFICATION_PAIR_EXPIRED);
+        // 2. notify
+        if (primaryDevice && primaryDevice.getSocket()) primaryDevice.getSocket().emit(ConnectorEvents.prototype.NOTIFICATION_SESSION_EXPIRED);
+        if (secondaryDevice && secondaryDevice.getSocket()) secondaryDevice.getSocket().emit(ConnectorEvents.prototype.NOTIFICATION_SESSION_EXPIRED);
 
         // 3. cleanup
         this.destroy(pair.getID());

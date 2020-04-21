@@ -208,8 +208,6 @@ module.exports.prototype = {
                 metaData.sFileName = Module_Crypto.decrypt(receivedData.metaData.fileName.data, receivedData.metaData.fileName.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
             }
 
-            //console.log('metaData', metaData);
-
             // d. broadcast event
             this.dispatchEvent(this.DATA_PREPARE_FOR_DISPLAY, metaData);
         }
