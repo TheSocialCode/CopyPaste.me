@@ -56,8 +56,8 @@ module.exports = {
             totalSizeStarted: 0,
             finished: 0,
             totalSizeFinished: 0,
-            failed: 0,
-            totalSizeFailed: 0,
+            unfinished: 0,
+            totalSizeUnfinished: 0,
             types: {
                 password: 0,
                 text: 0,
@@ -361,7 +361,7 @@ module.exports = {
             this._stats.transfers.totalSizeStarted = nTotalSize;
 
             // e. update
-            this._stats.transfers.totalSizeFailed = this._stats.transfers.totalSizeStarted - this._stats.transfers.totalSizeFinished;
+            this._stats.transfers.totalSizeUnfinished = this._stats.transfers.totalSizeStarted - this._stats.transfers.totalSizeFinished;
 
 
         }.bind(this));
