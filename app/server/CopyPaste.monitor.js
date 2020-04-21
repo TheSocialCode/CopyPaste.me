@@ -454,7 +454,7 @@ module.exports = {
         this._dbCollection_pairs.aggregate(
             [
                 { "$unwind": "$logs" },
-                {"$match": {"logs.action": "DATA", "logs.contentType": "file" }}
+                {"$match": {"logs.action": "DATA", "logs.contentType": "document" }}
             ]
         ).toArray(function(err, aDocs) {
 
