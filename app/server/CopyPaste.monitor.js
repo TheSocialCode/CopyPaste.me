@@ -300,7 +300,7 @@ module.exports = {
             this._stats.transfers.started = aDocs.length;
 
             // c. update
-            this._stats.transfers.failed = this._stats.transfers.started - this._stats.transfers.finished;
+            this._stats.transfers.unfinished = this._stats.transfers.started - this._stats.transfers.finished;
 
             // d. output
             this._outputStats();
