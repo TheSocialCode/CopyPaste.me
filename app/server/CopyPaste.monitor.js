@@ -213,76 +213,6 @@ module.exports = {
     {
 
 
-        this._dbCollection_pairs.countDocuments(function(err, nDocumentCount) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.pairs.idle = nDocumentCount - this._stats.pairs.active - this._stats.pairs.archived;
-
-            // c. output
-            this._outputStats();
-
-        }.bind(this));
-
-        this._dbCollection_pairs.countDocuments({ "states.active": true }, function(err, nDocumentCount) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.pairs.active = nDocumentCount;
-
-            // c. output
-            this._outputStats();
-
-        }.bind(this));
-
-
-        this._dbCollection_pairs.countDocuments({ "states.connected": true }, function(err, nDocumentCount) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.pairs.connected = nDocumentCount;
-
-            // c. output
-            this._outputStats();
-
-        }.bind(this));
-
-        this._dbCollection_pairs.countDocuments( { "states.used": true }, function(err, nDocumentCount) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.pairs.used = nDocumentCount;
-
-            // c. output
-            this._outputStats();
-
-        }.bind(this));
-
-
-        this._dbCollection_pairs.countDocuments( { "states.archived": true }, function(err, nDocumentCount) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.pairs.archived = nDocumentCount;
-
-            // c. output
-            this._outputStats();
-
-        }.bind(this));
-
-
-        //db.getSizeOfArray.aggregate({$project:{NumberOfItemsInArray:{$size:"$StudentMarks"}}})
-
         this._dbCollection_pairs.aggregate(
             [
                 // {"$project": {"logs":1}},
@@ -304,7 +234,6 @@ module.exports = {
 
             // d. output
             this._outputStats();
-
 
         }.bind(this));
 
@@ -499,6 +428,99 @@ module.exports = {
             this._stats.pairs.types.manualcode = aDocs.length;
 
         }.bind(this));
+
+
+
+
+
+
+
+
+        // ---------------------------------------------------
+
+
+
+
+        this._dbCollection_pairs.aggregate(
+            [
+                {
+                    $unwind: "$logs"
+                },
+                {
+                    $match: {
+                        "logs.action": "DATA"
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        numberOfTransfers: { $sum: 1 },
+                        totalSize: { $sum: "$logs.totalSize" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: false,
+                        numberOfTransfers : true,
+                        totalSize : true
+                    }
+                }
+            ]
+        ).toArray(function(err, aDocs) {
+
+            // a. validate
+            CoreModule_Assert.equal(err, null);
+
+            // b. update
+            this._stats.xxx = JSON.stringify(aDocs);
+
+        }.bind(this));
+
+        // ---------------------------------------------------
+
+
+
+
+
+        // ---------------------------------------------------
+
+
+
+
+        this._dbCollection_pairs.aggregate(
+            [
+                { "$group": {
+                        "_id": false,
+                        "pairCount": { $sum: 1 },
+                        "activeCount": { $sum: { $cond: [ { $eq: [ "$states.active", true ] }, 1, 0 ] } },
+                        "connectedCount": { $sum: { $cond: [ { $eq: [ "$states.connected", true ] }, 1, 0 ] } },
+                        "usedCount": { $sum: { $cond: [ { $eq: [ "$states.used", true ] }, 1, 0 ] } },
+                        "archivedCount": { $sum: { $cond: [ { $eq: [ "$states.archived", true ] }, 1, 0 ] } }
+                    }},
+
+                { "$project": { "_id": 0 } }
+            ]
+        ).toArray(function(err, aDocs) {
+
+            // a. validate
+            CoreModule_Assert.equal(err, null);
+
+            // b. store
+            let result = aDocs[0];
+
+            // c. update
+            this._stats.yyy = JSON.stringify(result);
+
+            // c. update
+            this._stats.pairs.active = result.activeCount;
+            this._stats.pairs.idle = result.pairCount - result.activeCount - result.archivedCount;
+            this._stats.pairs.connected = result.connectedCount;
+            this._stats.pairs.used = result.usedCount;
+            this._stats.pairs.archived = result.archivedCount;
+
+        }.bind(this));
+
+
 
 
 

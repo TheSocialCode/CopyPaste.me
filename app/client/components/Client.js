@@ -400,7 +400,7 @@ module.exports.prototype = {
         this._killConnection();
 
         // 3. output
-        this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to start a new connection.', true);
+        this._alertMessage.show('Your session expired to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
     },
 
     /**
@@ -662,7 +662,7 @@ module.exports.prototype = {
         if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
 
         // 3. notify
-        this._alertMessage.show('Oops, we lost the other device :/ <a href="/">Reload</a> this page to start a new connection.', true);
+        this._alertMessage.show('Oops, it seems we lost the other device :/ Let`s try again!', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
     },
 
     /**
@@ -828,7 +828,7 @@ module.exports.prototype = {
         this._killConnection();
 
         // 3. output
-        this._alertMessage.show('This session expired. <a href="/">Reload</a> this page to start a new connection.', true);
+        this._alertMessage.show('Your session expired to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
     },
 
     /**

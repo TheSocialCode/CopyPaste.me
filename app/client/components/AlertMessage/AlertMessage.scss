@@ -1,3 +1,8 @@
+div.component_AlertMessage_container {
+    width: 100%;
+    text-align: center;
+}
+
 div.component_AlertMessage {
 
     display:none;
@@ -24,7 +29,54 @@ div.component_AlertMessage {
 
 }
 
-div.component_AlertMessage_container {
-    width: 100%;
-    text-align: center;
+div.component_AlertMessage_content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    @media only screen and (max-width: 400px)
+    {
+        display: block;
+    }
 }
+
+    div.component_AlertMessage_label {
+        flex: content;
+
+        @media only screen and (max-width: 400px)
+        {
+            margin-bottom: 15px;
+        }
+    }
+
+
+    div.component_AlertMessage_menu {
+
+        flex: content;
+        display: none;
+        margin-left: 15px;
+
+        &.show {
+            display: inline-block;
+        }
+    }
+
+        div.component_AlertMessage_button {
+
+            display: inline-block;
+
+            background-color: $background-footer;
+            color: #ffffff;
+            border-radius: 9px;
+            padding: 6px 14px 8px 14px;
+            font-size: 16px;
+            letter-spacing: -0.55px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+
+            &:hover {
+                color: gold;
+            }
+        }

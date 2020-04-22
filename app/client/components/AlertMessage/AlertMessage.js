@@ -17,6 +17,12 @@ module.exports.prototype = {
 
     // views
     _elRoot: null,
+    _elLabel: null,
+    _elMenu: null,
+    _elButton: null,
+
+    // settings
+    _buttonData: null,
 
 
 
@@ -32,6 +38,12 @@ module.exports.prototype = {
     {
         // 1. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_AlertMessage"]');
+        this._elLabel = this._elRoot.querySelector('[data-mimoto-id="label"]');
+        this._elMenu = this._elRoot.querySelector('[data-mimoto-id="menu"]');
+        this._elButton = this._elRoot.querySelector('[data-mimoto-id="button"]');
+
+        // 2. configure
+        this._elButton.addEventListener('click', this._onButtonClick.bind(this));
     },
 
 
@@ -44,15 +56,29 @@ module.exports.prototype = {
     /**
      * Show component
      */
-    show: function(sMessage, bDisableInterface)
+    show: function(sMessage, bDisableInterface, buttonData)
     {
-        // 1. output
-        this._elRoot.innerHTML = sMessage;
+        // 1. store
+        this._buttonData = buttonData;
 
-        // 2. show
+        // 2. output
+        this._elLabel.innerHTML = sMessage;
+
+        // 3. show
         this._elRoot.classList.add('show');
+        this._elMenu.classList.remove('show');
 
-        // 3. disable
+        // 4. verify
+        if (this._buttonData && this._buttonData.sLabel && this._buttonData.fClickHandler)
+        {
+            // a. show
+            this._elMenu.classList.add('show');
+
+            // b. output
+            this._elButton.innerText = this._buttonData.sLabel;
+        }
+
+        // 5. disable
         if (bDisableInterface) this._elRoot.classList.add('disabled');
     },
 
@@ -63,6 +89,28 @@ module.exports.prototype = {
     {
         // 1. toggle
         this._elRoot.classList.remove('show');
+        this._elMenu.classList.remove('show');
+    },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Private functions ------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
+     * Handle button `click`
+     * @private
+     */
+    _onButtonClick: function()
+    {
+        // 1. validate
+        if (this._buttonData && this._buttonData.fClickHandler)
+        {
+            // a. execute
+            this._buttonData.fClickHandler();
+        }
     }
 
-};
+}

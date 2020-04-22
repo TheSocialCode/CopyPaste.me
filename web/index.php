@@ -56,9 +56,18 @@
                     </div>
 
                     <h1 class="tagline">Frictionless sharing<br>between devices</h1>
-                    <h2 class="description">Private end-to-end encryption, secure transfer and your data is never stored on the server</h2>
+                    <h2 class="description">Private end-to-end encryption, secure transfer and your data won't be stored in the cloud</h2>
 
-                    <div class="component_AlertMessage_container"><div data-mimoto-id="component_AlertMessage" class="component_AlertMessage"></div></div>
+                    <div class="component_AlertMessage_container">
+                        <div data-mimoto-id="component_AlertMessage" class="component_AlertMessage">
+                            <div class="component_AlertMessage_content">
+                                <div data-mimoto-id="label" class="component_AlertMessage_label"></div>
+                                <div data-mimoto-id="menu" class="component_AlertMessage_menu">
+                                    <div data-mimoto-id="button" class="component_AlertMessage_button">xxx</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div data-mimoto-id="warning_security_compromised" class="warning_security_compromised"></div>
 
