@@ -270,7 +270,7 @@ module.exports.prototype = {
         // 3. update
         this._aReceivedPackages[receivedData.id].receivedCount = Object.keys(this._aReceivedPackages[receivedData.id].packages).length;
 
-        
+
 
 
         if (console) console.log('Package # ' + this._aReceivedPackages[receivedData.id].receivedCount + ' of ' + this._aReceivedPackages[receivedData.id].packageCount);

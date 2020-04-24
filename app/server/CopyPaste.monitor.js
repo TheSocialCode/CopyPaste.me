@@ -61,6 +61,7 @@ module.exports = {
         transfers: {
             started: 0,
             totalSizeStarted: 0,
+            totalSizeTransferred: 0,
             finished: 0,
             totalSizeFinished: 0,
             unfinished: 0,
@@ -242,7 +243,8 @@ module.exports = {
                 { "$match": {"logs.action": "DATA" }},
                 {
                     $project: {
-                        totalSize: { $sum: "$logs.totalSize" }
+                        totalSize: { $sum: "$logs.totalSize" },
+                        totalTransferred: { $sum: "$logs.bytesTransferred" }
                     }
                 }
 
@@ -255,16 +257,19 @@ module.exports = {
 
             // b. init
             let nTotalSize = 0;
+            let nTotalTransferred = 0;
 
             // c. add up
             let nItemCount = aDocs.length;
             for (let nItemIndex = 0; nItemIndex < nItemCount; nItemIndex++)
             {
                 nTotalSize += aDocs[nItemIndex].totalSize;
+                nTotalTransferred += aDocs[nItemIndex].totalTransferred;
             }
 
             // d. update
             this._stats.transfers.totalSizeStarted = nTotalSize;
+            this._stats.transfers.totalSizeTransferred = nTotalTransferred;
 
             // e. update
             this._stats.transfers.totalSizeUnfinished = this._stats.transfers.totalSizeStarted - this._stats.transfers.totalSizeFinished;
@@ -371,43 +376,6 @@ module.exports = {
             this._stats.transfers.types.file = aDocs.length;
 
         }.bind(this));
-
-
-
-        // // count all connections type `QR`
-        // if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-        //     [
-        //         { "$unwind": "$logs" },
-        //         {"$match": {"logs.action": "SECONDARYDEVICE_CONNECTED_QR" }}
-        //     ]
-        // ).toArray(function(err, aDocs) {
-        //
-        //     // a. validate
-        //     CoreModule_Assert.equal(err, null);
-        //
-        //     // b. update
-        //     this._stats.pairs.types.qr = aDocs.length;
-        //
-        // }.bind(this));
-        //
-        // // count all connections type `MANUAL`
-        // if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-        //     [
-        //         { "$unwind": "$logs" },
-        //         {"$match": {"logs.action": "SECONDARYDEVICE_CONNECTED_MANUALCODE" }}
-        //     ]
-        // ).toArray(function(err, aDocs) {
-        //
-        //     // a. validate
-        //     CoreModule_Assert.equal(err, null);
-        //
-        //     // b. update
-        //     this._stats.pairs.types.manualcode = aDocs.length;
-        //
-        // }.bind(this));
-
-
-
 
 
 
