@@ -185,6 +185,7 @@ module.exports.prototype = {
         this._socket.on(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_DISCONNECTED, this._onUpdateOtherDeviceDisconnected.bind(this));
         this._socket.on(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_RECONNECTED, this._onUpdateOtherDeviceReconnected.bind(this));
         this._socket.on(ConnectorEvents.prototype.RECEIVE_DATA, this._onReceiveData.bind(this));
+        this._socket.on(ConnectorEvents.prototype.DATA_RECEIVED, this._onDataReceived.bind(this));
 
         // 4. configure security
         this._socket.on(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND, this._onErrorDeviceReconnectDeviceIDNotFound.bind(this));
@@ -277,6 +278,9 @@ module.exports.prototype = {
             // I. request
             this._socket.emit(ConnectorEvents.prototype.REQUEST_DEVICE_RECONNECT, this._sDeviceID);
         }
+
+        // 3. resume
+        this._dataManager.resume();
     },
 
     /**
@@ -311,6 +315,10 @@ module.exports.prototype = {
      */
     _onSocketDisconnect: function()
     {
+        // 1. pause
+        this._dataManager.pause();
+
+        // 2. notify
         this._alertMessage.show('Connection with server was lost .. reconnecting ..');
     },
 
@@ -390,14 +398,14 @@ module.exports.prototype = {
      */
     _onErrorDeviceReconnectDeviceIDNotFound: function()
     {
-        // 1. hide
+        // 1. cleanup
+        this._killConnection();
+
+        // 2. hide
         this._dataInput.hide();
         this._dataOutput.hide();
         this._toggleDirectionButton.hide();
         if (this._isOutputDevice()) this._connector.hide();
-
-        // 2. cleanup
-        this._killConnection();
 
         // 3. output
         this._alertMessage.show('Your session expired to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
@@ -472,7 +480,10 @@ module.exports.prototype = {
         this._dataOutput.hide();
         this._toggleDirectionButton.hide();
 
-        // 2. output
+        // 2. pause
+        this._dataManager.pause();
+
+        // 3. output
         this._alertMessage.show('The other device has been disconnected. Is it still online?');
     },
 
@@ -486,6 +497,9 @@ module.exports.prototype = {
         this._alertMessage.hide();
         if (this._isOutputDevice()) this._dataOutput.show();
         if (this._isOutputDevice()) this._toggleDirectionButton.show();
+
+        // 2. resume
+        this._dataManager.resume();
     },
 
 
@@ -761,6 +775,20 @@ module.exports.prototype = {
     {
         // 1. store
         this._dataManager.addPackage(receivedData);
+
+        // 2. notify
+        this._socket.emit(ConnectorEvents.prototype.DATA_RECEIVED, { dataID: receivedData.id, packageNumber: receivedData.packageNumber });
+    },
+
+    /**
+     * Handle `DATA_RECEIVED`
+     * @param data
+     * @private
+     */
+    _onDataReceived: function(data)
+    {
+        // 1. continue transfer
+        this._dataManager.continueToNextPackage(data);
     },
 
 
@@ -816,16 +844,16 @@ module.exports.prototype = {
      */
     _onDeviceNotificationSessionExpired: function()
     {
-        // 1. toggle visibility
+        // 1. cleanup
+        this._killConnection();
+
+        // 2. toggle visibility
         if (this._connector) this._connector.hide();
         if (this._manualConnectInput) this._manualConnectInput.hide();
         if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
         if (this._dataOutput) this._dataOutput.hide();
         if (this._dataInput) this._dataInput.hide();
         if (this._toggleDirectionButton) this._toggleDirectionButton.hide();
-
-        // 2. cleanup
-        this._killConnection();
 
         // 3. output
         this._alertMessage.show('Your session expired to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });

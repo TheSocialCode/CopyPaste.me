@@ -9,6 +9,7 @@
 
 // import project classes
 const Token = require('./components/Token');
+const MongoDB = require('./components/MongoDB');
 
 // import external classes
 const Module_FS = require('fs');
@@ -21,6 +22,9 @@ const CoreModule_Util = require('util');
 
 module.exports = {
 
+    // core
+    Mimoto: {},
+    
     // config
     _config: {
         mongo: true,
@@ -142,72 +146,42 @@ module.exports = {
         // 6. output extra line
         this._sIntro += '\n';
 
-
-
+        
         // --- Mongo DB
-
-
-        if (this._config.mongo)
-        {
-            // 4. init
-            this._mongo = Module_MongoDB.MongoClient;
-
-            // init
-            let sMongoURL = 'mongodb://';
-
-
-            // compose
-            if (this._config.mongoauthenticate)
-            {
-                let sUsername = encodeURIComponent(this._configFile.mongodb.username.toString());
-                let sPassword = encodeURIComponent(this._configFile.mongodb.password.toString());
-
-                sMongoURL += sUsername + ':' + sPassword + '@';
-            }
-
-            sMongoURL += this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
-            if (this._config.mongoauthenticate) sMongoURL += '?authMechanism=SCRAM-SHA-1&authSource=' + this._configFile.mongodb.dbname;
-
-            // 6. connect
-            this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
-        }
-
-        // // 7. init
-        // this._mongo = Module_MongoDB.MongoClient;
-        //
-        // // 8. configure
-        // const sMongoURL = 'mongodb://' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString();
-        //
-        // // 9. connect
-        // this._mongo.connect(sMongoURL, this._onMongoDBConnect.bind(this));
+        
+        
+        // 7. boot up
+        if (!this._startupMongoDB()) this._startupSocketIO();
     },
 
     /**
-     * Handle MongoDB connect
+     * Startup MongoDB
+     * @private
+     */
+    _startupMongoDB: function()
+    {
+        // 1. init
+        this.Mimoto.mongoDB = new MongoDB(this._configFile, this._config);
+
+        // 2. verify and exit
+        if (!this._config.mongo) return false;
+
+        // 3. configure
+        this.Mimoto.mongoDB.addEventListener(MongoDB.prototype.MONGODB_READY, this._onMongoDBReady.bind(this));
+
+        // 4. exit
+        return true
+    },
+    
+    /**
+     * Handle MongoDB ready
      * @param err
      * @param client
      * @private
      */
-    _onMongoDBConnect: function(err, client)
+    _onMongoDBReady: function(err, client)
     {
-        // 1. init
-        const sMongoDBName = this._configFile.mongodb.dbname.toString();
-
-        // 2. validate
-        CoreModule_Assert.equal(null, err);
-
-        // 3. output
-        console.log("MongoDB connected on " + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString());
-        console.log();
-
-        // 4. setup
-        this._db = client.db(sMongoDBName);
-
-        // 5. store
-        this._dbCollection_pairs = this._db.collection('pairs');
-        this._dbCollection_stats = this._db.collection('stats');
-
-        // 6. run
+        // 1. run
         this._timerMonitor = setInterval(this._collectStats.bind(this), 2000);
         this._timerMonitorOutput = setInterval(this._outputStats.bind(this), 1000);
     },
@@ -216,7 +190,7 @@ module.exports = {
     {
 
 
-        this._dbCollection_pairs.aggregate(
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
             [
                 // {"$project": {"logs":1}},
                 { "$unwind": "$logs" },
@@ -240,7 +214,7 @@ module.exports = {
 
         }.bind(this));
 
-        this._dbCollection_pairs.aggregate(
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
             [
                 // {"$project": {"logs":1}},
                 { "$unwind": "$logs" },
@@ -262,7 +236,7 @@ module.exports = {
 
 
 
-        this._dbCollection_pairs.aggregate(
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
             [
                 { "$unwind": "$logs" },
                 { "$match": {"logs.action": "DATA" }},
@@ -298,7 +272,7 @@ module.exports = {
 
         }.bind(this));
 
-        this._dbCollection_pairs.aggregate(
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
             [
                 { "$unwind": "$logs" },
                 { "$match": {"logs.action": "DATA", "logs.finished": true }},
@@ -351,7 +325,7 @@ module.exports = {
 
 
         // count all data type `PASSWORD`
-        this._dbCollection_pairs.aggregate(
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
             [
                 { "$unwind": "$logs" },
                 {"$match": {"logs.action": "DATA", "logs.contentType": "password" }}
@@ -367,7 +341,7 @@ module.exports = {
         }.bind(this));
 
         // count all data type `TEXT`
-        this._dbCollection_pairs.aggregate(
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
             [
                 { "$unwind": "$logs" },
                 {"$match": {"logs.action": "DATA", "logs.contentType": "text" }}
@@ -383,7 +357,7 @@ module.exports = {
         }.bind(this));
 
         // count all data type `PASSWORD`
-        this._dbCollection_pairs.aggregate(
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
             [
                 { "$unwind": "$logs" },
                 {"$match": {"logs.action": "DATA", "logs.contentType": "document" }}
@@ -401,7 +375,7 @@ module.exports = {
 
 
         // // count all connections type `QR`
-        // this._dbCollection_pairs.aggregate(
+        // if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
         //     [
         //         { "$unwind": "$logs" },
         //         {"$match": {"logs.action": "SECONDARYDEVICE_CONNECTED_QR" }}
@@ -417,7 +391,7 @@ module.exports = {
         // }.bind(this));
         //
         // // count all connections type `MANUAL`
-        // this._dbCollection_pairs.aggregate(
+        // if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
         //     [
         //         { "$unwind": "$logs" },
         //         {"$match": {"logs.action": "SECONDARYDEVICE_CONNECTED_MANUALCODE" }}
@@ -444,7 +418,7 @@ module.exports = {
 
 
 
-        this._dbCollection_pairs.aggregate(
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
             [
                 {
                     $unwind: "$logs"
@@ -490,7 +464,7 @@ module.exports = {
 
 
 
-        this._dbCollection_pairs.aggregate(
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
             [
                 {
                     "$group": {

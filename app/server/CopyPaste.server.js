@@ -175,7 +175,7 @@ module.exports = {
         Pair.prototype.Mimoto = this.Mimoto;
 
         // 2. init core
-        this.Mimoto.logger = new Logger(this._configFile.logtofile.file.toString(), this._config.mode === this.DEVELOPMENT);
+        this.Mimoto.logger = new Logger((this._configFile.logtofile.file) ? this._configFile.logtofile.file.toString() : '', this._config.mode === this.DEVELOPMENT);
 
         // 3. output
         new StartupInfo(this._configFile, this._config, this.Mimoto.mongoDB.isRunning());
@@ -218,6 +218,7 @@ module.exports = {
         // 5. configure both devices
         socket.on(ConnectorEvents.prototype.REQUEST_DEVICE_RECONNECT, this._onRequestDeviceReconnect.bind(this, socket));
         socket.on(ConnectorEvents.prototype.SEND_DATA, this._onSendData.bind(this, socket));
+        socket.on(ConnectorEvents.prototype.DATA_RECEIVED, this._onReceiverDataReceived.bind(this, socket));
 
         // 6. configure - setting events
         socket.on(ConnectorEvents.prototype.REQUEST_TOGGLE_DIRECTION, this._onRequestToggleDirection.bind(this, socket));
@@ -621,6 +622,25 @@ module.exports = {
 
         // 3. forward
         pair.sendData(encryptedData);
+    },
+
+    /**
+     * Handle receiver `DATA_RECEIVED`
+     * @param socket
+     * @param data
+     * @private
+     */
+    _onReceiverDataReceived: function(socket, data)
+    {
+        // 1. load
+        let pair = this.Mimoto.pairManager.getPairBySocketID(socket.id);
+
+        // 2. validate
+        if (pair === false) return;
+
+        // 3. forward
+        if (pair.hasOtherDevice(socket)) pair.getOtherDevice(socket).emit(ConnectorEvents.prototype.DATA_RECEIVED, data);
+
     },
 
 

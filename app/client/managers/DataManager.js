@@ -27,6 +27,7 @@ module.exports.prototype = {
     // data
     _aReceivedPackages: [],
     _aPackagesReadyForTransfer: [],
+    _packageCurrentlyInTransfer: null,
 
     // security
     _myKeyPair: null,
@@ -37,6 +38,7 @@ module.exports.prototype = {
 
     // utils
     _timerPackageTransfer: null,
+    _bPaused: false,
 
     // events
     DATA_READY_FOR_TRANSFER: 'data_ready_for_transfer',
@@ -86,8 +88,36 @@ module.exports.prototype = {
     },
 
     /**
+     * Pause transfer
+     */
+    pause: function()
+    {
+        // 1. toggle
+        this._bPaused = true;
+    },
+
+    /**
+     * Resume transfer
+     */
+    resume: function()
+    {
+        // 1. toggle
+        this._bPaused = false;
+
+        // 2. resume
+        this._transferPackages();
+    },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Sending data -----------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
      * Prepare data for transfer
-     * @param data
+     * @param dataToTransfer
      */
     prepareDataForTransfer: function(dataToTransfer)
     {
@@ -149,6 +179,16 @@ module.exports.prototype = {
     },
 
     /**
+     * Continue to next package
+     * @param data
+     */
+    continueToNextPackage: function(data)
+    {
+        // 1. start next transfer
+        if (this._aPackagesReadyForTransfer.length > 0 && this._timerPackageTransfer === null) this._timerPackageTransfer = setInterval(this._transferPackages.bind(this), 100);
+    },
+
+    /**
      * Transfer packages
      * @private
      */
@@ -164,18 +204,22 @@ module.exports.prototype = {
         if (this._aPackagesReadyForTransfer.length > 0)
         {
             // a. load and remove
-            let packageToTransfer = this._aPackagesReadyForTransfer.shift();
+            this._packageCurrentlyInTransfer = this._aPackagesReadyForTransfer.shift();
 
             // b. encrypt
-            packageToTransfer.value = Module_Crypto.encrypt(packageToTransfer.value, this._sTheirPublicKey, this._myKeyPair.secretKey);
+            this._packageCurrentlyInTransfer.value = Module_Crypto.encrypt(this._packageCurrentlyInTransfer.value, this._sTheirPublicKey, this._myKeyPair.secretKey);
 
             // c. broadcast
-            this.dispatchEvent(this.DATA_READY_FOR_TRANSFER, packageToTransfer);
+            this.dispatchEvent(this.DATA_READY_FOR_TRANSFER, this._packageCurrentlyInTransfer);
         }
-
-        // 4. configure
-        if (this._aPackagesReadyForTransfer.length > 0 && this._timerPackageTransfer === null) this._timerPackageTransfer = setInterval(this._transferPackages.bind(this), 100);
     },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Receiving data ---------------------------------------------------------
+    // ----------------------------------------------------------------------------
+
 
     /**
      * Add event listener

@@ -25,6 +25,10 @@ module.exports.prototype = {
     _bOutputToConsole: false,
     _bBlockOutput: false,
 
+    // config
+    _bHasLogFile: false,
+
+
 
     // ----------------------------------------------------------------------------
     // --- Constructor ------------------------------------------------------------
@@ -38,7 +42,10 @@ module.exports.prototype = {
     {
         // 1. store
         this._sLogFile = sLogFile;
-        this._bOutputToConsole = bOutputToConsole
+        this._bOutputToConsole = bOutputToConsole;
+
+        // 2. validate
+        this._bHasLogFile = (!sLogFile) ? false : true;
     },
 
 
@@ -74,7 +81,7 @@ module.exports.prototype = {
         if (this._bBlockOutput) return;
 
         // 2. verify and output
-        if (this._sLogFile) Module_LogToFile(sOutput, this._sLogFile);
+        if (this._sLogFile && this._bHasLogFile) Module_LogToFile(sOutput, this._sLogFile);
     },
 
     /**

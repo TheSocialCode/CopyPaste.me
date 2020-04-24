@@ -437,15 +437,54 @@ module.exports.prototype = {
         this._updateExpirationDate();
     },
 
+
     /**
-     * Set connection type
-     * @param sValue
+     * Check if pair has other device (socket)
+     * @returns {boolean}
      */
-    // setConnectionType: function(sValue)
-    // {
-    //     // 1. store
-    //     this._sConnectionType = sValue;
-    // },
+    hasOtherDevice: function(socket)
+    {
+        // 1. verify
+        if (this.hasPrimaryDevice() && this.getPrimaryDevice().id === socket.id) return this.hasSecondaryDevice();
+
+        // 2. verify
+        if (this.hasSecondaryDevice() && this.getSecondaryDevice().id === socket.id) return this.hasPrimaryDevice();
+
+        // 3. error
+        return false;
+    },
+
+    /**
+     * Get other device (socket)
+     * @returns object
+     */
+    getOtherDevice: function(socket)
+    {
+        // 1. verify
+        if (this.hasPrimaryDevice())
+        {
+            // a. validate
+            if (this.getPrimaryDevice().id === socket.id)
+            {
+                // I. verify and respond
+                return (this.hasSecondaryDevice()) ? this.getSecondaryDevice() : false;
+            }
+        }
+
+        // 2. verify
+        if (this.hasSecondaryDevice())
+        {
+            // a. validate
+            if (this.getSecondaryDevice().id === socket.id)
+            {
+                // I. verify and respond
+                return (this.hasPrimaryDevice()) ? this.getPrimaryDevice() : false;
+            }
+        }
+
+        // 3. error
+        return false;
+    },
 
     /**
      * Get pair's communication direction

@@ -89,7 +89,21 @@ module.exports.prototype = {
         if (config.mongoauthenticate) sMongoURL += '?authMechanism=SCRAM-SHA-1&authSource=' + configFile.mongodb.dbname;
 
         // 7. connect
-        this._mongoClient.connect(sMongoURL, this._onMongoDBConnected.bind(this, configFile));
+        this._mongoClient.connect(sMongoURL, {
+            useUnifiedTopology: true,
+            useNewUrlParser: true,
+        }, this._onMongoDBConnected.bind(this, configFile));
+
+
+        // mongoose
+        //     .connect(process.env.MONGO_URI, {
+        //         useUnifiedTopology: true,
+        //         useNewUrlParser: true,
+        //     })
+        //     .then(() => console.log('DB Connected!'))
+        //     .catch(err => {
+        //         console.log(DB Connection Error: ${err.message});
+        //     });
     },
 
 
