@@ -55,6 +55,7 @@ module.exports = {
                 qr: 0,
                 manualcode: 0
             },
+            averageTimeTillConnection: 0,
             used: 0,
             archived: 0
         },
@@ -272,7 +273,7 @@ module.exports = {
             this._stats.transfers.totalSizeTransferred = nTotalTransferred;
 
             // e. update
-            this._stats.transfers.totalSizeUnfinished = this._stats.transfers.totalSizeStarted - this._stats.transfers.totalSizeFinished;
+            this._stats.transfers.totalSizeUnfinished = this._stats.transfers.totalSizeStarted - this._stats.transfers.totalSizeTransferred;
 
 
         }.bind(this));
@@ -326,58 +327,6 @@ module.exports = {
         }.bind(this));
 
 
-        // --- types ----
-
-
-        // count all data type `PASSWORD`
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                { "$unwind": "$logs" },
-                {"$match": {"logs.action": "DATA", "logs.contentType": "password" }}
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.transfers.types.password = aDocs.length;
-
-        }.bind(this));
-
-        // count all data type `TEXT`
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                { "$unwind": "$logs" },
-                {"$match": {"logs.action": "DATA", "logs.contentType": "text" }}
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.transfers.types.text = aDocs.length;
-
-        }.bind(this));
-
-        // count all data type `PASSWORD`
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                { "$unwind": "$logs" },
-                {"$match": {"logs.action": "DATA", "logs.contentType": "document" }}
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.transfers.types.file = aDocs.length;
-
-        }.bind(this));
-
-
 
 
 
@@ -420,6 +369,45 @@ module.exports = {
             this._stats.xxx = JSON.stringify(aDocs);
 
         }.bind(this));
+
+
+
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
+            [
+                {
+                    $unwind: "$logs"
+                },
+                {
+                    $match: {
+                        "logs.action": "DATA"
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        numberOfTransfers: { $sum: 1 },
+                        totalSize: { $sum: "$logs.totalSize" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: false,
+                        numberOfTransfers : true,
+                        totalSize : true
+                    }
+                }
+            ]
+        ).toArray(function(err, aDocs) {
+
+            // a. validate
+            CoreModule_Assert.equal(err, null);
+
+            // b. update
+            this._stats.xxx = JSON.stringify(aDocs);
+
+        }.bind(this));
+
+
 
         // ---------------------------------------------------
 
@@ -472,6 +460,101 @@ module.exports = {
             this._stats.pairs.archived = result.archivedCount;
 
         }.bind(this));
+
+
+
+        // --- data ------------------------------------------------
+
+
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
+            [
+                {
+                    $unwind: "$logs"
+                },
+                {
+                    $match: {
+                        "logs.action": "DATA"
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": false,
+                        "typePasswordCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "password" ] }, 1, 0 ] } },
+                        "typeTextCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "text" ] }, 1, 0 ] } },
+                        "typeDcoumentCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "document" ] }, 1, 0 ] } },
+                    }
+                },
+                {
+                    "$project": {
+                        "_id": 0
+                    }
+                }
+            ]
+        ).toArray(function(err, aDocs) {
+
+            // a. validate
+            CoreModule_Assert.equal(err, null);
+
+            // b. store
+            let result = aDocs[0];
+
+            // c. validate
+            if (!result) return;
+
+            // d. update
+            this._stats.transfers.types.password = result.typePasswordCount;
+            this._stats.transfers.types.text = result.typeTextCount;
+            this._stats.transfers.types.file = result.typeDcoumentCount;
+
+        }.bind(this));
+
+
+
+        // --- duration ------------------------------------------------
+
+
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
+            [
+                {
+                    $unwind: "$logs"
+                },
+                {
+                    $match: {
+                        "logs.action": "DEVICES_CONNECTED"
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": false,
+                        "averageTimeTillConnection": { $avg: "$logs.timeSinceStart"}
+                    }
+                },
+                {
+                    "$project": {
+                        "_id": 0,
+                        "averageTimeTillConnection": { $round: "$averageTimeTillConnection" }
+                    }
+                }
+            ]
+        ).toArray(function(err, aDocs) {
+
+            // a. validate
+            CoreModule_Assert.equal(err, null);
+
+            // b. store
+            let result = aDocs[0];
+
+            // c. validate
+            if (!result) return;
+
+            // d. update
+            this._stats.pairs.averageTimeTillConnection = result.averageTimeTillConnection;
+
+        }.bind(this));
+
+
+
+
 
         this._outputStats();
     },
