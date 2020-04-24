@@ -186,7 +186,7 @@ module.exports.prototype = {
     continueToNextPackage: function(data)
     {
         // 1. cleanup
-        delete this._packageCurrentlyInTransfer;
+        this._packageCurrentlyInTransfer = null;
 
         // 2. start next transfer
         if (this._aPackagesReadyForTransfer.length > 0 && this._timerPackageTransfer === null) this._timerPackageTransfer = setInterval(this._transferPackages.bind(this), 100);
@@ -205,7 +205,7 @@ module.exports.prototype = {
         this._timerPackageTransfer = null;
 
         // 3. verify
-        if (this._aPackagesReadyForTransfer.length > 0)
+        if (this._aPackagesReadyForTransfer.length > 0 || this._packageCurrentlyInTransfer)
         {
             // a. load and remove
             if (!this._packageCurrentlyInTransfer)
