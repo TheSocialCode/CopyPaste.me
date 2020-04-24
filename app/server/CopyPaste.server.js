@@ -322,7 +322,10 @@ module.exports = {
             return;
         }
 
-        // 6. select
+        // 6. init
+        let bOtherDeviceConnected = false;
+
+        // 7. select
         switch(device.getType())
         {
             case Device.prototype.PRIMARYDEVICE:
@@ -330,8 +333,15 @@ module.exports = {
                 // a. store
                 if (!pair.reconnectPrimaryDevice(device)) return;
 
-                // b. send
-                if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_RECONNECTED);
+                // b. verify
+                if (pair.hasSecondaryDevice())
+                {
+                    // I. toggle
+                    bOtherDeviceConnected = true;
+
+                    // II. notify
+                    pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_RECONNECTED);
+                }
 
                 break;
 
@@ -340,8 +350,15 @@ module.exports = {
                 // a. store
                 if (!pair.reconnectSecondaryDevice(device)) return;
 
-                // b. send
-                if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_RECONNECTED);
+                // b. verify
+                if (pair.hasPrimaryDevice())
+                {
+                    // I. toggle
+                    bOtherDeviceConnected = true;
+
+                    // II. notify
+                    pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_RECONNECTED);
+                }
 
                 break;
 
@@ -350,11 +367,14 @@ module.exports = {
                 return;
         }
 
+        // 8. notify
+        socket.emit(ConnectorEvents.prototype.UPDATE_DEVICE_RECONNECTED, bOtherDeviceConnected);
+
 
         // ---
 
 
-        // 8. output
+        // 9. output
         this._logUsers('Device `' + device.getType() + '` with sDeviceID = `' + sDeviceID + '` reconnected to pair (socket.id = ' + socket.id + ')');
     },
 

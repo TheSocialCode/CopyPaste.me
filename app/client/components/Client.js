@@ -182,6 +182,7 @@ module.exports.prototype = {
 
         // 3. configure
 
+        this._socket.on(ConnectorEvents.prototype.UPDATE_DEVICE_RECONNECTED, this._onUpdateDeviceReconnected.bind(this));
         this._socket.on(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_DISCONNECTED, this._onUpdateOtherDeviceDisconnected.bind(this));
         this._socket.on(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_RECONNECTED, this._onUpdateOtherDeviceReconnected.bind(this));
         this._socket.on(ConnectorEvents.prototype.RECEIVE_DATA, this._onReceiveData.bind(this));
@@ -278,9 +279,6 @@ module.exports.prototype = {
             // I. request
             this._socket.emit(ConnectorEvents.prototype.REQUEST_DEVICE_RECONNECT, this._sDeviceID);
         }
-
-        // 3. resume
-        this._dataManager.resume();
     },
 
     /**
@@ -471,6 +469,17 @@ module.exports.prototype = {
     },
 
     /**
+     * Handle other device `UPDATE_DEVICE_RECONNECTED`
+     * @param bOtherDeviceConnected
+     * @private
+     */
+    _onUpdateDeviceReconnected: function(bOtherDeviceConnected)
+    {
+        // 3. resume
+        this._dataManager.resume(bOtherDeviceConnected);
+    },
+
+    /**
      * Handle other device `UPDATE_OTHERDEVICE_DISCONNECTED`
      * @private
      */
@@ -499,7 +508,7 @@ module.exports.prototype = {
         if (this._isOutputDevice()) this._toggleDirectionButton.show();
 
         // 2. resume
-        this._dataManager.resume();
+        this._dataManager.resume(true);
     },
 
 

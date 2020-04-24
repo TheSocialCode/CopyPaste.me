@@ -492,7 +492,10 @@ module.exports = {
             // b. store
             let result = aDocs[0];
 
-            // c. update
+            // c. validate
+            if (!result) return;
+
+            // d. update
             this._stats.pairs.active = result.activeCount;
             this._stats.pairs.idle = result.pairCount - result.activeCount - result.archivedCount;
             this._stats.pairs.connected = result.connectedCount;

@@ -98,11 +98,12 @@ module.exports.prototype = {
 
     /**
      * Resume transfer
+     * @param bOtherDeviceConnected
      */
-    resume: function()
+    resume: function(bOtherDeviceConnected)
     {
         // 1. toggle
-        this._bPaused = false;
+        this._bPaused = (bOtherDeviceConnected) ? false : true;
 
         // 2. resume
         this._transferPackages();
