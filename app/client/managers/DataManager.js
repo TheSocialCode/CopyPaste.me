@@ -27,6 +27,7 @@ module.exports.prototype = {
     // data
     _aReceivedPackages: [],
     _aPackagesReadyForTransfer: [],
+    _packageCurrentlyInTransfer: null,
 
     // security
     _myKeyPair: null,
@@ -184,9 +185,9 @@ module.exports.prototype = {
     continueToNextPackage: function(data)
     {
         // 1. cleanup
-        this._aPackagesReadyForTransfer.shift();
+        delete this._packageCurrentlyInTransfer;
 
-        // 1. start next transfer
+        // 2. start next transfer
         if (this._aPackagesReadyForTransfer.length > 0 && this._timerPackageTransfer === null) this._timerPackageTransfer = setInterval(this._transferPackages.bind(this), 100);
     },
 
@@ -206,13 +207,17 @@ module.exports.prototype = {
         if (this._aPackagesReadyForTransfer.length > 0)
         {
             // a. load and remove
-            let packageCurrentlyInTransfer = this._aPackagesReadyForTransfer[0];
+            if (!this._packageCurrentlyInTransfer)
+            {
+                // I. load
+                this._packageCurrentlyInTransfer = this._aPackagesReadyForTransfer.shift();
 
-            // b. encrypt
-            packageCurrentlyInTransfer.value = Module_Crypto.encrypt(packageCurrentlyInTransfer.value, this._sTheirPublicKey, this._myKeyPair.secretKey);
+                // II. encrypt
+                this._packageCurrentlyInTransfer.value = Module_Crypto.encrypt(this._packageCurrentlyInTransfer.value, this._sTheirPublicKey, this._myKeyPair.secretKey);
+            }
 
-            // c. broadcast
-            this.dispatchEvent(this.DATA_READY_FOR_TRANSFER, packageCurrentlyInTransfer);
+            // b. broadcast
+            this.dispatchEvent(this.DATA_READY_FOR_TRANSFER, this._packageCurrentlyInTransfer);
         }
     },
 
