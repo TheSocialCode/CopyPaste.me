@@ -166,7 +166,6 @@ div.sender_data_label_cover_label {
 
 .showProgress div.sender_data_label_cover_label {
     animation: showProgress-cover-label 0.6s;
-    clip-path: inset(0 100% 0 0);
 }
 
     @keyframes showProgress-cover-label {

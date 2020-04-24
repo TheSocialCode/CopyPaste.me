@@ -7,6 +7,9 @@
 'use strict';
 
 
+// import project classes
+const Token = require('./components/Token');
+
 // import external classes
 const Module_FS = require('fs');
 const Module_MongoDB = require("mongodb");
@@ -44,12 +47,12 @@ module.exports = {
             active: 0,
             idle: 0,
             connected: 0,
-            used: 0,
-            archived: 0,
-            types: {
+            connectionTypes: {
                 qr: 0,
                 manualcode: 0
-            }
+            },
+            used: 0,
+            archived: 0
         },
         transfers: {
             started: 0,
@@ -397,37 +400,37 @@ module.exports = {
 
 
 
-        // count all connections type `QR`
-        this._dbCollection_pairs.aggregate(
-            [
-                { "$unwind": "$logs" },
-                {"$match": {"logs.action": "SECONDARYDEVICE_CONNECTED_QR" }}
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.pairs.types.qr = aDocs.length;
-
-        }.bind(this));
-
-        // count all connections type `MANUAL`
-        this._dbCollection_pairs.aggregate(
-            [
-                { "$unwind": "$logs" },
-                {"$match": {"logs.action": "SECONDARYDEVICE_CONNECTED_MANUALCODE" }}
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.pairs.types.manualcode = aDocs.length;
-
-        }.bind(this));
+        // // count all connections type `QR`
+        // this._dbCollection_pairs.aggregate(
+        //     [
+        //         { "$unwind": "$logs" },
+        //         {"$match": {"logs.action": "SECONDARYDEVICE_CONNECTED_QR" }}
+        //     ]
+        // ).toArray(function(err, aDocs) {
+        //
+        //     // a. validate
+        //     CoreModule_Assert.equal(err, null);
+        //
+        //     // b. update
+        //     this._stats.pairs.types.qr = aDocs.length;
+        //
+        // }.bind(this));
+        //
+        // // count all connections type `MANUAL`
+        // this._dbCollection_pairs.aggregate(
+        //     [
+        //         { "$unwind": "$logs" },
+        //         {"$match": {"logs.action": "SECONDARYDEVICE_CONNECTED_MANUALCODE" }}
+        //     ]
+        // ).toArray(function(err, aDocs) {
+        //
+        //     // a. validate
+        //     CoreModule_Assert.equal(err, null);
+        //
+        //     // b. update
+        //     this._stats.pairs.types.manualcode = aDocs.length;
+        //
+        // }.bind(this));
 
 
 
@@ -489,16 +492,23 @@ module.exports = {
 
         this._dbCollection_pairs.aggregate(
             [
-                { "$group": {
+                {
+                    "$group": {
                         "_id": false,
                         "pairCount": { $sum: 1 },
-                        "activeCount": { $sum: { $cond: [ { $eq: [ "$states.active", true ] }, 1, 0 ] } },
-                        "connectedCount": { $sum: { $cond: [ { $eq: [ "$states.connected", true ] }, 1, 0 ] } },
-                        "usedCount": { $sum: { $cond: [ { $eq: [ "$states.used", true ] }, 1, 0 ] } },
-                        "archivedCount": { $sum: { $cond: [ { $eq: [ "$states.archived", true ] }, 1, 0 ] } }
-                    }},
-
-                { "$project": { "_id": 0 } }
+                        "activeCount": { $sum: { $cond: [ { $eq: [ "$active", true ] }, 1, 0 ] } },
+                        "connectedCount": { $sum: { $cond: [ { $eq: [ "$connected", true ] }, 1, 0 ] } },
+                        "connectionTypeQR": { $sum: { $cond: [ { $eq: [ "$connectionType", Token.prototype.TYPE_QR ] }, 1, 0 ] } },
+                        "connectionTypeManualcode": { $sum: { $cond: [ { $eq: [ "$connectionType", Token.prototype.TYPE_MANUALCODE ] }, 1, 0 ] } },
+                        "usedCount": { $sum: { $cond: [ { $eq: [ "$used", true ] }, 1, 0 ] } },
+                        "archivedCount": { $sum: { $cond: [ { $eq: [ "$archived", true ] }, 1, 0 ] } }
+                    }
+                },
+                {
+                    "$project": {
+                        "_id": 0
+                    }
+                }
             ]
         ).toArray(function(err, aDocs) {
 
@@ -509,21 +519,14 @@ module.exports = {
             let result = aDocs[0];
 
             // c. update
-            this._stats.yyy = JSON.stringify(result);
-
-            // c. update
             this._stats.pairs.active = result.activeCount;
             this._stats.pairs.idle = result.pairCount - result.activeCount - result.archivedCount;
             this._stats.pairs.connected = result.connectedCount;
+            this._stats.pairs.connectionTypes.qr = result.connectionTypeQR;
             this._stats.pairs.used = result.usedCount;
             this._stats.pairs.archived = result.archivedCount;
 
         }.bind(this));
-
-
-
-
-
 
         this._outputStats();
     },

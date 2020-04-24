@@ -31,9 +31,9 @@ module.exports.prototype = {
     TOKEN_LIFETIME: 2 * 60 * 1000,
 
     // types
-    TYPE_QR: 'TYPE_QR',
-    TYPE_MANUALCODE: 'TYPE_MANUALCODE',
-    TYPE_INVITE: 'TYPE_INVITE',
+    TYPE_QR: 'QR',
+    TYPE_MANUALCODE: 'ManualCode',
+    TYPE_INVITE: 'Invite',
 
 
 

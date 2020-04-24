@@ -68,9 +68,7 @@ module.exports.prototype = {
     ACTIONTYPE_PRIMARYDEVICE_DISCONNECTED: 'PRIMARYDEVICE_DISCONNECTED',
     ACTIONTYPE_PRIMARYDEVICE_RECONNECTED: 'PRIMARYDEVICE_RECONNECTED',
 
-    ACTIONTYPE_SECONDARYDEVICE_CONNECTED_QR: 'SECONDARYDEVICE_CONNECTED_QR',
-    ACTIONTYPE_SECONDARYDEVICE_CONNECTED_MANUALCODE: 'SECONDARYDEVICE_CONNECTED_MANUALCODE',
-    ACTIONTYPE_SECONDARYDEVICE_CONNECTED_INVITE: 'SECONDARYDEVICE_CONNECTED_INVITE',
+    ACTIONTYPE_DEVICES_CONNECTED: 'DEVICES_CONNECTED',
     ACTIONTYPE_SECONDARYDEVICE_DISCONNECTED: 'SECONDARYDEVICE_DISCONNECTED',
     ACTIONTYPE_SECONDARYDEVICE_RECONNECTED: 'SECONDARYDEVICE_RECONNECTED',
     ACTIONTYPE_SECURITYCOMPROMISED: 'SECURITY_COMPROMISED',
@@ -127,13 +125,12 @@ module.exports.prototype = {
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').insertOne(
             {
                 id: this._sPairID,
-                states: {
-                    active: this._bIsActive,
-                    connected: false,
-                    used: false,
-                    compromised: false,
-                    archived: false
-                }
+                active: this._bIsActive,
+                connected: false,
+                connectionType: null,
+                used: false,
+                compromised: false,
+                archived: false
             }
         );
 
@@ -217,22 +214,14 @@ module.exports.prototype = {
         // 5. init
         let sAction = '';
 
-        // 6. prepare
-        switch(sConnectionType)
-        {
-            case Token.prototype.TYPE_QR: sAction = this.ACTIONTYPE_SECONDARYDEVICE_CONNECTED_QR; break;
-            case Token.prototype.TYPE_MANUALCODE: sAction = this.ACTIONTYPE_SECONDARYDEVICE_CONNECTED_MANUALCODE; break;
-            case Token.prototype.TYPE_INVITE: sAction = this.ACTIONTYPE_SECONDARYDEVICE_CONNECTED_INVITE; break;
-        }
-
-        // 7. store
+        // 6. store
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').updateOne(
             {
                 "id": this.getID()
             },
             {
-                $set: { "states.connected" : true },
-                $push: { logs: { action: sAction, timeSinceStart: Utils.prototype.since(this._nCreated) } }
+                $set: { "connected" : true, "connectionType": sConnectionType },
+                $push: { logs: { action: this.ACTIONTYPE_DEVICES_CONNECTED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)
             {
@@ -519,7 +508,10 @@ module.exports.prototype = {
         if (encryptedData.packageNumber === 0)
         {
             // a. store
-            this._aTransferTimes[encryptedData.id] = Utils.prototype.since(this._nCreated);
+            this._aTransferTimes[encryptedData.id] = {
+                created: Utils.prototype.since(this._nCreated),
+                bytesTransferred: encryptedData.packageSize
+            };
 
             // b. log
             this.Mimoto.mongoDB.getCollection('pairs').updateOne(
@@ -527,18 +519,41 @@ module.exports.prototype = {
                     "id": this.getID()
                 },
                 {
-                    $set: { "states.used": true },
+                    $set: { "used": true },
                     $push: { logs: {
                             action: this.ACTIONTYPE_DATA,
                             id: encryptedData.id,
                             contentType: encryptedData.sType,
                             totalSize: encryptedData.totalSize,
+                            bytesTransferred: encryptedData.packageSize,
                             direction: this.getDirection(),
-                            timeSinceStart: this._aTransferTimes[encryptedData.id],
+                            timeSinceStart: this._aTransferTimes[encryptedData.id].created,
                             finished: (encryptedData.packageNumber === encryptedData.packageCount - 1)
                         } }
                 },
                 function(err, result)
+                {
+                    CoreModule_Assert.equal(err, null);
+                }
+            );
+        }
+        else
+        {
+            // a. update
+            this._aTransferTimes[encryptedData.id].bytesTransferred += encryptedData.packageSize;
+
+            // b. log
+            this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+                {
+                    "id": this.getID(), "logs.action": this.ACTIONTYPE_DATA, "logs.id": encryptedData.id
+                },
+                {
+                    $set: {
+                        "logs.$.bytesTransferred": this._aTransferTimes[encryptedData.id].bytesTransferred,
+                        "logs.$.duration": Utils.prototype.since(this._nCreated) - this._aTransferTimes[encryptedData.id].created
+                    }
+                },
+                function(err, result, encryptedData)
                 {
                     CoreModule_Assert.equal(err, null);
                 }
@@ -555,8 +570,7 @@ module.exports.prototype = {
                 },
                 {
                     $set: {
-                        "logs.$.finished": true,
-                        "logs.$.duration": Utils.prototype.since(this._nCreated) - this._aTransferTimes[encryptedData.id]
+                        "logs.$.finished": true
                     }
                 },
                 function(err, result, encryptedData)
@@ -603,7 +617,7 @@ module.exports.prototype = {
                     "id": this.getID()
                 },
                 {
-                    $set: { "states.active" : this._bIsActive }
+                    $set: { "active" : this._bIsActive }
                 },
                 function(err, result)
                 {
@@ -640,7 +654,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "states.archived": true }
+                $set: { "archived": true }
             },
             function(err, result)
             {
@@ -676,7 +690,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "states.compromised": true },
+                $set: { "compromised": true },
                 $push: { logs: { action: this.ACTIONTYPE_SECURITYCOMPROMISED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)
