@@ -698,16 +698,10 @@ module.exports = {
 
         // 3. output
         this.Mimoto.logger.logToFile('');
-        this.Mimoto.logger.logToFile('');
-        this.Mimoto.logger.logToFile(sTitle);
         this.Mimoto.logger.logToFile(sTitle);
         this.Mimoto.logger.logToFile('Devices by socket ID');
-        this.Mimoto.logger.logToFile('Devices by socket ID');
-        this.Mimoto.logger.logToFile('=========================');
         this.Mimoto.logger.logToFile('=========================');
         this.Mimoto.logger.logToFile(this.Mimoto.deviceManager.getAllDevicesBySocketID());
-        this.Mimoto.logger.logToFile(this.Mimoto.deviceManager.getAllDevicesBySocketID());
-
 
 
         this.Mimoto.logger.log('Devices by device ID');
