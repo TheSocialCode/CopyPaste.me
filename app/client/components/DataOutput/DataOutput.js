@@ -151,7 +151,7 @@ module.exports.prototype = {
     {
         // a. verify and show
         if (this._elContainer.children.length === 0 && !this._bIsMuted) this._waiting.show();
-        
+
         // b. find
         for (let nIndex = 0; nIndex < this._aSharedData.length; nIndex++)
         {

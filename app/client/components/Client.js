@@ -470,16 +470,20 @@ module.exports.prototype = {
     /**
      * Handle other device `UPDATE_DEVICE_RECONNECTED`
      * @param bOtherDeviceConnected
+     * @param sDirection
      * @private
      */
-    _onUpdateDeviceReconnected: function(bOtherDeviceConnected)
+    _onUpdateDeviceReconnected: function(bOtherDeviceConnected, sDirection)
     {
-        // 1. toggle visibility
+        // 1, store
+        this._sDirection = sDirection;
+
+        // 2. toggle visibility
         this._alertMessage.hide();
         if (this._isOutputDevice()) this._dataOutput.show();
         if (this._isOutputDevice()) this._toggleDirectionButton.show();
 
-        // 2. resume
+        // 3. resume
         this._dataManager.resume(bOtherDeviceConnected);
     },
 

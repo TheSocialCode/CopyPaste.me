@@ -368,7 +368,7 @@ module.exports = {
         }
 
         // 8. notify
-        socket.emit(ConnectorEvents.prototype.UPDATE_DEVICE_RECONNECTED, bOtherDeviceConnected);
+        socket.emit(ConnectorEvents.prototype.UPDATE_DEVICE_RECONNECTED, bOtherDeviceConnected ,pair.getDirection());
 
 
         // ---
