@@ -63,7 +63,7 @@
                             <div class="component_AlertMessage_content">
                                 <div data-mimoto-id="label" class="component_AlertMessage_label"></div>
                                 <div data-mimoto-id="menu" class="component_AlertMessage_menu">
-                                    <div data-mimoto-id="button" class="component_AlertMessage_button">xxx</div>
+                                    <div data-mimoto-id="button" class="component_AlertMessage_button"></div>
                                 </div>
                             </div>
                         </div>

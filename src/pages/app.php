@@ -133,6 +133,7 @@
     <!-- Data output -->
 
     <div data-mimoto-id="component_DataOutput" class="component_DataOutput">
+        <div data-mimoto-id="progress" class="component_DataOutput_progress">Receiving 100%</div>
         <div data-mimoto-id="component_DataOutput_container"></div>
         <div data-mimoto-id="component_ClearClipboard" class="component_ClearClipboard">
             <div class="component_ClearClipboard_content">

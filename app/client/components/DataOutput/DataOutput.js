@@ -25,6 +25,7 @@ module.exports.prototype = {
     // views
     _elRoot: null,
     _elContainer: null,
+    _elProgress: null,
 
     // components
     _waiting: null,
@@ -50,8 +51,9 @@ module.exports.prototype = {
     {
         // 1. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_DataOutput"]');
-        this._elContainer = document.querySelector('[data-mimoto-id="component_DataOutput_container"]');
-        
+        this._elContainer = this._elRoot.querySelector('[data-mimoto-id="component_DataOutput_container"]');
+        this._elProgress = this._elRoot.querySelector('[data-mimoto-id="progress"]');
+
         // 2. init
         this._waiting = new Waiting();
         this._clearClipboard = new ClearClipboard();
@@ -100,22 +102,21 @@ module.exports.prototype = {
 
     /**
      * Show data that was shared with this client
-     * @param data
+     * @param metaData
      */
     prepareData: function(metaData)
     {
-        // 1. toggle
-        this._waiting.hide();
+        // 1. toggle state
+        (this._elContainer.children.length === 0) ? this._elRoot.classList.add('empty') : this._elRoot.classList.remove('empty');
 
-        // 2. create
-        let sharedData = new SharedData(this._elContainer, metaData);
+        // 2. verify and show
+        if (metaData.receivedCount === 1 && metaData.totalCount >= 5) this._elProgress.classList.add('show');
 
-        // 3. configure
-        sharedData.addEventListener(SharedData.prototype.CLEARED, this._onSharedDataCleared.bind(this, sharedData));
-        sharedData.addEventListener(SharedData.prototype.USED_CLIPBOARD, this._onSharedDataUsedClipboard.bind(this, sharedData));
+        // 3. verify and hide
+        if (metaData.receivedCount === metaData.totalCount) this._elProgress.classList.remove('show');
 
-        // 4. store
-        this._aSharedData.push(sharedData);
+        // 4. output
+        this._elProgress.innerText = 'Receiving ' + Math.round(100 * metaData.receivedCount / metaData.totalCount) + '%';
     },
 
     /**
@@ -124,11 +125,6 @@ module.exports.prototype = {
      */
     showData: function(data)
     {
-        // get correct item based on ID
-
-
-//        this._aSharedData.showData(data);
-
         // 1. toggle
         this._waiting.hide();
 
@@ -143,7 +139,6 @@ module.exports.prototype = {
         this._aSharedData.push(sharedData);
 
 
-
         sharedData.showData(data);
 
     },
@@ -156,7 +151,7 @@ module.exports.prototype = {
     {
         // a. verify and show
         if (this._elContainer.children.length === 0 && !this._bIsMuted) this._waiting.show();
-
+        
         // b. find
         for (let nIndex = 0; nIndex < this._aSharedData.length; nIndex++)
         {

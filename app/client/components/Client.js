@@ -322,7 +322,6 @@ module.exports.prototype = {
 
 
 
-
     // ----------------------------------------------------------------------------
     // --- Event handlers - Communication -----------------------------------------
     // ----------------------------------------------------------------------------
@@ -475,7 +474,12 @@ module.exports.prototype = {
      */
     _onUpdateDeviceReconnected: function(bOtherDeviceConnected)
     {
-        // 3. resume
+        // 1. toggle visibility
+        this._alertMessage.hide();
+        if (this._isOutputDevice()) this._dataOutput.show();
+        if (this._isOutputDevice()) this._toggleDirectionButton.show();
+
+        // 2. resume
         this._dataManager.resume(bOtherDeviceConnected);
     },
 
@@ -744,13 +748,13 @@ module.exports.prototype = {
     },
 
     /**
-     * Handle PackageManager event `DATA_PREPARE_FOR DISPLAY`
+     * Handle PackageManager event `DATA_PREPARE_FOR_DISPLAY`
      * @private
      */
-    _onDataManagerDataPrepareForDisplay: function()
+    _onDataManagerDataPrepareForDisplay: function(metaData)
     {
         // 1. forward
-        //this._dataOutput.prepareData();
+        this._dataOutput.prepareData(metaData);
     },
 
     /**

@@ -249,19 +249,19 @@ module.exports.prototype = {
 
             // --- prepare
 
-            // b. init
-            let metaData = {
-                sType: receivedData.sType
-            };
-
-            // c. read
-            if (receivedData.sType ===  DataInput.prototype.DATATYPE_DOCUMENT)
-            {
-                metaData.sFileName = Module_Crypto.decrypt(receivedData.metaData.fileName.data, receivedData.metaData.fileName.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
-            }
-
-            // d. broadcast event
-            this.dispatchEvent(this.DATA_PREPARE_FOR_DISPLAY, metaData);
+            // // b. init
+            // let metaData = {
+            //     sType: receivedData.sType
+            // };
+            //
+            // // c. read
+            // if (receivedData.sType ===  DataInput.prototype.DATATYPE_DOCUMENT)
+            // {
+            //     metaData.sFileName = Module_Crypto.decrypt(receivedData.metaData.fileName.data, receivedData.metaData.fileName.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
+            // }
+            //
+            // // d. broadcast event
+            // this.dispatchEvent(this.DATA_PREPARE_FOR_DISPLAY, metaData);
         }
 
         // 2. store
@@ -271,9 +271,17 @@ module.exports.prototype = {
         this._aReceivedPackages[receivedData.id].receivedCount = Object.keys(this._aReceivedPackages[receivedData.id].packages).length;
 
 
+        // debugging
+        //if (console) console.log('Package # ' + this._aReceivedPackages[receivedData.id].receivedCount + ' of ' + this._aReceivedPackages[receivedData.id].packageCount);
 
+        // b. init
+        let metaData = {
+            sType: receivedData.sType,
+            receivedCount: this._aReceivedPackages[receivedData.id].receivedCount,
+            totalCount: this._aReceivedPackages[receivedData.id].packageCount
+        };
 
-        if (console) console.log('Package # ' + this._aReceivedPackages[receivedData.id].receivedCount + ' of ' + this._aReceivedPackages[receivedData.id].packageCount);
+        this.dispatchEvent(this.DATA_PREPARE_FOR_DISPLAY, metaData);
 
 
 
