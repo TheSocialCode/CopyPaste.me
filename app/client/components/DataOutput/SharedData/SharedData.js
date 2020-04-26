@@ -95,10 +95,7 @@ module.exports.prototype = {
         // 1. store
         this._data = data;
 
-        // 2. init
-        this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900 + ((this._elRootContainer.children.length > 1) ? 1000 : 0);
-
-        // 3. select
+        // 2. select
         switch(this._data.sType)
         {
             case DataInput.prototype.DATATYPE_PASSWORD:
@@ -120,27 +117,27 @@ module.exports.prototype = {
                 break;
         }
 
-        // 4. configure
+        // 3. configure
         this._elButton.addEventListener('click', this._onButtonClick.bind(this));
 
-        // 5. configure
+        // 4. configure
         this._elRoot.querySelector('[data-mimoto-id=receiver_data_option_clearnow]').addEventListener('click', function(elData) {
 
             this._clearData(elData);
 
         }.bind(this, this._elRoot));
 
-        // 6. configure
+        // 5. configure
         this._elRoot.querySelector('[data-mimoto-id=receiver_data_option_extend]').addEventListener('click', function() {
 
             this._extendAutoDestructionDelay()
 
         }.bind(this));
 
-        // 7. register
+        // 6. register
         let elContent = this._elRoot.querySelector('[data-mimoto-id="content"]');
 
-        // 8. verify
+        // 7. verify
         if (this._elRootContainer.children.length === 0)
         {
             // a. show instantly
@@ -152,7 +149,7 @@ module.exports.prototype = {
             this._show(elContent);
         }
 
-        // 9. verify and start progress notification
+        // 8. verify and start progress notification
         if (data.totalCount > 1)
         {
             // a. disable
@@ -172,14 +169,8 @@ module.exports.prototype = {
         // 1. store
         this._data = data;
 
-
-        // 1. show indicator
-        // 2. Copied to clipboard!
-        // 3. hide label at first
-
+        // 2. output
         this._elCoverLabel.innerText = 'Receiving ' + (Math.round(100 * data.receivedCount / data.totalCount)) + '%';
-
-
     },
 
     /**
@@ -235,7 +226,14 @@ module.exports.prototype = {
             }.bind(this), 900);
         }
 
-        // 5. setup auto-destruct
+
+        // --- auto-destruct
+
+
+        // 5. init
+        this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900 + ((this._elRootContainer.children.length > 1) ? 1000 : 0);
+
+        // 6. setup auto-destruct
         this._timer = setInterval(function()
         {
             if (this._updateTimer())
