@@ -16,19 +16,26 @@ const Module_ClipboardCopy = require('clipboard-copy');
 const DataInput = require('./../../DataInput/DataInput');
 
 
-module.exports = function(elDataContainer)
+module.exports = function(elRootContainer)
 {
     // start
-    this.__construct(elDataContainer);
+    this.__construct(elRootContainer);
 };
 
 module.exports.prototype = {
 
     // connection
-    _elDataContainer: null,
+    _elRootContainer: null,
+    _elRoot: null,
+    _elDataLabel: null,
     _elButton: null,
-    _elData: null,
+    _elOptionsMenu: null,
+
+    // data
     _data: null,
+
+    // utils
+    _bLocked: false,
     _timer: null,
     _nTimeToAutoDestruct: 0,
 
@@ -48,36 +55,29 @@ module.exports.prototype = {
 
     /**
      * Constructor
+     * @param elRootContainer
      */
-    __construct: function (elDataContainer)
+    __construct: function(elRootContainer)
     {
         // 1. extend
         new EventDispatcherExtender(this);
 
         // 2. store
-        this._elDataContainer = elDataContainer;
+        this._elRootContainer = elRootContainer;
 
         // 3. init
         var elDataTemplate = document.getElementById('template-data');
 
         // 4. copy and prepare
-        this._elData = elDataTemplate.cloneNode(true);
-        this._elData.removeAttribute('id');
-        this._elButton = this._elData.querySelector('[data-mimoto-id="receiver_data_button"]');
+        this._elRoot = elDataTemplate.cloneNode(true);
+        this._elRoot.removeAttribute('id');
+        this._elDataLabel = this._elRoot.querySelector('[data-mimoto-id=receiver_data_label_data]');
+        this._elButton = this._elRoot.querySelector('[data-mimoto-id="receiver_data_button"]');
+        this._elOptionsMenu = this._elRoot.querySelector('[data-mimoto-id="optionsmenu"]');
+        this._elCoverLabel = this._elRoot.querySelector('[data-mimoto-id="coverlabel"]');
 
         // 5. show
-        this._elDataContainer.insertBefore(this._elData, this._elDataContainer.firstChild);
-
-
-    // case DataInput.prototype.DATATYPE_DOCUMENT:
-    //
-    //     this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value.fileName;
-    //     this._elButton.innerText = 'Download';
-    //     break;
-
-
-        // TEMP
-        //this.showData(data);
+        this._elRootContainer.insertBefore(this._elRoot, this._elRootContainer.firstChild);
     },
 
 
@@ -87,55 +87,35 @@ module.exports.prototype = {
 
 
     /**
-     * Show data
-     * @private
+     * Init data
+     * @param data
      */
-    showData: function(data)
+    initData: function(data)
     {
         // 1. store
         this._data = data;
 
         // 2. init
-        this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900 + ((this._elDataContainer.children.length > 1) ? 1000 : 0);
+        this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900 + ((this._elRootContainer.children.length > 1) ? 1000 : 0);
 
         // 3. select
         switch(this._data.sType)
         {
             case DataInput.prototype.DATATYPE_PASSWORD:
 
-                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = '* * * * * * * * *';
+                this._elDataLabel.innerText = '* * * * * * * * *';
                 this._elButton.innerText = 'Copy to clipboard';
-                break;
-
-            case DataInput.prototype.DATATYPE_URL:
-
-                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value;
-                this._elButton.innerText = 'Open URL';
                 break;
 
             case DataInput.prototype.DATATYPE_TEXT:
 
-                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value;
+                this._elDataLabel.innerText = this._data.value;
                 this._elButton.innerText = 'Copy to clipboard';
                 break;
 
-            case DataInput.prototype.DATATYPE_IMAGE:
+            case DataInput.prototype.DATATYPE_FILE:
 
-                var elImage = document.createElement('img');
-
-                // loader -> get originalWidth or max width
-
-                elImage.setAttribute('width', 300); // #todo setup default container
-                elImage.setAttribute('src', this._data.value.base64);
-
-                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').append(elImage);
-                this._elButton.innerText = 'Download';
-
-                break;
-
-            case DataInput.prototype.DATATYPE_DOCUMENT:
-
-                this._elData.querySelector('[data-mimoto-id=receiver_data_label_data]').innerText = this._data.value.fileName;
+                this._elDataLabel.innerText = this._data.sFileName;
                 this._elButton.innerText = 'Download';
                 break;
         }
@@ -144,20 +124,118 @@ module.exports.prototype = {
         this._elButton.addEventListener('click', this._onButtonClick.bind(this));
 
         // 5. configure
-        this._elData.querySelector('[data-mimoto-id=receiver_data_option_clearnow]').addEventListener('click', function(elData) {
+        this._elRoot.querySelector('[data-mimoto-id=receiver_data_option_clearnow]').addEventListener('click', function(elData) {
 
             this._clearData(elData);
 
-        }.bind(this, this._elData));
+        }.bind(this, this._elRoot));
 
         // 6. configure
-        this._elData.querySelector('[data-mimoto-id=receiver_data_option_extend]').addEventListener('click', function() {
+        this._elRoot.querySelector('[data-mimoto-id=receiver_data_option_extend]').addEventListener('click', function() {
 
             this._extendAutoDestructionDelay()
 
         }.bind(this));
 
-        // 7. setup
+        // 7. register
+        let elContent = this._elRoot.querySelector('[data-mimoto-id="content"]');
+
+        // 8. verify
+        if (this._elRootContainer.children.length === 0)
+        {
+            // a. show instantly
+            elContent.classList.add('show');
+        }
+        else
+        {
+            // a. show animated
+            this._show(elContent);
+        }
+
+        // 9. verify and start progress notification
+        if (data.totalCount > 1)
+        {
+            // a. disable
+            this._toggleSendButton(false);
+
+            // b. prepare
+            this._elRoot.classList.add('showProgress');
+        }
+    },
+
+    /**
+     * Show progress
+     * @param data
+     */
+    showProgress: function(data)
+    {
+        // 1. store
+        this._data = data;
+
+
+        // 1. show indicator
+        // 2. Copied to clipboard!
+        // 3. hide label at first
+
+        this._elCoverLabel.innerText = 'Receiving ' + (Math.round(100 * data.receivedCount / data.totalCount)) + '%';
+
+
+    },
+
+    /**
+     * Show data
+     * @param data
+     */
+    showData: function(data)
+    {
+        // 1. store
+        this._data = data;
+
+        // 2. select
+        switch(this._data.sType)
+        {
+            case DataInput.prototype.DATATYPE_PASSWORD:
+
+                break;
+
+            case DataInput.prototype.DATATYPE_TEXT:
+
+                this._elDataLabel.innerText = this._data.value;
+                break;
+
+            case DataInput.prototype.DATATYPE_FILE:
+
+                break;
+        }
+
+        // 3. toggle visibility
+        this._elOptionsMenu.classList.add('show');
+        this._elDataLabel.classList.add('show');
+
+        // 4. verify and end progress notification
+        if (data.totalCount > 1)
+        {
+            // a. enable
+            this._toggleSendButton(true);
+
+            // b. continue animation
+            this._elRoot.classList.remove('showProgress');
+            this._elRoot.classList.add('hideProgress');
+
+            // c. time clearing of animation
+            let timerCover = setTimeout(function ()
+            {
+                // I. cleanup
+                this._elRoot.classList.remove('hideProgress');
+
+                // II. toggle
+                this._bUnlocked = true;
+                this._elRoot.classList.add('unlocked');
+
+            }.bind(this), 900);
+        }
+
+        // 5. setup auto-destruct
         this._timer = setInterval(function()
         {
             if (this._updateTimer())
@@ -166,20 +244,6 @@ module.exports.prototype = {
             }
 
         }.bind(this), 100);
-
-
-        // 8. register
-        let elContent = this._elData.querySelector('[data-mimoto-id="content"]');
-
-        // 9. verify
-        if (this._elDataContainer.children.length === 0)
-        {
-            elContent.classList.add('show');
-        }
-        else
-        {
-            this._show(elContent);
-        }
     },
 
 
@@ -198,10 +262,10 @@ module.exports.prototype = {
     _show: function(elContent)
     {
         // 5. register
-        let nPlaceholderHeight = this._elData.offsetHeight + 10;
+        let nPlaceholderHeight = this._elRoot.offsetHeight + 10;
 
         // a. register
-        let elPlaceholder = this._elData.querySelector('[data-mimoto-id="placeholder"]');
+        let elPlaceholder = this._elRoot.querySelector('[data-mimoto-id="placeholder"]');
 
         // b. hide
         elContent.style.display = 'none'; // #todo - move to css class
@@ -236,11 +300,11 @@ module.exports.prototype = {
     _hide: function()
     {
         // 1. register
-        let nPlaceholderHeight = this._elData.offsetHeight + 10;
+        let nPlaceholderHeight = this._elRoot.offsetHeight + 10;
 
         // 2. register
-        let elContent = this._elData.querySelector('[data-mimoto-id="content"]');
-        let elPlaceholder = this._elData.querySelector('[data-mimoto-id="placeholder"]');
+        let elContent = this._elRoot.querySelector('[data-mimoto-id="content"]');
+        let elPlaceholder = this._elRoot.querySelector('[data-mimoto-id="placeholder"]');
 
         // 3. hide
         elContent.style.display = 'none'; // #todo - move to css class
@@ -260,7 +324,7 @@ module.exports.prototype = {
         let timerOutroEnd = setTimeout(function()
         {
             // 2. clear
-            this._elDataContainer.removeChild(this._elData);
+            this._elRootContainer.removeChild(this._elRoot);
 
             // 3.
             this.dispatchEvent(this.CLEARED);
@@ -288,7 +352,7 @@ module.exports.prototype = {
         sRemainingTime += ((nSeconds === 60) ? ((nMinutes !== 0) ? 0 : nSeconds) : nSeconds) + ' ' + ((nSeconds === 1) ? 'sec' : 'secs');
 
         // 4. update
-        this._elData.querySelector('[data-mimoto-id=receiver_data_lifetime]').innerText = sRemainingTime;
+        this._elRoot.querySelector('[data-mimoto-id=receiver_data_lifetime]').innerText = sRemainingTime;
 
         // 5. verify and send
         return (nDifference <= 0);
@@ -329,7 +393,10 @@ module.exports.prototype = {
      */
     _onButtonClick: function()
     {
-        // 1. select
+        // 1. validate
+        if (this._bLocked) return;
+
+        // 2. select
         switch(this._data.sType)
         {
             case DataInput.prototype.DATATYPE_PASSWORD:
@@ -341,12 +408,6 @@ module.exports.prototype = {
                 this.dispatchEvent(this.USED_CLIPBOARD);
                 break;
 
-            case DataInput.prototype.DATATYPE_URL:
-
-                // a. open
-                window.open(this._data.value, '_blank');
-                break;
-
             case DataInput.prototype.DATATYPE_TEXT:
 
                 // a. copy
@@ -356,17 +417,32 @@ module.exports.prototype = {
                 this.dispatchEvent(this.USED_CLIPBOARD);
                 break;
 
-            case DataInput.prototype.DATATYPE_IMAGE:
+            case DataInput.prototype.DATATYPE_FILE:
 
                 // a. download
                 Module_FileSaver.saveAs(this._data.value.base64, this._data.value.fileName);
                 break;
+        }
+    },
 
-            case DataInput.prototype.DATATYPE_DOCUMENT:
+    /**
+     * Toggle send button
+     * @param bEnable
+     * @private
+     */
+    _toggleSendButton: function(bEnable)
+    {
+        // 1. store
+        this._bLocked = !bEnable;
 
-                // a. download
-                Module_FileSaver.saveAs(this._data.value.base64, this._data.value.fileName);
-                break;
+        // 2. select
+        if (bEnable)
+        {
+            this._elButton.classList.remove('disabled');
+        }
+        else
+        {
+            this._elButton.classList.add('disabled');
         }
     },
 
@@ -381,13 +457,13 @@ module.exports.prototype = {
         Module_ClipboardCopy(this._data.value);
 
         // 2. prepare
-        this._elData.classList.add('clear');
+        this._elRoot.classList.add('clear');
 
         // 3. time clearing of animation
         let timerCover = setTimeout(function()
         {
             // a. cleanup
-            this._elData.classList.remove('clear');
+            this._elRoot.classList.remove('clear');
 
         }.bind(this), 1200);
     }

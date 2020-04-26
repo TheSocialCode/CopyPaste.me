@@ -76,11 +76,8 @@
         <div class="sender_input">
             <div id="sender_menu" class="sender_menu">
                 <div data-type="password" class="sender_menu_tab selected">Password</div>
-                <!--                        <div data-type="url" class="sender_menu_tab">URL</div>-->
                 <div data-type="text" class="sender_menu_tab">Text</div>
-                <!--                        <div data-type="image" class="sender_menu_tab">Image</div>-->
-                <div data-type="document" class="sender_menu_tab">File</div>
-                <!--                        <div data-type="document" class="sender_menu_tab">Document</div>-->
+                <div data-type="file" class="sender_menu_tab">File</div>
             </div>
             <div class="sender_data">
                 <div class="sender_data_label">
@@ -91,31 +88,15 @@
                         </div>
                         <div class="sender_data_label_data_input">
                             <input data-mimoto-id="data_input_password" class="data_input selected" type="password" placeholder="Enter password"/>
-                            <input data-mimoto-id="data_input_url" class="data_input" type="text" placeholder="Enter URL"/>
                             <textarea data-mimoto-id="data_input_text" class="data_input" placeholder="Enter text"></textarea>
-                            <div data-mimoto-id="data_input_image" class="data_input">
-                                <div class="data_input_image">
-                                    <div class="data_input_image_menu">
-                                        <div data-mimoto-id="data_input_image_file_button" class="button">Select image</div>
-                                        <input data-mimoto-id="data_input_image_file_inputfield" type="file" class="data_input_image_file_inputfield" accept='image/*' name="data_input_image_file"/>
+                            <div data-mimoto-id="data_input_file" class="data_input">
+                                <div class="data_input_file">
+                                    <div class="data_input_file_menu">
+                                        <div data-mimoto-id="data_input_file_button" class="button">Select file</div>
+                                        <input data-mimoto-id="data_input_file_inputfield" class="data_input_file_inputfield" type="file" name="data_input_file"/>
                                     </div>
-                                    <div data-mimoto-id="data_input_image_preview"
-                                         class="data_input_image_preview">
-                                        <div class="data_input_image_preview_imagecontainer">
-                                            <img data-mimoto-id="data_input_image_preview_image" class="data_input_image_preview_image"/>
-                                        </div>
-                                        <div data-mimoto-id="data_input_image_preview_label" class="data_input_image_preview_label"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div data-mimoto-id="data_input_document" class="data_input">
-                                <div class="data_input_document">
-                                    <div class="data_input_document_menu">
-                                        <div data-mimoto-id="data_input_document_file_button" class="button">Select document</div>
-                                        <input data-mimoto-id="data_input_document_file_inputfield" class="data_input_document_file_inputfield" type="file" name="data_input_document_file"/>
-                                    </div>
-                                    <div data-mimoto-id="data_input_document_preview" class="data_input_document_preview">
-                                        <div data-mimoto-id="data_input_document_preview_label" class="data_input_document_preview_label"></div>
+                                    <div data-mimoto-id="data_input_file_preview" class="data_input_file_preview">
+                                        <div data-mimoto-id="data_input_file_preview_label" class="data_input_file_preview_label"></div>
                                     </div>
                                 </div>
                             </div>
@@ -133,7 +114,6 @@
     <!-- Data output -->
 
     <div data-mimoto-id="component_DataOutput" class="component_DataOutput">
-        <div data-mimoto-id="progress" class="component_DataOutput_progress">Receiving 100%</div>
         <div data-mimoto-id="component_DataOutput_container"></div>
         <div data-mimoto-id="component_ClearClipboard" class="component_ClearClipboard">
             <div class="component_ClearClipboard_content">
@@ -175,23 +155,26 @@
             <div data-mimoto-id="placeholder" class="receiver_data_placeholder"></div>
         </div>
         <div data-mimoto-id="content" class="receiver_data_content_container">
-            <div class="sender_data_label_data_cover">
-                <div class="sender_data_label_cover_internal"></div>
-                <div class="sender_data_label_cover_label">Copied to clipboard!</div>
-            </div>
             <div class="receiver_data_content">
                 <div class="receiver_data_label">
-
-                    <div data-mimoto-id="receiver_data_label_data" class="receiver_data_label_data"></div>
+                    <div class="receiver_data_label_data">
+                        <div class="sender_data_label_data_cover">
+                            <div class="sender_data_label_cover_internal"></div>
+                            <div class="sender_data_label_cover_label"><img class="sender_data_label_cover_label_indicator" src="static/images/waiting.svg">&nbsp;<span data-mimoto-id="coverlabel">Receiving data ...</span></div>
+                        </div>
+                        <div data-mimoto-id="receiver_data_label_data" class="module_SharedData_data_label"></div>
+                    </div>
                 </div>
                 <div class="receiver_data_menu">
                     <div data-mimoto-id="receiver_data_button" class="button">Copy&nbsp;to&nbsp;clipboard</div>
                 </div>
             </div>
             <div class="receiver_data_options">
-                <span data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</span> |
-                <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
-                clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
+                <div data-mimoto-id="optionsmenu" class="component_SharedData_optionsmenu">
+                    <span data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</span> |
+                    <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
+                    clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
+                </div>
             </div>
         </div>
     </div>

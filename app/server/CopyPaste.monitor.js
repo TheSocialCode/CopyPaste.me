@@ -481,7 +481,7 @@ module.exports = {
                         "_id": false,
                         "typePasswordCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "password" ] }, 1, 0 ] } },
                         "typeTextCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "text" ] }, 1, 0 ] } },
-                        "typeDcoumentCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "document" ] }, 1, 0 ] } },
+                        "typeFileCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "file" ] }, 1, 0 ] } },
                     }
                 },
                 {
@@ -504,7 +504,7 @@ module.exports = {
             // d. update
             this._stats.transfers.types.password = result.typePasswordCount;
             this._stats.transfers.types.text = result.typeTextCount;
-            this._stats.transfers.types.file = result.typeDcoumentCount;
+            this._stats.transfers.types.file = result.typeFileCount;
 
         }.bind(this));
 

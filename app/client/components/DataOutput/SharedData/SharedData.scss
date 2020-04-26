@@ -29,6 +29,7 @@ div.receiver_data_label {
 }
 
 div.receiver_data_label_data {
+    position: relative;
     background-color: $background-light;
     border-radius: 3px;
     border: $background-lightgray 1px solid;
@@ -41,10 +42,13 @@ div.receiver_data_label_data {
     word-break: break-word;
 }
 
-div.receiver_data_label_data img {
-    width: auto;
-    max-width: 100%;
-    max-height: 100px;
+div.module_SharedData_data_label {
+
+    visibility: hidden;
+
+    &.show {
+        visibility: visible;
+    }
 }
 
 div.receiver_data_options {
@@ -57,6 +61,18 @@ div.receiver_data_options {
     text-align: left;
     user-select: none;
 }
+
+div.component_SharedData_optionsmenu {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+
+    &.show {
+        visibility: visible;
+        opacity: 1;
+    }
+}
+
 
 span.receiver_data_option {
     text-decoration: none;

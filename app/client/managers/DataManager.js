@@ -42,7 +42,7 @@ module.exports.prototype = {
 
     // events
     DATA_READY_FOR_TRANSFER: 'data_ready_for_transfer',
-    DATA_PREPARE_FOR_DISPLAY: 'data_prepare_for_display',
+    DATA_LOADING: 'DATA_LOADING',
     DATA_READY_FOR_DISPLAY: 'data_ready_for_display',
 
 
@@ -129,7 +129,7 @@ module.exports.prototype = {
         let sJSONValueToTransfer = JSON.stringify(dataToTransfer.value);
 
         // 3. encrypt and store
-        let fileName = (dataToTransfer.sType ===  DataInput.prototype.DATATYPE_DOCUMENT) ? Module_Crypto.encrypt(dataToTransfer.value.fileName, this._sTheirPublicKey, this._myKeyPair.secretKey) : '';
+        let fileName = (dataToTransfer.sType ===  DataInput.prototype.DATATYPE_FILE) ? Module_Crypto.encrypt(dataToTransfer.value.fileName, this._sTheirPublicKey, this._myKeyPair.secretKey) : '';
 
         // 4. cleanup
         dataToTransfer.value = '';
@@ -164,7 +164,7 @@ module.exports.prototype = {
                 packageToTransfer.metaData = {};
 
                 // II. verify
-                if (dataToTransfer.sType ===  DataInput.prototype.DATATYPE_DOCUMENT)
+                if (dataToTransfer.sType ===  DataInput.prototype.DATATYPE_FILE)
                 {
                     // 1. encrypt and store
                     packageToTransfer.metaData.fileName = fileName;
@@ -244,24 +244,9 @@ module.exports.prototype = {
                 sType: receivedData.sType,
                 packageCount: receivedData.packageCount,
                 receivedCount: 0,
-                packages: []
+                packages: [],
+                jsonValue: ''
             };
-
-            // --- prepare
-
-            // // b. init
-            // let metaData = {
-            //     sType: receivedData.sType
-            // };
-            //
-            // // c. read
-            // if (receivedData.sType ===  DataInput.prototype.DATATYPE_DOCUMENT)
-            // {
-            //     metaData.sFileName = Module_Crypto.decrypt(receivedData.metaData.fileName.data, receivedData.metaData.fileName.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
-            // }
-            //
-            // // d. broadcast event
-            // this.dispatchEvent(this.DATA_PREPARE_FOR_DISPLAY, metaData);
         }
 
         // 2. store
@@ -270,50 +255,37 @@ module.exports.prototype = {
         // 3. update
         this._aReceivedPackages[receivedData.id].receivedCount = Object.keys(this._aReceivedPackages[receivedData.id].packages).length;
 
-
-        // debugging
-        //if (console) console.log('Package # ' + this._aReceivedPackages[receivedData.id].receivedCount + ' of ' + this._aReceivedPackages[receivedData.id].packageCount);
-
-        // b. init
-        let metaData = {
+        // 4. init
+        let data = {
+            id: receivedData.id,
             sType: receivedData.sType,
             receivedCount: this._aReceivedPackages[receivedData.id].receivedCount,
             totalCount: this._aReceivedPackages[receivedData.id].packageCount
         };
 
-        this.dispatchEvent(this.DATA_PREPARE_FOR_DISPLAY, metaData);
+        // 5. add metadata
+        if (receivedData.sType === DataInput.prototype.DATATYPE_FILE && receivedData.metaData && receivedData.metaData.fileName)
+        {
+            // a. decrypt
+            data.sFileName = Module_Crypto.decrypt(receivedData.metaData.fileName.data, receivedData.metaData.fileName.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
+        }
 
+        // 6. report
+        this.dispatchEvent(this.DATA_LOADING, data);
 
+        // 7. recombine
+        this._aReceivedPackages[receivedData.id].jsonValue += Module_Crypto.decrypt(receivedData.value.data, receivedData.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
 
-        // --- recombine
-
-
-        // 5. validate
+        // 8. validate
         if (this._aReceivedPackages[receivedData.id].receivedCount === this._aReceivedPackages[receivedData.id].packageCount)
         {
-            // a. init
-            let sJSONReceivedValue = '';
+            // a. init and compose
+            data.value = JSON.parse(this._aReceivedPackages[receivedData.id].jsonValue);
 
-            // b. recombine
-            for (let nPackageIndex = 0; nPackageIndex < this._aReceivedPackages[receivedData.id].packageCount; nPackageIndex++)
-            {
-                // I. register
-                let receivedPackage = this._aReceivedPackages[receivedData.id].packages[nPackageIndex];
-
-                // II. decrypt and combine
-                sJSONReceivedValue += Module_Crypto.decrypt(receivedPackage.value.data, receivedPackage.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
-            }
-
-            // c. init and compose
-            let data = {
-                sType: this._aReceivedPackages[receivedData.id].sType,
-                value: JSON.parse(sJSONReceivedValue)
-            };
-
-            // d. cleanup
+            // b. cleanup
             delete this._aReceivedPackages[receivedData.id];
 
-            // e. broadcast event
+            // c. broadcast event
             this.dispatchEvent(this.DATA_READY_FOR_DISPLAY, data);
         }
     }

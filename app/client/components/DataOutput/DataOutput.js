@@ -102,21 +102,34 @@ module.exports.prototype = {
 
     /**
      * Show data that was shared with this client
-     * @param metaData
+     * @param data
      */
-    prepareData: function(metaData)
+    prepareData: function(data)
     {
-        // 1. toggle state
-        (this._elContainer.children.length === 0) ? this._elRoot.classList.add('empty') : this._elRoot.classList.remove('empty');
+        // 1. toggle
+        this._waiting.hide();
 
-        // 2. verify and show
-        if (metaData.receivedCount === 1 && metaData.totalCount >= 5) this._elProgress.classList.add('show');
+        // 2. verify
+        if (!this._aSharedData[data.id])
+        {
+            // a. create
+            let sharedData = new SharedData(this._elContainer);
 
-        // 3. verify and hide
-        if (metaData.receivedCount === metaData.totalCount) this._elProgress.classList.remove('show');
+            // b. configure
+            sharedData.addEventListener(SharedData.prototype.CLEARED, this._onSharedDataCleared.bind(this, sharedData));
+            sharedData.addEventListener(SharedData.prototype.USED_CLIPBOARD, this._onSharedDataUsedClipboard.bind(this, sharedData));
 
-        // 4. output
-        this._elProgress.innerText = 'Receiving ' + Math.round(100 * metaData.receivedCount / metaData.totalCount) + '%';
+            // c. store
+            this._aSharedData[data.id] = sharedData;
+
+            // d. init
+            this._aSharedData[data.id].initData(data);
+        }
+        else
+        {
+            // a. update
+            this._aSharedData[data.id].showProgress(data);
+        }
     },
 
     /**
@@ -125,22 +138,8 @@ module.exports.prototype = {
      */
     showData: function(data)
     {
-        // 1. toggle
-        this._waiting.hide();
-
-        // 2. create
-        let sharedData = new SharedData(this._elContainer);
-
-        // 3. configure
-        sharedData.addEventListener(SharedData.prototype.CLEARED, this._onSharedDataCleared.bind(this, sharedData));
-        sharedData.addEventListener(SharedData.prototype.USED_CLIPBOARD, this._onSharedDataUsedClipboard.bind(this, sharedData));
-
-        // 4. store
-        this._aSharedData.push(sharedData);
-
-
-        sharedData.showData(data);
-
+        // 1. verify and forward
+        if (this._aSharedData[data.id]) this._aSharedData[data.id].showData(data);
     },
 
     /**

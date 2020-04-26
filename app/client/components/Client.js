@@ -93,7 +93,7 @@ module.exports.prototype = {
 
         // 5. configure
         this._dataManager.addEventListener(DataManager.prototype.DATA_READY_FOR_TRANSFER, this._onDataManagerDataReadyForTransfer.bind(this));
-        this._dataManager.addEventListener(DataManager.prototype.DATA_PREPARE_FOR_DISPLAY, this._onDataManagerDataPrepareForDisplay.bind(this));
+        this._dataManager.addEventListener(DataManager.prototype.DATA_LOADING, this._onDataManagerDataLoading.bind(this));
         this._dataManager.addEventListener(DataManager.prototype.DATA_READY_FOR_DISPLAY, this._onDataManagerDataReadyForDisplay.bind(this));
 
 
@@ -752,13 +752,14 @@ module.exports.prototype = {
     },
 
     /**
-     * Handle PackageManager event `DATA_PREPARE_FOR_DISPLAY`
+     * Handle PackageManager event `DATA_LOADING`
+     * @param data
      * @private
      */
-    _onDataManagerDataPrepareForDisplay: function(metaData)
+    _onDataManagerDataLoading: function(data)
     {
         // 1. forward
-        this._dataOutput.prepareData(metaData);
+        this._dataOutput.prepareData(data);
     },
 
     /**

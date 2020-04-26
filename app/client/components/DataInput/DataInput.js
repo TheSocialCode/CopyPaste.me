@@ -46,10 +46,8 @@ module.exports.prototype = {
 
     // data types
     DATATYPE_PASSWORD: 'password',
-    DATATYPE_URL: 'url',
     DATATYPE_TEXT: 'text',
-    DATATYPE_IMAGE: 'image',
-    DATATYPE_DOCUMENT: 'document',
+    DATATYPE_FILE: 'file',
 
     // data
     _bValidated: false,
@@ -78,14 +76,10 @@ module.exports.prototype = {
 
         // 3. register
         this._elInputPassword = this._elRoot.querySelector('[data-mimoto-id="data_input_password"]');
-        this._elInputURL = this._elRoot.querySelector('[data-mimoto-id="data_input_url"]');
         this._elInputText = this._elRoot.querySelector('[data-mimoto-id="data_input_text"]');
-        this._elInputImage = this._elRoot.querySelector('[data-mimoto-id="data_input_image"]');
-        this._elInputImageButton = this._elInputImage.querySelector('[data-mimoto-id="data_input_image_file_button"]');
-        this._elInputImageInputfield = this._elInputImage.querySelector('[data-mimoto-id="data_input_image_file_inputfield"]');
-        this._elInputDocument = this._elRoot.querySelector('[data-mimoto-id="data_input_document"]');
-        this._elInputDocumentButton = this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_file_button"]');
-        this._elInputDocumentInputfield = this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_file_inputfield"]');
+        this._elInputFile = this._elRoot.querySelector('[data-mimoto-id="data_input_file"]');
+        this._elInputFileButton = this._elInputFile.querySelector('[data-mimoto-id="data_input_file_button"]');
+        this._elInputFileInputfield = this._elInputFile.querySelector('[data-mimoto-id="data_input_file_inputfield"]');
         this._elUploadProgress = this._elRoot.querySelector('[data-mimoto-id="progress"]');
         this._elButtonSend = this._elRoot.querySelector('[data-mimoto-id="button_input_send"]');
 
@@ -136,10 +130,9 @@ module.exports.prototype = {
             // a. hide
             this._elUploadProgress.innerText = 'Sharing done!';
 
-            // b. toggle outp0ut
+            // b. toggle output
             document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.remove('showProgress');
             document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.add('hideProgress');
-
 
             // c. time clearing of animation
             let timerCover = setTimeout(function()
@@ -170,25 +163,15 @@ module.exports.prototype = {
         this._elInputPassword.addEventListener('paste', this._validatePassword.bind(this));
         this._elInputPassword.addEventListener('input', this._validatePassword.bind(this));
 
-        // 2. configure input: URL
-        this._elInputURL.addEventListener('change', this._validateURL.bind(this));
-        this._elInputURL.addEventListener('keyup', this._validateURL.bind(this));
-        this._elInputURL.addEventListener('paste', this._validateURL.bind(this));
-        this._elInputURL.addEventListener('input', this._validateURL.bind(this));
-
-        // 3. configure input: text
+        // 2. configure input: text
         this._elInputText.addEventListener('change', this._validateText.bind(this));
         this._elInputText.addEventListener('keyup', this._validateText.bind(this));
         this._elInputText.addEventListener('paste', this._validateText.bind(this));
         this._elInputText.addEventListener('input', this._validateText.bind(this));
 
-        // 4. configure input: image & document
-        this._elInputImageButton.addEventListener('click', function() { this._elInputImageInputfield.click(); }.bind(this));
-        this._elInputImageInputfield.addEventListener('change', this._onSelectImage.bind(this));
-
-        // 5. configure input: document
-        this._elInputDocumentButton.addEventListener('click', function() { this._elInputDocumentInputfield.click(); }.bind(this));
-        this._elInputDocumentInputfield.addEventListener('change', this._onSelectDocument.bind(this));
+        // 3. configure input: file
+        this._elInputFileButton.addEventListener('click', function() { this._elInputFileInputfield.click(); }.bind(this));
+        this._elInputFileInputfield.addEventListener('change', this._onSelectFile.bind(this));
 
         // 6. configure send button
         this._elButtonSend.addEventListener('click', this._onButtonSendClick.bind(this));
@@ -270,7 +253,7 @@ module.exports.prototype = {
         this._data.sType = sDataType;
 
         // init
-        let aInputs = [this.DATATYPE_PASSWORD, this.DATATYPE_URL, this.DATATYPE_TEXT, this.DATATYPE_IMAGE, this.DATATYPE_DOCUMENT];
+        let aInputs = [this.DATATYPE_PASSWORD, this.DATATYPE_TEXT, this.DATATYPE_FILE];
 
         for (let nIndex = 0; nIndex < aInputs.length; nIndex++)
         {
@@ -294,10 +277,10 @@ module.exports.prototype = {
         }
     },
 
-    _onSelectImage: function()
+    _onSelectFile: function()
     {
         // 1. validate
-        if (this._elInputImageInputfield.files && this._elInputImageInputfield.files[0])
+        if (this._elInputFileInputfield.files && this._elInputFileInputfield.files[0])
         {
             // a. init
             var reader = new FileReader();
@@ -307,60 +290,28 @@ module.exports.prototype = {
             {
                 // I. store
                 this._data.value = {
-                    fileName: this._elInputImageInputfield.files[0].name,
+                    fileName: this._elInputFileInputfield.files[0].name,
                     base64: e.target.result
                 };
 
                 // II. show
-               this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview"]').classList.add('data_input_image_preview-visible');
-               this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview_image"]').setAttribute('src', this._data.value.base64);
-               this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview_label"]').innerText = this._data.value.fileName;
+                this._elInputFile.querySelector('[data-mimoto-id="data_input_file_preview"]').classList.add('data_input_file_preview-visible');
+                this._elInputFile.querySelector('[data-mimoto-id="data_input_file_preview_label"]').innerText = this._data.value.fileName;
 
                 // III. toggle
-                this._validateImage();
+                this._validateFile();
 
             }.bind(this);
 
-            // reader.onerror = function (error) { console.log('Error: ', error); };
-
             // c. load
-            reader.readAsDataURL(this._elInputImageInputfield.files[0]);
+            reader.readAsDataURL(this._elInputFileInputfield.files[0]);
         }
     },
 
-    _onSelectDocument: function()
-    {
-        // 1. validate
-        if (this._elInputDocumentInputfield.files && this._elInputDocumentInputfield.files[0])
-        {
-            // a. init
-            var reader = new FileReader();
-
-            // b. configure
-            reader.onload = function(e)
-            {
-                // I. store
-                this._data.value = {
-                    fileName: this._elInputDocumentInputfield.files[0].name,
-                    base64: e.target.result
-                };
-
-                // II. show
-                this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_preview"]').classList.add('data_input_document_preview-visible');
-                this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_preview_label"]').innerText = this._data.value.fileName;
-
-                // III. toggle
-                this._validateDocument();
-
-            }.bind(this);
-
-            // reader.onerror = function (error) { console.log('Error: ', error); };
-
-            // c. load
-            reader.readAsDataURL(this._elInputDocumentInputfield.files[0]);
-        }
-    },
-
+    /**
+     * Handle send button `click`
+     * @private
+     */
     _onButtonSendClick: function()
     {
         // 1. validate
@@ -378,7 +329,7 @@ module.exports.prototype = {
         this._elRoot.classList.remove('unlocked');
 
         // 4. prepare
-        document.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.add('showProgress');
+        this._elRoot.querySelector('[data-mimoto-id="sender_data_label_data"]').classList.add('showProgress');
 
         // 5. time clearing of value
         let timerValue = setTimeout(function()
@@ -398,17 +349,11 @@ module.exports.prototype = {
     _discardAllInput: function(sType)
     {
         if (sType === this.DATATYPE_PASSWORD || !sType) this._elInputPassword.value = '';
-        if (sType === this.DATATYPE_URL || !sType) this._elInputURL.value = '';
         if (sType === this.DATATYPE_TEXT || !sType) this._elInputText.value = '';
-        if (sType === this.DATATYPE_IMAGE || !sType)
+        if (sType === this.DATATYPE_FILE || !sType)
         {
-            this._elInputImage.querySelector('[data-mimoto-id="data_input_image_preview"]').classList.remove('data_input_image_preview-visible');
-            this._elInputImageInputfield.value = null;
-        }
-        if (sType === this.DATATYPE_DOCUMENT || !sType)
-        {
-            this._elInputDocument.querySelector('[data-mimoto-id="data_input_document_preview"]').classList.remove('data_input_document_preview-visible');
-            this._elInputDocumentInputfield.value = null;
+            this._elInputFile.querySelector('[data-mimoto-id="data_input_file_preview"]').classList.remove('data_input_file_preview-visible');
+            this._elInputFileInputfield.value = null;
         }
     },
 
@@ -421,30 +366,6 @@ module.exports.prototype = {
         this._data.value = this._elInputPassword.value;
     },
 
-    _validateURL: function()
-    {
-        // 1. init
-        var expression = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-        var regex = new RegExp(expression);
-
-        // 2. toggle
-        this._toggleSendButton(this._elInputURL.value.match(regex));
-
-        // 3. init
-        var protocolExpression = /(https?:\/\/)/gi;
-        var protocolRegex = new RegExp(protocolExpression);
-
-        // 4. store
-        if (!this._elInputURL.value.match(protocolRegex))
-        {
-            this._data.value = 'https://' + this._elInputURL.value;
-        }
-        else
-        {
-            this._data.value = this._elInputURL.value;
-        }
-    },
-
     _validateText: function()
     {
         // 1. toggle
@@ -454,13 +375,7 @@ module.exports.prototype = {
         this._data.value = this._elInputText.value;
     },
 
-    _validateImage: function()
-    {
-        // 1. toggle
-        this._toggleSendButton(true);
-    },
-
-    _validateDocument: function()
+    _validateFile: function()
     {
         // 1. toggle
         this._toggleSendButton(true);

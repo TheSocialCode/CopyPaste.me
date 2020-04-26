@@ -128,6 +128,7 @@ div.sender_data_label_cover_label {
     left: 0;
     text-align: center;
     color: $textcolor-light;
+    font-size: medium;
 
     cursor: default;
 
@@ -292,51 +293,6 @@ input.data_input.selected, textarea.data_input.selected, div.data_input.selected
     display: block;
 }
 
-div.data_input_image
-{
-    display: flex;
-}
-
-div.data_input_image_menu {
-    flex: content;
-    margin-right: 12px;
-}
-
-
-div.data_input_image_preview {
-    display: block;
-    width: 100%;
-    height: 125px;
-    visibility: hidden;
-}
-
-div.data_input_image_preview-visible {
-    visibility: visible;
-}
-
-div.data_input_image_preview_imagecontainer {
-    flex: auto;
-    width: 100%;
-    background-color: $background-lightergray;
-    border: 1px solid $background-lightgray;
-    border-radius: 3px;
-}
-
-img.data_input_image_preview_image {
-    display: block;
-    max-width: 100%;
-    max-height: 100px;
-}
-
-div.data_input_image_preview_label {
-    font-size: small;
-    background-color: $background-light;
-    padding: 7px 0 0 1px;
-    font-style: italic;
-    overflow: hidden;
-    word-break: break-word;
-}
-
 img.sender_data_label_cover_label_indicator {
     width: 20px;
     display: none;
@@ -346,28 +302,28 @@ img.sender_data_label_cover_label_indicator {
     }
 }
 
-div.data_input_document
+div.data_input_file
 {
 
 }
 
-div.data_input_document_menu {
+div.data_input_file_menu {
 
 }
 
-input.data_input_image_file_inputfield, input.data_input_document_file_inputfield {
+input.data_input_file_inputfield {
     display: none;
 }
 
-div.data_input_document_preview {
+div.data_input_file_preview {
     display: none;
 }
 
-div.data_input_document_preview-visible {
+div.data_input_file_preview-visible {
     display: block;
 }
 
-div.data_input_document_preview_label {
+div.data_input_file_preview_label {
     font-size: small;
     background-color: $background-light;
     padding: 7px 0 0 1px;
