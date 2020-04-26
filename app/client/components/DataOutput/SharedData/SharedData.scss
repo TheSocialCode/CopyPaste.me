@@ -63,12 +63,12 @@ div.receiver_data_options {
 }
 
 div.component_SharedData_optionsmenu {
-    visibility: hidden;
+    display: none;
     opacity: 0;
     transition: opacity 0.3s ease-out;
 
     &.show {
-        visibility: visible;
+        display: block;
         opacity: 1;
     }
 }
@@ -83,4 +83,25 @@ span.receiver_data_option:hover {
     text-decoration: underline;
     cursor: pointer;
     color: $support-color-dark;
+}
+
+div.component_SharedData_donate {
+
+    display: none;
+
+    &.show {
+        display: block;
+    }
+}
+
+a.component_SharedData_donate {
+    color: #999999;
+}
+
+a.component_SharedData_donate:hover {
+    color: #000000;
+}
+
+span.module_SharedData_donate_heart {
+    color:#C25B56;
 }

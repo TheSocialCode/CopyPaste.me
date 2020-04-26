@@ -174,6 +174,10 @@
                     <span data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</span> |
                     <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
                     clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
+                    - Please <a href="#support" target="_blank" class="component_SharedData_donate">donate</a> <span class="module_SharedData_donate_heart">♥</span>
+                </div>
+                <div data-mimoto-id="donate" class="component_SharedData_donate">
+                    Help keeping this project free for all. Please <a href="#support" target="_blank" class="component_SharedData_donate">donate</a> <span class="module_SharedData_donate_heart">♥</span>
                 </div>
             </div>
         </div>

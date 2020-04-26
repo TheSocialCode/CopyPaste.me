@@ -1,6 +1,6 @@
 <div data-mimoto-id="main-information" class="main-information">
     <div class="main-interface-information">
-        <div id="information_howitworks" class="main-interface-information-section left">
+        <div id="howitworks" class="main-interface-information-section left">
             <h2 class="main-interface-information-section-title">What does it do?</h2>
             <div class="main-interface-information-section-body">
                 <p>
@@ -63,7 +63,7 @@
             </div>
         </div>
 
-        <div id="information_support" class="main-interface-information-section right">
+        <div id="support" class="main-interface-information-section right">
             <h2 class="main-interface-information-section-title">How you can help to keep it free</h2>
             <div class="main-interface-information-section-body bottom">
                 <p><a href="https://thesocialcodefoundation.org" target="_blank">The Social Code Foundation</a> wants to offer this privacy-friendly sharing service free to all, but to cover the operational costs it relies on donations by enthusiastic users. For privacy reasons, and because the advertisement business model is broken to the core, the project can’t be funded with ad revenue. For long term sustainability reasons the project doesn’t want to rely on investors: profit and economic growth shouldn't be at the core of every initiative.</p>

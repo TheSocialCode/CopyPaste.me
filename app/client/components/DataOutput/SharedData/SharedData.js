@@ -30,6 +30,7 @@ module.exports.prototype = {
     _elDataLabel: null,
     _elButton: null,
     _elOptionsMenu: null,
+    _elDonate: null,
 
     // data
     _data: null,
@@ -75,6 +76,7 @@ module.exports.prototype = {
         this._elButton = this._elRoot.querySelector('[data-mimoto-id="receiver_data_button"]');
         this._elOptionsMenu = this._elRoot.querySelector('[data-mimoto-id="optionsmenu"]');
         this._elCoverLabel = this._elRoot.querySelector('[data-mimoto-id="coverlabel"]');
+        this._elDonate = this._elRoot.querySelector('[data-mimoto-id="donate"]');
 
         // 5. show
         this._elRootContainer.insertBefore(this._elRoot, this._elRootContainer.firstChild);
@@ -157,6 +159,7 @@ module.exports.prototype = {
 
             // b. prepare
             this._elRoot.classList.add('showProgress');
+            this._elDonate.classList.add('show');
         }
     },
 
@@ -212,6 +215,7 @@ module.exports.prototype = {
             // b. continue animation
             this._elRoot.classList.remove('showProgress');
             this._elRoot.classList.add('hideProgress');
+            this._elDonate.classList.remove('show');
 
             // c. time clearing of animation
             let timerCover = setTimeout(function ()
@@ -231,7 +235,7 @@ module.exports.prototype = {
 
 
         // 5. init
-        this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + 900 + ((this._elRootContainer.children.length > 1) ? 1000 : 0);
+        this._nTimeToAutoDestruct = new Date().getTime() + 2 * 60 * 1000 + ((this._elRootContainer.children.length > 1) ? 1000 : 0);
 
         // 6. setup auto-destruct
         this._timer = setInterval(function()
