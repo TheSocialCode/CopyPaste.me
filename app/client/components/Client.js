@@ -815,7 +815,7 @@ module.exports.prototype = {
         this._disableInterface();
 
         // 3. output
-        this._alertMessage.show('Your session expired `NOTIFICATION_SESSION_EXPIRED` to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
+        this._alertMessage.show('Your session expired to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
     },
 
     /**

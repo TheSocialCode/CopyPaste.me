@@ -286,9 +286,18 @@ module.exports = {
      */
     _onRequestDeviceReconnect: function(socket, sDeviceID)
     {
+        this.Mimoto.logger.logToFile('socket id = ' + socket.id);
+        this.Mimoto.logger.logToFile('sDeviceID = ' + sDeviceID);
+
+
         // 1. load
         let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
         let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
+
+
+        this.Mimoto.logger.logToFile('newDevice = ', newDevice);
+        this.Mimoto.logger.logToFile('originalDevice = ', originalDevice);
+
 
         // 2. validate
         if (!newDevice || !originalDevice)
