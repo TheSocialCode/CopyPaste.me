@@ -294,6 +294,8 @@ module.exports = {
         let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
         let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
 
+        // 2. check if device wasn;t registered as offline yet (find out why this could happen)
+        if (!originalDevice === false) this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
 
         console.log('newDevice = ', newDevice);
         console.log('originalDevice = ', originalDevice);
