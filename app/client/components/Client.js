@@ -42,6 +42,7 @@ module.exports.prototype = {
     _sManualCode: '',
     _bIsPrimaryDevice: null,
     _bIsManualConnect: false,
+    _sState: null,
     _sDirection: ToggleDirectionStates.prototype.DEFAULT,
 
     // components
@@ -63,6 +64,10 @@ module.exports.prototype = {
     // managers
     _dataManager: null,
     _packageManager: null,
+
+    // states
+    STATE_PRIMARYDEVICE_WAITINGFORSECONDARYDEVICE: 'STATE_PRIMARYDEVICE_WAITINGFORSECONDARYDEVICE',
+    STATE_SECONDARYDEVICECONNECTED: 'STATE_SECONDARYDEVICECONNECTED',
 
 
 
@@ -297,13 +302,13 @@ module.exports.prototype = {
      */
     _onSocketConnectError: function(err)
     {
-        // 1. hide
-        if (this._dataInput) this._dataInput.hide();
-        if (this._dataOutput) this._dataOutput.hide();
-        if (this._toggleDirectionButton) this._toggleDirectionButton.hide();
-        if (this._isOutputDevice()) if (this._connector) this._connector.hide();
+        // 1. pause
+        this._dataManager.pause();
 
-        // 2. output
+        // 2. disable
+        this._disableInterface();
+
+        // 3. output
         if (this._alertMessage) this._alertMessage.show('Error connecting to server. Please try again!');
     },
 
@@ -353,6 +358,8 @@ module.exports.prototype = {
      */
     _onUpdatePrimaryDeviceConnected: function(sDeviceID, sToken, nTokenLifetime)
     {
+        console.log('#._onUpdatePrimaryDeviceConnected');
+
         // 1. store
         this._sDeviceID = sDeviceID;
 
@@ -363,8 +370,8 @@ module.exports.prototype = {
         this._connector.addEventListener(Connector.prototype.REQUEST_TOKEN_REFRESH, this._onConnectorRequestTokenRefresh.bind(this));
         this._connector.addEventListener(Connector.prototype.REQUEST_MANUALCODE, this._onConnectorRequestManualCode.bind(this));
 
-        // 4. show
-        this._connector.show();
+        // 4. toggle
+        this._setState(this.STATE_PRIMARYDEVICE_WAITINGFORSECONDARYDEVICE);
     },
 
     /**
@@ -398,14 +405,11 @@ module.exports.prototype = {
         // 1. cleanup
         this._killConnection();
 
-        // 2. hide
-        this._dataInput.hide();
-        this._dataOutput.hide();
-        this._toggleDirectionButton.hide();
-        if (this._isOutputDevice()) this._connector.hide();
+        // 2. disable
+        this._disableInterface();
 
         // 3. output
-        this._alertMessage.show('Your session expired to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
+        this._alertMessage.show('Your session expired `ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND` to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
     },
 
     /**
@@ -414,12 +418,11 @@ module.exports.prototype = {
      */
     _onErrorSecondaryDeviceConnectByQRTokenNotFound: function()
     {
-        // 1. toggle visibility
-        this._dataInput.hide();
-        this._toggleDirectionButton.hide();
-
-        // 2. cleanup
+        // 1. cleanup
         this._killConnection();
+
+        // 2. disable
+        this._disableInterface();
 
         // 3. output
         this._alertMessage.show('The link you are trying to use is not working. Please try again.', true);
@@ -435,14 +438,8 @@ module.exports.prototype = {
         // 1. store
         this._dataManager.setTheirPublicKey(sOtherDevicePublicKey);
 
-        // 2. toggle visibility
-        this._alertMessage.hide();
-        if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
-
-        // 3. toggle
-        this._connector.hide();
-        this._dataOutput.show();
-        this._toggleDirectionButton.show();
+        // 2. update interface
+        this._setState(this.STATE_SECONDARYDEVICECONNECTED, true);
     },
 
     /**
@@ -461,10 +458,8 @@ module.exports.prototype = {
         // 2. store
         this._dataManager.setTheirPublicKey(sOtherDevicePublicKey);
 
-        // 3. toggle visibility
-        this._alertMessage.hide();
-        if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
-        this._dataInput.show();
+        // 3. update interface
+        this._setState(this.STATE_SECONDARYDEVICECONNECTED, true);
     },
 
     /**
@@ -475,16 +470,16 @@ module.exports.prototype = {
      */
     _onUpdateDeviceReconnected: function(bOtherDeviceConnected, sDirection)
     {
+        console.log('#._onUpdateDeviceReconnected');
+
         // 1, store
         this._sDirection = sDirection;
 
-        // 2. toggle visibility
-        this._alertMessage.hide();
-        if (this._isOutputDevice()) this._dataOutput.show();
-        if (this._isOutputDevice()) this._toggleDirectionButton.show();
-
-        // 3. resume
+        // 2. resume
         this._dataManager.resume(bOtherDeviceConnected);
+
+        // 3. update interface
+        this._setState(this._sState, bOtherDeviceConnected);
     },
 
     /**
@@ -493,15 +488,14 @@ module.exports.prototype = {
      */
     _onUpdateOtherDeviceDisconnected: function()
     {
-        // 1. toggle visibility
-        this._dataOutput.hide();
-        this._toggleDirectionButton.hide();
-
-        // 2. pause
+        // 1. pause
         this._dataManager.pause();
 
-        // 3. output
+        // 2. output
         this._alertMessage.show('The other device has been disconnected. Is it still online?');
+
+        // 3. update interface
+        this._setState(this._sState, false);
     },
 
     /**
@@ -510,13 +504,11 @@ module.exports.prototype = {
      */
     _onUpdateOtherDeviceReconnected: function()
     {
-        // 1. toggle visibility
-        this._alertMessage.hide();
-        if (this._isOutputDevice()) this._dataOutput.show();
-        if (this._isOutputDevice()) this._toggleDirectionButton.show();
-
-        // 2. resume
+        // 1. resume transfer
         this._dataManager.resume(true);
+
+        // 2. update interface
+        this._setState(this._sState, true);
     },
 
 
@@ -536,43 +528,8 @@ module.exports.prototype = {
         // 1. store
         this._sDirection = sDirection;
 
-        // 2. verify
-        if (sDirection !== ToggleDirectionStates.prototype.SWAPPED)
-        {
-            // a. toggle visibility
-            if (this._bIsPrimaryDevice)
-            {
-                this._toggleDirectionButton.show();
-                this._dataInput.hide();
-                this._dataOutput.unmute();
-                this._dataOutput.show();
-            }
-            else
-            {
-                this._toggleDirectionButton.hide();
-                this._dataInput.show();
-                this._dataOutput.mute();
-                this._dataOutput.hide();
-            }
-        }
-        else
-        {
-            // a. toggle visibility
-            if (this._bIsPrimaryDevice)
-            {
-                this._toggleDirectionButton.hide();
-                this._dataInput.show();
-                this._dataOutput.mute();
-                this._dataOutput.hide();
-            }
-            else
-            {
-                this._toggleDirectionButton.show();
-                this._dataInput.hide();
-                this._dataOutput.unmute();
-                this._dataOutput.show();
-            }
-        }
+        // 2. update interface
+        this._setState(this._sState, true);
     },
 
 
@@ -689,8 +646,8 @@ module.exports.prototype = {
         // 1. cleanup
         this._killConnection();
 
-        // 2. cleanup
-        if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
+        // 2. disable
+        this._disableInterface();
 
         // 3. notify
         this._alertMessage.show('Oops, it seems we lost the other device :/ Let`s try again!', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
@@ -707,27 +664,16 @@ module.exports.prototype = {
     {
         // 1. store
         this._sDeviceID = sDeviceID;
+        this._sDirection = sDirection;
 
         // 2. store
         this._dataManager.setTheirPublicKey(sOtherDevicePublicKey);
-        this._sDirection = sDirection;
 
-        // 3. hide
-        this._manualConnectHandshake.hide();
-
-        // 4. toggle visibility
-        if (this._isOutputDevice())
-        {
-            this._dataOutput.show();
-            this._toggleDirectionButton.show();
-        }
-        else
-        {
-            this._dataInput.show();
-        }
-
-        // 5. update
+        // 3. update
         if (window && window.history && window.history.pushState) window.history.pushState(null, document.getElementsByTagName("title")[0].innerHTML, '/');
+
+        // 4. update interface
+        this._setState(this.STATE_SECONDARYDEVICECONNECTED, true);
     },
 
 
@@ -866,15 +812,10 @@ module.exports.prototype = {
         this._killConnection();
 
         // 2. toggle visibility
-        if (this._connector) this._connector.hide();
-        if (this._manualConnectInput) this._manualConnectInput.hide();
-        if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
-        if (this._dataOutput) this._dataOutput.hide();
-        if (this._dataInput) this._dataInput.hide();
-        if (this._toggleDirectionButton) this._toggleDirectionButton.hide();
+        this._disableInterface();
 
         // 3. output
-        this._alertMessage.show('Your session expired to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
+        this._alertMessage.show('Your session expired `NOTIFICATION_SESSION_EXPIRED` to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
     },
 
     /**
@@ -922,6 +863,127 @@ module.exports.prototype = {
 
         // 3. cleanup
         delete this._socket;
+    },
+
+    /**
+     * Disable interface
+     * @private
+     */
+    _disableInterface: function()
+    {
+        // 1. hide
+        if (this._connector) this._connector.hide();
+        if (this._manualConnectInput) this._manualConnectInput.hide();
+        if (this._manualConnectHandshake) this._manualConnectHandshake.hide();
+        if (this._dataOutput) this._dataOutput.hide();
+        if (this._dataInput) this._dataInput.hide();
+        if (this._toggleDirectionButton) this._toggleDirectionButton.hide();
+    },
+
+    /**
+     * Set state
+     * @param sState
+     * @param bBothDevicesOnline
+     * @private
+     */
+    _setState: function(sState, bBothDevicesOnline)
+    {
+        // 1. store
+        this._sState = sState;
+
+        // 2. toggle visibility
+        this._alertMessage.hide();
+
+        // 3. select
+        switch(this._sState)
+        {
+            case this.STATE_PRIMARYDEVICE_WAITINGFORSECONDARYDEVICE:
+
+                console.log('STATE = STATE_PRIMARYDEVICE_WAITINGFORSECONDARYDEVICE');
+
+                // a. show
+                this._connector.show();
+                break;
+
+            case this.STATE_SECONDARYDEVICECONNECTED:
+
+                console.log('STATE = STATE_SECONDARYDEVICECONNECTED');
+
+                // a. verify
+                if (this._connector)
+                {
+                    // I. hide
+                    this._connector.hide();
+
+                    // 2. cleanup
+                    delete this._connector;
+                }
+
+                // b. verify
+                if (bBothDevicesOnline)
+                {
+                    // I. toggle visibility
+                    if (this._isOutputDevice())
+                    {
+                        this._toggleDirectionButton.show();
+                        this._dataInput.hide();
+                        this._dataOutput.unmute();
+                        this._dataOutput.show();
+                    }
+                    else
+                    {
+                        this._toggleDirectionButton.hide();
+                        this._dataInput.show();
+                        this._dataOutput.mute();
+                        this._dataOutput.hide();
+                    }
+                }
+                else
+                {
+                    console.log('NOT both devices online');
+                }
+
+                break;
+        }
+
+
+        // // 2. verify
+        // if (sDirection !== ToggleDirectionStates.prototype.SWAPPED)
+        // {
+        //     // a. toggle visibility
+        //     if (this._bIsPrimaryDevice)
+        //     {
+        //         this._toggleDirectionButton.show();
+        //         this._dataInput.hide();
+        //         this._dataOutput.unmute();
+        //         this._dataOutput.show();
+        //     }
+        //     else
+        //     {
+        //         this._toggleDirectionButton.hide();
+        //         this._dataInput.show();
+        //         this._dataOutput.mute();
+        //         this._dataOutput.hide();
+        //     }
+        // }
+        // else
+        // {
+        //     // a. toggle visibility
+        //     if (this._bIsPrimaryDevice)
+        //     {
+        //         this._toggleDirectionButton.hide();
+        //         this._dataInput.show();
+        //         this._dataOutput.mute();
+        //         this._dataOutput.hide();
+        //     }
+        //     else
+        //     {
+        //         this._toggleDirectionButton.show();
+        //         this._dataInput.hide();
+        //         this._dataOutput.unmute();
+        //         this._dataOutput.show();
+        //     }
+        // }
     }
 
 };
