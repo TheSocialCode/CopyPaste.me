@@ -358,8 +358,6 @@ module.exports.prototype = {
      */
     _onUpdatePrimaryDeviceConnected: function(sDeviceID, sToken, nTokenLifetime)
     {
-        console.log('#._onUpdatePrimaryDeviceConnected');
-
         // 1. store
         this._sDeviceID = sDeviceID;
 
@@ -470,8 +468,6 @@ module.exports.prototype = {
      */
     _onUpdateDeviceReconnected: function(bOtherDeviceConnected, sDirection)
     {
-        console.log('#._onUpdateDeviceReconnected');
-
         // 1, store
         this._sDirection = sDirection;
 
@@ -491,11 +487,11 @@ module.exports.prototype = {
         // 1. pause
         this._dataManager.pause();
 
-        // 2. output
-        this._alertMessage.show('The other device has been disconnected. Is it still online?');
-
-        // 3. update interface
+        // 2. update interface
         this._setState(this._sState, false);
+
+        // 3. output
+        this._alertMessage.show('The other device has been disconnected. Is it still online?');
     },
 
     /**
