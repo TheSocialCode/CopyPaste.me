@@ -286,7 +286,6 @@ module.exports = {
      */
     _onRequestDeviceReconnect: function(socket, sDeviceID)
     {
-        console.log('socket id = ' + socket.id);
         console.log('sDeviceID = ' + sDeviceID);
 
 
@@ -294,7 +293,6 @@ module.exports = {
         let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
         let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
 
-        console.log('newDevice = ', newDevice);
         console.log('###################################### - originalDevice = ', originalDevice);
 
         // 2. check if device wasn;t registered as offline yet (find out why this could happen)
