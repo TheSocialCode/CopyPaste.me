@@ -234,6 +234,7 @@ module.exports.prototype = {
 
         // --- manual connect
 
+
         // 12. verify
         if (this._bIsManualConnect)
         {
@@ -407,7 +408,7 @@ module.exports.prototype = {
         this._disableInterface();
 
         // 3. output
-        this._alertMessage.show('Your session expired `ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND` to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
+        this._alertMessage.show('Your session expired to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
     },
 
     /**
@@ -937,45 +938,6 @@ module.exports.prototype = {
 
                 break;
         }
-
-
-        // // 2. verify
-        // if (sDirection !== ToggleDirectionStates.prototype.SWAPPED)
-        // {
-        //     // a. toggle visibility
-        //     if (this._bIsPrimaryDevice)
-        //     {
-        //         this._toggleDirectionButton.show();
-        //         this._dataInput.hide();
-        //         this._dataOutput.unmute();
-        //         this._dataOutput.show();
-        //     }
-        //     else
-        //     {
-        //         this._toggleDirectionButton.hide();
-        //         this._dataInput.show();
-        //         this._dataOutput.mute();
-        //         this._dataOutput.hide();
-        //     }
-        // }
-        // else
-        // {
-        //     // a. toggle visibility
-        //     if (this._bIsPrimaryDevice)
-        //     {
-        //         this._toggleDirectionButton.hide();
-        //         this._dataInput.show();
-        //         this._dataOutput.mute();
-        //         this._dataOutput.hide();
-        //     }
-        //     else
-        //     {
-        //         this._toggleDirectionButton.show();
-        //         this._dataInput.hide();
-        //         this._dataOutput.unmute();
-        //         this._dataOutput.show();
-        //     }
-        // }
     }
 
 };

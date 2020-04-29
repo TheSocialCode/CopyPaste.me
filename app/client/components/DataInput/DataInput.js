@@ -27,14 +27,10 @@ module.exports.prototype = {
     _elRoot: null,
     _elCurrentDataInput: null,
     _elInputPassword: null,
-    _elInputURL: null,
     _elInputText: null,
-    _elInputImage: null,
-    _elInputImageButton: null,
-    _elInputImageInputfield: null,
-    _elInputDocument: null,
-    _elInputDocumentButton: null,
-    _elInputDocumentInputfield: null,
+    _elInputFile: null,
+    _elInputFileButton: null,
+    _elInputFileInputfield: null,
     _elUploadProgress: null,
 
     // utils
@@ -86,6 +82,9 @@ module.exports.prototype = {
         // 4. setup
         this._setupInput();
         this._setupTabMenu();
+
+        // 5. init
+        this._data.sType = this.DATATYPE_PASSWORD;
     },
 
 
@@ -102,6 +101,9 @@ module.exports.prototype = {
     {
         // 1. toggle
         this._elRoot.classList.add('show');
+
+        // 2. refocus
+        this._focusDataInput(this._data.sType);
     },
 
     /**
@@ -204,14 +206,8 @@ module.exports.prototype = {
                 // II. focus
                 this._focusTab(sDataType);
 
-                // III. toggle
-                this._focusDataInput(sDataType);
-
             }.bind(this, elTab.getAttribute('data-type')));
         }
-
-        // 4. auto focus
-        this._focusDataInput('password');
     },
 
     /**
@@ -221,10 +217,13 @@ module.exports.prototype = {
      */
     _focusTab: function(sDataType)
     {
-        // 1. cleanup
+        // 1. validate
+        if (this._data.sType === sDataType) return;
+
+        // 2. cleanup
         this._discardAllInput();
 
-        // 2. change focus
+        // 3. change focus
         for (let nTabIndex = 0; nTabIndex < this._aTabs.length; nTabIndex++)
         {
             // a. register
@@ -233,10 +232,10 @@ module.exports.prototype = {
             // b. verify
             if (elTab.getAttribute('data-type') === sDataType)
             {
-                // I. toggle
+                // 1. toggle
                 elTab.classList.add('selected');
 
-                // II. focus
+                // 2. focus
                 this._focusDataInput(sDataType);
             }
             else
@@ -247,31 +246,55 @@ module.exports.prototype = {
         }
     },
 
+    /**
+     * Focus data input type
+     * @param sDataType
+     * @private
+     */
     _focusDataInput: function(sDataType)
     {
-        // store
+        // 1. store
         this._data.sType = sDataType;
 
-        // init
+        // 2. init
         let aInputs = [this.DATATYPE_PASSWORD, this.DATATYPE_TEXT, this.DATATYPE_FILE];
 
+        // 3. toggle state
         for (let nIndex = 0; nIndex < aInputs.length; nIndex++)
         {
-            // register
+            // a. register
             let sInputName = aInputs[nIndex];
             let elInput = this._elRoot.querySelector('[data-mimoto-id="data_input_' + sInputName + '"]');
 
-            if (aInputs[nIndex] === sDataType)
+            // b. verify
+            if (sInputName === sDataType)
             {
-                // store
+                // I. store
                 this._elCurrentDataInput = elInput;
 
-                // show
+                // II. show
                 this._elCurrentDataInput.classList.add('selected');
+
+                // III. focus
+                switch(sDataType)
+                {
+                    case this.DATATYPE_PASSWORD:
+                    case this.DATATYPE_TEXT:
+
+                        // 1. auto-focus
+                        this._elCurrentDataInput.focus();
+                        break;
+
+                    case this.DATATYPE_FILE:
+
+                        // 1. auto open file select
+                        this._elInputFileInputfield.click();
+                        break;
+                }
             }
             else
             {
-                // hide
+                // I. hide
                 elInput.classList.remove('selected');
             }
         }

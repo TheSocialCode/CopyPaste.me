@@ -74,12 +74,13 @@ div.component_SharedData_optionsmenu {
 }
 
 
-span.receiver_data_option {
+a.receiver_data_option {
+    color: #999999;
     text-decoration: none;
     cursor: pointer;
 }
 
-span.receiver_data_option:hover {
+a.receiver_data_option:hover {
     text-decoration: underline;
     cursor: pointer;
     color: $support-color-dark;

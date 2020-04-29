@@ -171,8 +171,8 @@
             </div>
             <div class="receiver_data_options">
                 <div data-mimoto-id="optionsmenu" class="component_SharedData_optionsmenu">
-                    <span data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</span> |
-                    <span data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</span> |
+                    <a data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</a> |
+                    <a data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</a> |
                     clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
                     - Please <a href="#support" target="_blank" class="component_SharedData_donate">donate</a> <span class="module_SharedData_donate_heart">♥</span>
                 </div>
