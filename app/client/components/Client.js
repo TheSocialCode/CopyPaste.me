@@ -895,15 +895,11 @@ module.exports.prototype = {
         {
             case this.STATE_PRIMARYDEVICE_WAITINGFORSECONDARYDEVICE:
 
-                console.log('STATE = STATE_PRIMARYDEVICE_WAITINGFORSECONDARYDEVICE');
-
                 // a. show
                 this._connector.show();
                 break;
 
             case this.STATE_SECONDARYDEVICECONNECTED:
-
-                console.log('STATE = STATE_SECONDARYDEVICECONNECTED');
 
                 // a. verify
                 if (this._connector)
@@ -936,7 +932,7 @@ module.exports.prototype = {
                 }
                 else
                 {
-                    console.log('NOT both devices online');
+                    //console.log('NOT both devices online');
                 }
 
                 break;

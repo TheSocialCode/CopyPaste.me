@@ -286,27 +286,27 @@ module.exports = {
      */
     _onRequestDeviceReconnect: function(socket, sDeviceID)
     {
-        console.log('socket.id = ' + socket.id);
-        console.log('sDeviceID = ' + sDeviceID);
+        // console.log('socket.id = ' + socket.id);
+        // console.log('sDeviceID = ' + sDeviceID);
 
 
-        // 1. check if device still exists
-        let device = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
+        // // 1. check if device still exists
+        // let device = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
 
-        if (!device)
-        {
-            console.log('#.Device DID NOT exist');
+        // if (!device)
+        // {
+        //     console.log('#.Device DID NOT exist');
 
             // 1. load
             let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
             let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
 
-            console.log('###################################### - originalDevice = ', originalDevice);
+            // console.log('###################################### - originalDevice = ', originalDevice);
 
             // 2. check if device wasn;t registered as offline yet (find out why this could happen)
-            if (!originalDevice === false) this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
+            // if (!originalDevice === false) this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
 
-            console.log('###################################### - originalDevice = ', originalDevice);
+            // console.log('###################################### - originalDevice = ', originalDevice);
 
 
             // 2. validate
@@ -324,11 +324,11 @@ module.exports = {
 
             // 3. restore and merge
             let device = this.Mimoto.deviceManager.restoreAndMerge(originalDevice, newDevice);
-        }
-        else
-        {
-            console.log('#.Device EXISTED! (p.s. find out why)');
-        }
+        // }
+        // else
+        // {
+        //     console.log('#.Device EXISTED! (p.s. find out why)');
+        // }
 
 
         // 4. load

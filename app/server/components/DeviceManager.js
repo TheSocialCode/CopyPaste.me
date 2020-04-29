@@ -218,11 +218,6 @@ module.exports.prototype = {
             // b. validate
             if (offlineDeviceData.nExpires >= new Date().getTime()) continue;
 
-
-            console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
-            console.log('@@@ Device expired - Device ID = ' + offlineDeviceData.device.getID() + ' @@@@@@@@@@@@@@@@@@@@@@');
-            console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
-
             // c. cleanup
             delete this._aOfflineDevices[sKey];
 
