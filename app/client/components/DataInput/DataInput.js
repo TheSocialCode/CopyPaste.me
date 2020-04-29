@@ -220,10 +220,13 @@ module.exports.prototype = {
         // 1. validate
         if (this._data.sType === sDataType) return;
 
-        // 2. cleanup
+        // 2. disable
+        this._toggleSendButton(false);
+
+        // 3. cleanup
         this._discardAllInput();
 
-        // 3. change focus
+        // 4. change focus
         for (let nTabIndex = 0; nTabIndex < this._aTabs.length; nTabIndex++)
         {
             // a. register
