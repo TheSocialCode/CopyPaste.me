@@ -88,14 +88,14 @@ module.exports.prototype = {
             }
 
             // b. output
-            this.Mimoto.logger.log(aLines[nLineIndex], true);
+            console.log(aLines[nLineIndex]);
 
             // c. compose
             sLogOutput += aLines[nLineIndex] + '\n';
         }
 
         // 8. output extra line
-        this.Mimoto.logger.log('', true);
+        console.log('');
 
         // 9. compose
         sLogOutput += '\n';

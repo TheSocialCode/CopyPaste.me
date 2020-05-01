@@ -56,19 +56,17 @@ module.exports.prototype = {
 
     /**
      * Log to file
-     * @param sOutput
-     * @param bForceOutput
      */
-    log: function(sOutput, bForceOutput)
+    log: function()
     {
         // 1. verify
         if (this._bBlockOutput) return;
 
         // 2. validate
-        if (!this._bOutputToConsole && !bForceOutput) return;
+        if (!this._bOutputToConsole) return;
 
         // 3. verify and output
-        if (console && console.log) console.log(sOutput);
+        if (console && console.log) console.log.apply(console, arguments);
     },
 
     /**

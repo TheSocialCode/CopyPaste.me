@@ -275,7 +275,7 @@ module.exports = {
         pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_PRIMARYDEVICE_CONNECTED, pair.getPrimaryDeviceID(), token.getValue(), token.getLifetime());
 
         // 4. output
-        this._logUsers('Primary Device with socket.id = ' + primaryDeviceSocket.id + ' requests token = ' + token.getValue());
+        this._logUsers('Primary Device with socket.id = ' + primaryDeviceSocket.id, 'Requests token = ' + token.getValue());
     },
 
     /**
@@ -313,7 +313,7 @@ module.exports = {
             if (!newDevice || !originalDevice)
             {
                 // a. output
-                this.Mimoto.logger.log('No original device after server restart sDeviceID = ' + sDeviceID);
+                this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
 
                 // b. send
                 socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
@@ -400,7 +400,7 @@ module.exports = {
 
 
         // 9. output
-        this._logUsers('Device `' + device.getType() + '` with sDeviceID = `' + sDeviceID + '` reconnected to pair (socket.id = ' + socket.id + ')');
+        this._logUsers('Device `' + device.getType() + '` with sDeviceID = `' + sDeviceID + '`', 'Reconnected to pair (socket.id = ' + socket.id + ')');
     },
 
 
@@ -475,7 +475,7 @@ module.exports = {
         if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey());
 
         // 9. output
-        this._logUsers('Secondary device with socket.id = ' + socket.id + ' requests connection to token = ' + token.getValue());
+        this._logUsers('Secondary device with socket.id = ' + socket.id, 'Requests connection to token = ' + token.getValue());
     },
 
 
@@ -556,7 +556,7 @@ module.exports = {
 
 
         // 8. output
-        this._logUsers('Secondary device with socket.id = ' + socket.id + ' requests connection to manual code = ' + token.getValue());
+        this._logUsers('Secondary device with socket.id = ' + socket.id, 'Requests connection to manual code = ' + token.getValue());
     },
 
     /**
@@ -697,55 +697,70 @@ module.exports = {
 
     /**
      * Log users (for debugging purposes only)
-     * @param sTitle
      * @private
      */
-    _logUsers: function(sTitle)
+    _logUsers: function()
     {
-        // 1. compose
-        let sOutput = '' + '\n' +
-            sTitle + '\n' +
-            '=========================' + '\n' +
-            'Number of sockets:' + this.Mimoto.deviceManager.getNumberOfDevices() + '\n' +
-            'Number of pairs:' + this.Mimoto.pairManager.getNumberOfActivePairs() + '\n' +
-            'Number of idle pairs:' + this.Mimoto.pairManager.getNumberOfIdlePairs() + '\n' +
-            //'---' + '\n' +
-            //'Number of pairs that established connection between both devices:' + Object.keys(this._aConnectedPairs).length + '\n' +
-            //'Number of pairs that have been used to send data:' + Object.keys(this._aUsedPairs).length +
-            '\n';
-
-        // 2. output to file
-        this.Mimoto.logger.logToFile(sOutput);
-
-        // 3. output to console
-        this.Mimoto.logger.log(sOutput);
-
-
-        // 3. output
-        this.Mimoto.logger.logToFile('');
-        this.Mimoto.logger.logToFile(sTitle);
-        this.Mimoto.logger.logToFile('Devices by socket ID');
-        this.Mimoto.logger.logToFile('=========================');
-        this.Mimoto.logger.logToFile(this.Mimoto.deviceManager.getAllDevicesBySocketID());
-
-
-        this.Mimoto.logger.log('Devices by device ID');
-        this.Mimoto.logger.log('=========================');
-        this.Mimoto.logger.log(this.Mimoto.deviceManager.getAllDevicesByDeviceID());
-        this.Mimoto.logger.log('Offline devices');
-        this.Mimoto.logger.log('=========================');
-        this.Mimoto.logger.log(this.Mimoto.deviceManager.getAllOfflineDevices());
-        this.Mimoto.logger.log('=========================');
-        this.Mimoto.logger.log('Pairs');
-        this.Mimoto.logger.log('-------------------------');
-        this.Mimoto.logger.log(this.Mimoto.pairManager.getActivePairs());
+        // 1. output action
         this.Mimoto.logger.log('');
-        // this.Mimoto.logger.log('Idle pairs');
-        // this.Mimoto.logger.log('-------------------------');
-        // this.Mimoto.logger.log(this._aInactivePairs);
-        //this.Mimoto.logger.log(CoreModule_Util.inspect(this._aInactivePairs, false, null, true));
+        this.Mimoto.logger.log('========================================================================');
+        for (let nActionIndex = 0; nActionIndex < arguments.length; nActionIndex++)
+        {
+            this.Mimoto.logger.log('=== ' + arguments[nActionIndex]);
+        }
+        this.Mimoto.logger.log('========================================================================');
+
         this.Mimoto.logger.log('');
+
+        // 2. output active devices
+        let aDevices = this.Mimoto.deviceManager.getAllDevicesByDeviceID();
+        this.Mimoto.logger.log('Devices (count = ' + this.Mimoto.deviceManager.getNumberOfDevices() + ')');
+        this.Mimoto.logger.log('------------------------------------------');
+        for (let sKey in aDevices)
+        {
+            this.Mimoto.logger.log('device = ', this._prepareDeviceForOutput(aDevices[sKey]));
+        }
         this.Mimoto.logger.log('');
+
+        // 3. output offline devices
+        let aOfflineDevices = this.Mimoto.deviceManager.getAllOfflineDevices();
+        this.Mimoto.logger.log('Offline devices (count = ' + this.Mimoto.deviceManager.getNumberOfOfflineDevices() + ')');
+        this.Mimoto.logger.log('------------------------------------------');
+        for (let sKey in aOfflineDevices)
+        {
+            this.Mimoto.logger.log('device =', this._prepareDeviceForOutput(aOfflineDevices[sKey].device), 'Expires at ' + new Date(aOfflineDevices[sKey].nExpires));
+            this.Mimoto.logger.log('');
+        }
+        this.Mimoto.logger.log('');
+
+        // 4. output pairs
+        let aPairs = this.Mimoto.pairManager.getActivePairs();
+        this.Mimoto.logger.log('Pairs (count = ' + this.Mimoto.pairManager.getNumberOfActivePairs() + ')');
+        this.Mimoto.logger.log('------------------------------------------');
+        for (let sKey in aPairs)
+        {
+            this.Mimoto.logger.log('pair =', this._preparePairForOutput(aPairs[sKey]), 'State =  ' + ((aPairs[sKey].isActive()) ? 'active' : 'idle'), (!aPairs[sKey].isActive()) ? 'Expires at ' + new Date(aPairs[sKey].getExpiryDate()) : '');
+            this.Mimoto.logger.log('');
+        }
+        this.Mimoto.logger.log('\n\n');
+    },
+
+    _prepareDeviceForOutput: function(device)
+    {
+        return {
+            id: device.getID(),
+            socketId: device.getSocketID(),
+            pairId: device.getPairID()
+        };
+    },
+
+    _preparePairForOutput: function(pair)
+    {
+        return {
+            id: pair.getID(),
+            primaryDeviceId: pair.getPrimaryDeviceID(),
+            secondaryDeviceId: pair.getSecondaryDeviceID()
+        };
     }
 
 };

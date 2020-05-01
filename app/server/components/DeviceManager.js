@@ -267,6 +267,15 @@ module.exports.prototype = {
     getAllOfflineDevices: function()
     {
         return this._aOfflineDevices;
+    },
+
+    /**
+     * Get number of offline devices
+     * @returns number
+     */
+    getNumberOfOfflineDevices: function()
+    {
+        return Object.keys(this._aOfflineDevices).length;
     }
 
 };

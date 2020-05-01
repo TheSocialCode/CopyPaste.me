@@ -437,7 +437,6 @@ module.exports.prototype = {
         this._updateExpirationDate();
     },
 
-
     /**
      * Check if pair has other device (socket)
      * @returns {boolean}
@@ -623,6 +622,23 @@ module.exports.prototype = {
         }
     },
 
+    /**
+     * Get active state
+     * @returns boolean
+     */
+    isActive: function()
+    {
+        return this._bIsActive;
+    },
+
+    /**
+     * Get expiry date
+     * @returns {null|number}
+     */
+    getExpiryDate: function()
+    {
+        return this._nExpires;
+    },
 
 
     // ----------------------------------------------------------------------------
@@ -637,7 +653,14 @@ module.exports.prototype = {
     _updateExpirationDate: function()
     {
         // 1. cleanup
-        if (this._timerExpiration) clearTimeout(this._timerExpiration);
+        if (this._timerExpiration)
+        {
+            // a. reset
+            this._nExpires = null;
+
+            // b. cleanup
+            clearTimeout(this._timerExpiration);
+        }
 
         // 2. define
         let bNewState = (this.hasPrimaryDevice() || this.hasSecondaryDevice());
@@ -665,17 +688,20 @@ module.exports.prototype = {
             );
 
             // b. update
-            if (this._bIsActive )
+            if (this._bIsActive)
             {
                 // a. broadcast
                 this.dispatchEvent(this.ACTIVE);
             }
             else
             {
-                // a. setup
+                // a. store
+                this._nExpires = new Date().getTime() + this.MAX_IDLE_TIME;
+
+                // b. setup
                 this._timerExpiration = setTimeout(this._onHandleExpiration.bind(this), this.MAX_IDLE_TIME);
 
-                // b. broadcast
+                // c. broadcast
                 this.dispatchEvent(this.IDLE);
             }
         }
