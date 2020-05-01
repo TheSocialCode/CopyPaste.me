@@ -310,7 +310,7 @@ module.exports.prototype = {
         this._disableInterface();
 
         // 3. output
-        if (this._alertMessage) this._alertMessage.show('Error connecting to server. Please try again!');
+        if (this._alertMessage) this._alertMessage.show('We lost the connection. Are you still online?');
     },
 
     /**
@@ -323,7 +323,7 @@ module.exports.prototype = {
         this._dataManager.pause();
 
         // 2. notify
-        this._alertMessage.show('Connection with server was lost .. reconnecting ..');
+        this._alertMessage.show('We seem to have gone offline .. reconnecting ..');
     },
 
 
@@ -748,6 +748,9 @@ module.exports.prototype = {
      */
     _onDataReceived: function(data)
     {
+
+        console.log('#._onDataReceived - data = ', data);
+
         // 1. continue transfer
         this._dataManager.continueToNextPackage(data);
     },

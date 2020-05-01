@@ -94,6 +94,12 @@ module.exports.prototype = {
     {
         // 1. toggle
         this._bPaused = true;
+
+        // 2. cancel
+        if (this._timerPackageTransfer) clearInterval(this._timerPackageTransfer);
+
+        // 3. cleanup
+        this._timerPackageTransfer = null;
     },
 
     /**
@@ -122,24 +128,21 @@ module.exports.prototype = {
      */
     prepareDataForTransfer: function(dataToTransfer)
     {
-        // 1. clone
-        //let dataToTransfer = JSON.parse(JSON.stringify(data));
-
-        // 2. prepare
+        // 1. prepare
         let sJSONValueToTransfer = JSON.stringify(dataToTransfer.value);
 
-        // 3. encrypt and store
+        // 2. encrypt and store
         let fileName = (dataToTransfer.sType ===  DataInput.prototype.DATATYPE_FILE) ? Module_Crypto.encrypt(dataToTransfer.value.fileName, this._sTheirPublicKey, this._myKeyPair.secretKey) : '';
 
-        // 4. cleanup
+        // 3. cleanup
         dataToTransfer.value = '';
 
-        // 5. setup
+        // 4. setup
         dataToTransfer.id = Module_GenerateUniqueID({ length: 32 });
         dataToTransfer.packageCount = Math.ceil(sJSONValueToTransfer.length / this._nSizePerPackage);
         dataToTransfer.totalSize = sJSONValueToTransfer.length;
 
-        // 6. split
+        // 5. split
         for (let nPackageIndex = 0; nPackageIndex < dataToTransfer.packageCount; nPackageIndex++)
         {
             // a. clone
@@ -175,7 +178,7 @@ module.exports.prototype = {
             this._aPackagesReadyForTransfer.push(packageToTransfer);
         }
 
-        // 7. configure
+        // 6. configure
         if (this._timerPackageTransfer === null) this._timerPackageTransfer = setInterval(this._transferPackages.bind(this), 10);
     },
 
@@ -185,11 +188,28 @@ module.exports.prototype = {
      */
     continueToNextPackage: function(data)
     {
-        // 1. cleanup
-        this._packageCurrentlyInTransfer = null;
+        console.log('#.continueToNextPackage - this._packageCurrentlyInTransfer = ', this._packageCurrentlyInTransfer);
 
-        // 2. start next transfer
-        if (this._aPackagesReadyForTransfer.length > 0 && this._timerPackageTransfer === null) this._timerPackageTransfer = setInterval(this._transferPackages.bind(this), 100);
+        // 1. validate
+        if (this._packageCurrentlyInTransfer)
+        {
+            if (data && data.dataID === this._packageCurrentlyInTransfer.id && data.packageNumber === this._packageCurrentlyInTransfer.packageNumber)
+            {
+                // a. cleanup
+                this._packageCurrentlyInTransfer = null;
+            }
+            else
+            {
+                // a. exit
+                return;
+            }
+        }
+
+        // 2. validate
+        if (this._bPaused) return;
+
+        // 3. start next transfer
+        if (this._aPackagesReadyForTransfer.length > 0 && !this._timerPackageTransfer) this._timerPackageTransfer = setInterval(this._transferPackages.bind(this), 100);
     },
 
     /**
@@ -198,13 +218,18 @@ module.exports.prototype = {
      */
     _transferPackages: function()
     {
+        console.log('#._transferPackages');
+
         // 1. stop
-        clearInterval(this._timerPackageTransfer);
+        if (this._timerPackageTransfer) clearInterval(this._timerPackageTransfer);
 
         // 2. cleanup
         this._timerPackageTransfer = null;
 
-        // 3. verify
+        // 3. validate
+        if (this._bPaused) return;
+
+        // 4. verify
         if (this._aPackagesReadyForTransfer.length > 0 || this._packageCurrentlyInTransfer)
         {
             // a. load and remove
