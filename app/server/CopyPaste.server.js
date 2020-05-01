@@ -30,6 +30,7 @@ const TokenManager = require('./components/TokenManager');
 const MongoDB = require('./components/MongoDB');
 const Logger = require('./components/Logger');
 const StartupInfo = require('./components/StartupInfo');
+const Utils = require('./utils/Utils');
 const ToggleDirectionStates = require('./../client/components/ToggleDirectionButton/ToggleDirectionStates');
 const ConnectorEvents = require('./../client/components/Connector/ConnectorEvents');
 
@@ -708,6 +709,8 @@ module.exports = {
         {
             this.Mimoto.logger.log('=== ' + arguments[nActionIndex]);
         }
+        this.Mimoto.logger.log('===');
+        this.Mimoto.logger.log('=== ' + Utils.prototype.buildDate());
         this.Mimoto.logger.log('========================================================================');
 
         this.Mimoto.logger.log('');
