@@ -731,7 +731,7 @@ module.exports = {
         this.Mimoto.logger.log('------------------------------------------');
         for (let sKey in aOfflineDevices)
         {
-            this.Mimoto.logger.log('device =', this._prepareDeviceForOutput(aOfflineDevices[sKey].device), 'Expires at ' + new Date(aOfflineDevices[sKey].nExpires));
+            this.Mimoto.logger.log('device =', this._prepareDeviceForOutput(aOfflineDevices[sKey].device), 'Expires at ' + Utils.prototype.buildDate(aOfflineDevices[sKey].nExpires));
             this.Mimoto.logger.log('');
         }
         this.Mimoto.logger.log('');
@@ -742,7 +742,7 @@ module.exports = {
         this.Mimoto.logger.log('------------------------------------------');
         for (let sKey in aPairs)
         {
-            this.Mimoto.logger.log('pair =', this._preparePairForOutput(aPairs[sKey]), 'State =  ' + ((aPairs[sKey].isActive()) ? 'active' : 'idle'), (!aPairs[sKey].isActive()) ? 'Expires at ' + new Date(aPairs[sKey].getExpiryDate()) : '');
+            this.Mimoto.logger.log('pair =', this._preparePairForOutput(aPairs[sKey]), 'State =  ' + ((aPairs[sKey].isActive()) ? 'active' : 'idle'), (!aPairs[sKey].isActive()) ? 'Expires at ' + Utils.prototype.buildDate(aPairs[sKey].getExpiryDate()) : '');
             this.Mimoto.logger.log('');
         }
         this.Mimoto.logger.log('\n\n');
