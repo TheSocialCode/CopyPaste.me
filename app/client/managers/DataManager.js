@@ -269,8 +269,7 @@ module.exports.prototype = {
                 sType: receivedData.sType,
                 packageCount: receivedData.packageCount,
                 receivedCount: 0,
-                packages: [],
-                jsonValue: ''
+                packages: []
             };
         }
 
@@ -304,18 +303,30 @@ module.exports.prototype = {
         this.dispatchEvent(this.DATA_LOADING, data);
 
         // 7. recombine
-        this._aReceivedPackages[receivedData.id].jsonValue += Module_Crypto.decrypt(receivedData.value.data, receivedData.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
+        //this._aReceivedPackages[receivedData.id].jsonValue += Module_Crypto.decrypt(receivedData.value.data, receivedData.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
+
+
+        // 7. decrypt
+        receivedData.value = Module_Crypto.decrypt(receivedData.value.data, receivedData.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
+
 
         // 8. validate
         if (this._aReceivedPackages[receivedData.id].receivedCount === this._aReceivedPackages[receivedData.id].packageCount)
         {
-            // a. init and compose
-            data.value = JSON.parse(this._aReceivedPackages[receivedData.id].jsonValue);
+            // a. recombine
+            for (let nPackageIndex = 0; nPackageIndex < this._aReceivedPackages[receivedData.id].packageCount; nPackageIndex++)
+            {
+                // a. build
+                data.value += this._aReceivedPackages[receivedData.id].packages[nPackageIndex].value;
+            }
 
-            // b. cleanup
+            // b. convert
+            data.value = JSON.parse(data.value);
+
+            // c. cleanup
             delete this._aReceivedPackages[receivedData.id];
 
-            // c. broadcast event
+            // d. broadcast event
             this.dispatchEvent(this.DATA_READY_FOR_DISPLAY, data);
         }
     }
