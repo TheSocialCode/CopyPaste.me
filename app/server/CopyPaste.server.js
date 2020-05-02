@@ -288,9 +288,6 @@ module.exports = {
      */
     _onRequestDeviceReconnect: function(socket, sDeviceID, sPreviousSocketID)
     {
-        this.Mimoto.logger.log('ALERT - Trying to reconnect to sDeviceID = ' + sDeviceID);
-
-
         // 1. verify - OFFLINE_RESCUE_#1 - this parameter is only passed when the server lost track of a device that didn't manage to properly disconnect and unregister (for instance because the internet got cut off and the device wasn't able to communicate it's change in presence
         if (sPreviousSocketID)
         {
@@ -300,18 +297,11 @@ module.exports = {
             // b. validate
             if (undisconnectedDevice && undisconnectedDevice.getSocketID() === sPreviousSocketID)
             {
+                // I. report
                 this.Mimoto.logger.log('ALERT - The device DOES EXIST and seems to be the one we lost due to bad disconnect sDeviceID = ' + sDeviceID);
 
-                // I. force disconnect and set the state of the device to offline
+                // II. force disconnect and set the state of the device to offline
                 this.Mimoto.deviceManager.unregisterSocket(undisconnectedDevice.getSocket())
-
-
-
-                // lock / unlock
-
-
-
-
             }
         }
 
@@ -324,7 +314,6 @@ module.exports = {
         {
             // a. output
             this.Mimoto.logger.log('ALERT - No original device after server restart or device offline - sDeviceID = ' + sDeviceID + '\n\n');
-
 
             // b. OFFLINE_RESCUE_#1 - check if the device has gone offline earlier, but hasn't managed to log off officially
             let undisconnectedDevice = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);

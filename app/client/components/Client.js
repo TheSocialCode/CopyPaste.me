@@ -267,19 +267,10 @@ module.exports.prototype = {
         if (this._socketIDs.current) this._socketIDs.previous = this._socketIDs.current;
         this._socketIDs.current = this._socket.id;
 
-
-        console.log('this._socketIDs', this._socketIDs);
-
-
-
-
-
-
-
-        // 1. hide
+        // 2. hide
         this._alertMessage.hide();
 
-        // 2. select
+        // 3. select
         if (!this._isRegisteredDevice())
         {
             // 2. select
@@ -416,22 +407,12 @@ module.exports.prototype = {
      */
     _onErrorDeviceReconnectDeviceIDNotFound: function(bMightHaveBeenUnableToLogOffEarlier)
     {
-
-        console.log('DeviceID not found', this._socketIDs);
-
-        alert('DeviceID not found = ' + JSON.stringify(this._socketIDs));
-
         // 1. Verify - OFFLINE_RESCUE_#1 - The device might have lost the internet connection earlier and was unable to disconnect to the server, making the server think it's still online and connected
         if (bMightHaveBeenUnableToLogOffEarlier === true)
         {
-
-            console.log('TRY again', this._socketIDs);
-
+            // 1. verify
             if (this._socketIDs.previous)
             {
-                console.log('Has previous device', this._socketIDs);
-
-
                 // I. request
                 this._socket.emit(ConnectorEvents.prototype.REQUEST_DEVICE_RECONNECT, this._sDeviceID, this._socketIDs.previous);
 
@@ -440,15 +421,13 @@ module.exports.prototype = {
             }
         }
 
-
-
-        // 1. cleanup
+        // 2. cleanup
         this._killConnection();
 
-        // 2. disable
+        // 3. disable
         this._disableInterface();
 
-        // 3. output
+        // 4. output
         this._alertMessage.show('Your session expired to ensure the safety of your data', true, { sLabel: 'Start new session', fClickHandler: function() { window.open('/', '_self') } });
     },
 
@@ -778,9 +757,6 @@ module.exports.prototype = {
      */
     _onReceiveData: function(receivedData)
     {
-        // console.log('#._onReceiveData - receivedData = ', receivedData.packageNumber, 'of', receivedData.packageCount);
-
-
         // 1. store
         this._dataManager.addPackage(receivedData);
 
@@ -795,9 +771,6 @@ module.exports.prototype = {
      */
     _onDataReceived: function(data)
     {
-
-        // console.log('#._onDataReceived - data = ', data);
-
         // 1. continue transfer
         this._dataManager.continueToNextPackage(data);
     },

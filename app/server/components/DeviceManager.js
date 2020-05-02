@@ -92,19 +92,26 @@ module.exports.prototype = {
         let device = this._aDevicesBySocketID[socket.id];
 
         // 2. validate - OFFLINE_RESCUE_#1 - The device has been cleanup up when restoring an offline device
-        if (!device) return;
+        if (!device)
+        {
+            // a. report
+            this.Mimoto.logger.log('ALERT - An old offline socket tried to disconnect very late, but the connection was already restored. Skipping this one! socket.id = ' + socket.id);
 
-        // 2. move and set moment of expiry
+            // b. exit
+            return;
+        }
+
+        // 3. move and set moment of expiry
         this._aOfflineDevices[device.getID()] = {
             device: this._aDevicesByDeviceID[device.getID()],
             nExpires: new Date().getTime() + this.OFFLINE_DEVICE_LIFETIME
         };
 
-        // 3. cleanup
+        // 4. cleanup
         delete this._aDevicesBySocketID[socket.id];
         delete this._aDevicesByDeviceID[device.getID()];
 
-        // 4. broadcast
+        // 5. broadcast
         this.dispatchEvent(this.DEVICE_OFFLINE, device);
     },
 
