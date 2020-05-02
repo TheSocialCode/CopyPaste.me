@@ -412,7 +412,7 @@ module.exports.prototype = {
         console.log('DeviceID not found', this._aSocketIDs);
 
 
-        document.querySelector('data-mimoto-id=["footer"]').innerText = 'DeviceID not found = ' + JSON.stringify(this._aSocketIDs);
+        document.querySelector('[data-mimoto-id="footer"]').innerText = 'DeviceID not found = ' + JSON.stringify(this._aSocketIDs);
 
         // if (!this._bSecondTry)
         // {
