@@ -46,7 +46,7 @@
             </div>
             <img src="/static/images/features_files.png" class="feature_image">
             <div class="feature_description">
-                Never again the desparate search for a USB stick or someone
+                Never again the desperate search for a USB stick or someone
                 from the technical desk to get files from your laptop or phone
                 to a computer you need it on. Also very handy for sharing
                 files or photos with people you’ve just met, but currently
