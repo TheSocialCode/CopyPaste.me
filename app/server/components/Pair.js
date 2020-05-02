@@ -535,6 +535,20 @@ module.exports.prototype = {
         // 2. register
         let receiverSocket = (this.getDirection() === ToggleDirectionStates.prototype.SWAPPED) ? this.getSecondaryDevice() : this.getPrimaryDevice();
 
+
+        let dataCloneForLogging = JSON.parse(JSON.stringify(encryptedData));
+
+        if (dataCloneForLogging.value.data.length > 20)
+        {
+            let sValue = dataCloneForLogging.value.data;
+
+            dataCloneForLogging.value.data = sValue.substr(0, 10) + ' ... ' + sValue.substr(sValue.length - 10);
+        }
+
+
+        this.Mimoto.logger.logToFile('\nDATA - encryptedData = ' + JSON.stringify(dataCloneForLogging) + '\n');
+
+
         // 3. send
         receiverSocket.emit(ConnectorEvents.prototype.RECEIVE_DATA, encryptedData);
 
