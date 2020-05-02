@@ -42,7 +42,7 @@ div.receiver_data_label_data {
     word-break: break-word;
 }
 
-div.module_SharedData_data_label {
+div.component_SharedData_data_label {
 
     visibility: hidden;
 
@@ -105,4 +105,10 @@ a.component_SharedData_donate:hover {
 
 span.module_SharedData_donate_heart {
     color:#C25B56;
+}
+
+span.component_SharedData_expires {
+    font-family: monospace;
+    font-size: 13px;
+    color: $color-button-dark;
 }

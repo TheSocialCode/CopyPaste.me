@@ -766,6 +766,12 @@ module.exports.prototype = {
 
         // 2. store
         this._dataManager.addPackage(receivedData);
+
+        // 3. verify and disable
+        if (receivedData.packageNumber === 0) this._toggleDirectionButton.disable();
+
+        // 4. verify and enable
+        if (receivedData.packageNumber === receivedData.packageCount - 1) this._toggleDirectionButton.enable();
     },
 
     /**

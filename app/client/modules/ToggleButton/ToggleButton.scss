@@ -10,7 +10,19 @@ div.module_ToggleButton {
     cursor: pointer;
     user-select: none;
 
+    transition: opacity 1s;
+    opacity: 1;
+
     &:hover {
         background-color: $support-color-dark;
+    }
+
+    &.disabled {
+        cursor: default;
+        opacity: 0.4;
+    }
+
+    &.disabled:hover {
+        background-color: $color-button-dark;
     }
 }

@@ -26,6 +26,9 @@ module.exports.prototype = {
     _elRoot: null,
     _elButton: null,
 
+    // states
+    _bIsDisabled: false,
+
     // events
     REQUEST_TOGGLE_DIRECTION: 'REQUEST_TOGGLE_DIRECTION',
 
@@ -74,6 +77,30 @@ module.exports.prototype = {
         this._elRoot.classList.remove('show');
     },
 
+    /**
+     * Disable
+     */
+    disable: function()
+    {
+        // 1. toggle
+        this._bIsDisabled = true;
+
+        // 2. set state
+        this._elButton.classList.add('disabled')
+    },
+
+    /**
+     * Enable
+     */
+    enable: function()
+    {
+        // 1. toggle
+        this._bIsDisabled = false;
+
+        // 2. set state
+        this._elButton.classList.remove('disabled')
+    },
+
 
 
     // ----------------------------------------------------------------------------
@@ -88,7 +115,10 @@ module.exports.prototype = {
      */
     _onButtonClick: function(e)
     {
-        // 1. broadcast
+        // 1. validate
+        if (this._bIsDisabled) return;
+
+        // 2. broadcast
         this.dispatchEvent(this.REQUEST_TOGGLE_DIRECTION);
     }
 

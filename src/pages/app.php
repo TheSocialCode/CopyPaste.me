@@ -160,9 +160,9 @@
                     <div class="receiver_data_label_data">
                         <div class="sender_data_label_data_cover">
                             <div class="sender_data_label_cover_internal"></div>
-                            <div class="sender_data_label_cover_label"><img class="sender_data_label_cover_label_indicator" src="static/images/waiting.svg">&nbsp;<span data-mimoto-id="coverlabel">Receiving data ...</span></div>
+                            <div class="sender_data_label_cover_label"><span data-mimoto-id="indicator" class="component_SharedData_cover_indicator"><img class="sender_data_label_cover_label_indicator" src="static/images/waiting.svg">&nbsp;</span><span data-mimoto-id="coverlabel">Receiving data ...</span></div>
                         </div>
-                        <div data-mimoto-id="receiver_data_label_data" class="module_SharedData_data_label"></div>
+                        <div data-mimoto-id="receiver_data_label_data" class="component_SharedData_data_label"></div>
                     </div>
                 </div>
                 <div class="receiver_data_menu">
@@ -171,10 +171,10 @@
             </div>
             <div class="receiver_data_options">
                 <div data-mimoto-id="optionsmenu" class="component_SharedData_optionsmenu">
-                    <a data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">Clear now</a> |
-                    <a data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</a> |
-                    clears in <span data-mimoto-id="receiver_data_lifetime">2 mins 0 secs</span>
-                    - Please <a href="#support" target="_blank" class="component_SharedData_donate">donate</a> <span class="module_SharedData_donate_heart">♥</span>
+                    Clears in <span data-mimoto-id="receiver_data_lifetime" class="component_SharedData_expires">2 mins 0 secs</span> -
+                    <a data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</a> -
+                    <a data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">clear now</a> -
+                    Please <a href="#support" target="_blank" class="component_SharedData_donate">donate</a> <span class="module_SharedData_donate_heart">♥</span>
                 </div>
                 <div data-mimoto-id="donate" class="component_SharedData_donate">
                     Help keeping this project free for all. Please <a href="#support" target="_blank" class="component_SharedData_donate">donate</a> <span class="module_SharedData_donate_heart">♥</span>

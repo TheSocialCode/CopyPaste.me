@@ -338,3 +338,12 @@ div.component_DataInput_progress {
     color: $textcolor-dark;
     text-align: center;
 }
+
+span.component_SharedData_cover_indicator {
+
+    display: none;
+
+    &.show {
+        display: inline-block;
+    }
+}

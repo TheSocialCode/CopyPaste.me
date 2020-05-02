@@ -31,6 +31,8 @@ module.exports.prototype = {
     _elButton: null,
     _elOptionsMenu: null,
     _elDonate: null,
+    _elCoverLabel: null,
+    _elCoverIndicator: null,
 
     // data
     _data: null,
@@ -76,6 +78,7 @@ module.exports.prototype = {
         this._elButton = this._elRoot.querySelector('[data-mimoto-id="receiver_data_button"]');
         this._elOptionsMenu = this._elRoot.querySelector('[data-mimoto-id="optionsmenu"]');
         this._elCoverLabel = this._elRoot.querySelector('[data-mimoto-id="coverlabel"]');
+        this._elCoverIndicator = this._elRoot.querySelector('[data-mimoto-id="indicator"]');
         this._elDonate = this._elRoot.querySelector('[data-mimoto-id="donate"]');
 
         // 5. show
@@ -102,19 +105,28 @@ module.exports.prototype = {
         {
             case DataInput.prototype.DATATYPE_PASSWORD:
 
-                this._elDataLabel.innerText = '* * * * * * * * *';
+                // a. output
+                this._setDataLabel('* * * * * * *');
+
+                // b. setup
                 this._elButton.innerText = 'Copy to clipboard';
                 break;
 
             case DataInput.prototype.DATATYPE_TEXT:
 
-                this._elDataLabel.innerText = this._data.value;
+                // a. output
+                this._setDataLabel(this._data.value);
+
+                // b. setup
                 this._elButton.innerText = 'Copy to clipboard';
                 break;
 
             case DataInput.prototype.DATATYPE_FILE:
 
-                this._elDataLabel.innerText = this._data.sFileName;
+                // a. output
+                this._setDataLabel(this._data.sFileName);
+
+                // b. setup
                 this._elButton.innerText = 'Download';
                 break;
         }
@@ -173,7 +185,7 @@ module.exports.prototype = {
         this._data = data;
 
         // 2. output
-        this._elCoverLabel.innerText = 'Receiving ' + (Math.round(100 * data.receivedCount / data.totalCount)) + '%';
+        this._setCoverLabel('Receiving ' + (Math.round(100 * data.receivedCount / data.totalCount)) + '%', true);
     },
 
     /**
@@ -194,7 +206,8 @@ module.exports.prototype = {
 
             case DataInput.prototype.DATATYPE_TEXT:
 
-                this._elDataLabel.innerText = this._data.value;
+                // a. output
+                this._setDataLabel(this._data.value);
                 break;
 
             case DataInput.prototype.DATATYPE_FILE:
@@ -270,7 +283,7 @@ module.exports.prototype = {
         let elPlaceholder = this._elRoot.querySelector('[data-mimoto-id="placeholder"]');
 
         // b. hide
-        elContent.style.display = 'none'; // #todo - move to css class
+        elContent.style.display = 'none';
 
         // c. start animation
         let timerIntro = setTimeout(function(elPlaceholder)
@@ -309,7 +322,7 @@ module.exports.prototype = {
         let elPlaceholder = this._elRoot.querySelector('[data-mimoto-id="placeholder"]');
 
         // 3. hide
-        elContent.style.display = 'none'; // #todo - move to css class
+        elContent.style.display = 'none';
 
         // 4. setup
         elPlaceholder.style.height = nPlaceholderHeight;
@@ -428,6 +441,32 @@ module.exports.prototype = {
     },
 
     /**
+     * Set data label
+     * @param sLabel
+     * @private
+     */
+    _setDataLabel: function(sLabel, )
+    {
+        // 1. output
+        this._elDataLabel.innerText = sLabel;
+    },
+
+    /**
+     * Set data label
+     * @param sLabel
+     * @param bShowProgressIndicator
+     * @private
+     */
+    _setCoverLabel: function(sLabel, bShowProgressIndicator)
+    {
+        // 1. output
+        this._elCoverLabel.innerText = sLabel;
+
+        // 2. toggle
+        (bShowProgressIndicator) ? this._elCoverIndicator.classList.add('show') : this._elCoverIndicator.classList.remove('show');
+    },
+
+    /**
      * Toggle send button
      * @param bEnable
      * @private
@@ -458,16 +497,33 @@ module.exports.prototype = {
         // 1. copy
         Module_ClipboardCopy(this._data.value);
 
-        // 2. prepare
-        this._elRoot.classList.add('clear');
+        // 2. output
+        this._setCoverLabel('Copied to clipboard!');
 
-        // 3. time clearing of animation
-        let timerCover = setTimeout(function()
+        // 3. disable
+        this._toggleSendButton(false);
+
+        // 4. animate
+        this._elRoot.classList.add('showProgress');
+
+        // 5. time clearing of animation
+        setTimeout(function ()
         {
             // a. cleanup
-            this._elRoot.classList.remove('clear');
+            this._elRoot.classList.remove('showProgress');
+            this._elRoot.classList.add('hideProgress');
 
-        }.bind(this), 1200);
+            setTimeout(function ()
+            {
+                // a. cleanup
+                this._elRoot.classList.remove('hideProgress');
+
+                // b. enable
+                this._toggleSendButton(true);
+
+            }.bind(this), 900);
+
+        }.bind(this), 900);
     }
 
 };
