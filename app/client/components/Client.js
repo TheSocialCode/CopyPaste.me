@@ -757,11 +757,11 @@ module.exports.prototype = {
      */
     _onReceiveData: function(receivedData)
     {
-        // 1. store
-        this._dataManager.addPackage(receivedData);
-
-        // 2. notify
+        // 1. report back
         this._socket.emit(ConnectorEvents.prototype.DATA_RECEIVED, { dataID: receivedData.id, packageNumber: receivedData.packageNumber });
+
+        // 2. store
+        this._dataManager.addPackage(receivedData);
     },
 
     /**
