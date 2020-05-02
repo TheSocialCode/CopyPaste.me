@@ -139,7 +139,7 @@ module.exports = {
             this._app = Module_Express();
 
             // b. setup
-            this._server = new Module_HTTP.createServer(this._app, { pingTimeout: 30000, allowUpgrades: false, upgradeTimeout: 30000});
+            this._server = new Module_HTTP.createServer(this._app, { pingTimeout: 20000, allowUpgrades: false, upgradeTimeout: 30000});
         }
 
         // 2. setup
@@ -297,31 +297,11 @@ module.exports = {
             // a. output
             this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
 
-            this.Mimoto.logger.log('Trying something else!');
+            // b. send
+            socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
 
-            // a. see if the device is still active
-            let existingDevice = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
-
-            this.Mimoto.logger.log('existingDevice', existingDevice);
-
-            if (!existingDevice)
-            {
-                // a. output
-                this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
-
-                // b. send
-                socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
-
-                // c. exit
-                return;
-            }
-            else
-            {
-                this.Mimoto.logger.log('ALERT - Tried to get existinbg device  succeeded sDeviceID = ' + sDeviceID + '\n\n');
-
-                // a. replace
-                originalDevice = existingDevice;
-            }
+            // c. exit
+            return;
         }
 
         // 3. restore and merge
