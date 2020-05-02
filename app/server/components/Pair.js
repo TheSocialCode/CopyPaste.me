@@ -545,10 +545,6 @@ module.exports.prototype = {
             dataCloneForLogging.value.data = sValue.substr(0, 10) + ' ... ' + sValue.substr(sValue.length - 10);
         }
 
-
-        this.Mimoto.logger.logToFile('\nDATA - encryptedData = ' + JSON.stringify(dataCloneForLogging) + '\n');
-
-
         // 3. send
         receiverSocket.emit(ConnectorEvents.prototype.RECEIVE_DATA, encryptedData);
 

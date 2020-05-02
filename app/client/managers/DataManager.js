@@ -287,11 +287,6 @@ module.exports.prototype = {
             totalCount: this._aReceivedPackages[receivedData.id].packageCount
         };
 
-
-        console.log('Received data', data);
-        console.log('encryptedData.length', receivedData.value.data.length);
-
-
         // 5. add metadata
         if (receivedData.sType === DataInput.prototype.DATATYPE_FILE && receivedData.metaData && receivedData.metaData.fileName)
         {
@@ -302,31 +297,33 @@ module.exports.prototype = {
         // 6. report
         this.dispatchEvent(this.DATA_LOADING, data);
 
-        // 7. recombine
-        //this._aReceivedPackages[receivedData.id].jsonValue += Module_Crypto.decrypt(receivedData.value.data, receivedData.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
-
-
         // 7. decrypt
-        receivedData.value = Module_Crypto.decrypt(receivedData.value.data, receivedData.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
+        let jsonDecryptedValue = Module_Crypto.decrypt(receivedData.value.data, receivedData.value.nonce, this._sTheirPublicKey, this._myKeyPair.secretKey);
+
+        // 8. store
+        receivedData.value = jsonDecryptedValue;
 
 
-        // 8. validate
+        // 9. validate
         if (this._aReceivedPackages[receivedData.id].receivedCount === this._aReceivedPackages[receivedData.id].packageCount)
         {
-            // a. recombine
+            // a. init
+            data.value = '';
+
+            // b. recombine
             for (let nPackageIndex = 0; nPackageIndex < this._aReceivedPackages[receivedData.id].packageCount; nPackageIndex++)
             {
                 // a. build
                 data.value += this._aReceivedPackages[receivedData.id].packages[nPackageIndex].value;
             }
 
-            // b. convert
+            // c. convert
             data.value = JSON.parse(data.value);
 
-            // c. cleanup
+            // d. cleanup
             delete this._aReceivedPackages[receivedData.id];
 
-            // d. broadcast event
+            // e. broadcast event
             this.dispatchEvent(this.DATA_READY_FOR_DISPLAY, data);
         }
     }
