@@ -264,6 +264,10 @@ module.exports.prototype = {
     {
         // console.log('#._onSocketConnect', this._socket.id.toString());
 
+
+        if (!this._aSocketIDs) this._aSocketIDs = [];
+        this._aSocketIDs.push(this._socket.id);
+
         // 1. hide
         this._alertMessage.hide();
 
@@ -327,7 +331,7 @@ module.exports.prototype = {
         this._dataManager.pause();
 
         // 2. notify
-        this._alertMessage.show('You seem to have gone offline .. reconnecting ..');
+        if (this._alertMessage) this._alertMessage.show('You seem to have gone offline .. reconnecting ..');
     },
 
 
@@ -405,7 +409,10 @@ module.exports.prototype = {
      */
     _onErrorDeviceReconnectDeviceIDNotFound: function()
     {
-        // console.log('DeviceID not found');
+        console.log('DeviceID not found', this._aSocketIDs);
+
+
+        document.querySelector('data-mimoto-id=["footer"]').innerText = 'DeviceID not found = ' + JSON.stringify(this._aSocketIDs);
 
         // if (!this._bSecondTry)
         // {
