@@ -949,6 +949,16 @@ module.exports.prototype = {
                 }
 
                 // b. verify
+                if (this._manualConnectHandshake)
+                {
+                    // I. hide
+                    this._manualConnectHandshake.hide();
+
+                    // 2. cleanup
+                    delete this._manualConnectHandshake;
+                }
+
+                // c. verify
                 if (bBothDevicesOnline)
                 {
                     // I. toggle visibility
