@@ -419,6 +419,7 @@ module.exports.prototype = {
 
         console.log('DeviceID not found', this._socketIDs);
 
+        alert('DeviceID not found = ' + JSON.stringify(this._socketIDs));
 
         // 1. Verify - OFFLINE_RESCUE_#1 - The device might have lost the internet connection earlier and was unable to disconnect to the server, making the server think it's still online and connected
         if (bMightHaveBeenUnableToLogOffEarlier === true)
@@ -433,14 +434,11 @@ module.exports.prototype = {
 
                 // I. request
                 this._socket.emit(ConnectorEvents.prototype.REQUEST_DEVICE_RECONNECT, this._sDeviceID, this._socketIDs.previous);
+
+                // II. exit
+                return;
             }
-
         }
-
-
-        alert('DeviceID not found = ' + JSON.stringify(this._socketIDs));
-
-
 
 
 
