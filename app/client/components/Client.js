@@ -734,6 +734,9 @@ module.exports.prototype = {
      */
     _onReceiveData: function(receivedData)
     {
+        console.log('#._onReceiveData - receivedData = ', receivedData.packageNumber, 'of', receivedData.packageCount);
+
+
         // 1. store
         this._dataManager.addPackage(receivedData);
 
