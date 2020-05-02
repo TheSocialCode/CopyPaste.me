@@ -88,6 +88,13 @@ module.exports.prototype = {
      */
     unregisterSocket: function(socket)
     {
+        console.log('#.unregisterSocket', socket.id);
+        console.log('this._aDevicesBySocketID', this._aDevicesBySocketID);
+        console.log('this._aDevicesByDeviceID', this._aDevicesByDeviceID);
+        console.log(' ');
+
+
+
         // 1. load
         let device = this._aDevicesBySocketID[socket.id];
 
