@@ -235,6 +235,8 @@ module.exports.prototype = {
             // a. load and remove
             if (!this._packageCurrentlyInTransfer)
             {
+                alert('Package encrypt ' + this._packageCurrentlyInTransfer.packageNumber);
+
                 // I. load
                 this._packageCurrentlyInTransfer = this._aPackagesReadyForTransfer.shift();
 
