@@ -316,11 +316,31 @@ module.exports = {
                 // a. output
                 this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
 
-                // b. send
-                socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
+                this.Mimoto.logger.log('Trying something else!');
 
-                // c. exit
-                return;
+                // a. see if the device is still active
+                let existingDevice = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
+
+                this.Mimoto.logger.log('existingDevice', existingDevice);
+
+                if(!existingDevice)
+                {
+                    // a. output
+                    this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
+
+                    // b. send
+                    socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
+
+                    // c. exit
+                    return;
+                }
+                else
+                {
+                    this.Mimoto.logger.log('ALERT - Tried to get existinbg device  succeeded sDeviceID = ' + sDeviceID + '\n\n');
+
+                    // replace
+                    originalDevice = existingDevice;
+                }
             }
 
             // 3. restore and merge
