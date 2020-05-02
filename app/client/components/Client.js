@@ -401,6 +401,30 @@ module.exports.prototype = {
      */
     _onErrorDeviceReconnectDeviceIDNotFound: function()
     {
+        console.log('DeviceID not found');
+
+        if (!this._bSecondTry)
+        {
+            console.log('socket.disconnect');
+            this._socket.disconnect();
+
+            console.log('socket.connect');
+            this._socket.connect();
+
+            console.log('Does it register correctly now?');
+
+            this._bSecondTry = true;
+            return;
+        }
+
+
+
+
+
+
+
+
+
         // 1. cleanup
         this._killConnection();
 
