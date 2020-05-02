@@ -44,6 +44,7 @@ module.exports.prototype = {
     _bIsManualConnect: false,
     _sState: null,
     _sDirection: ToggleDirectionStates.prototype.DEFAULT,
+    _socketIDs: {}, // OFFLINE_RESCUE_#1
 
     // components
     _connector: null,
@@ -262,11 +263,18 @@ module.exports.prototype = {
      */
     _onSocketConnect: function ()
     {
-        // console.log('#._onSocketConnect', this._socket.id.toString());
+        // 1. store - OFFLINE_RESCUE_#1
+        if (this._socketIDs.current) this._socketIDs.previous = this._socketIDs.current;
+        this._socketIDs.current = this._socket.id;
 
 
-        if (!this._aSocketIDs) this._aSocketIDs = [];
-        this._aSocketIDs.push(this._socket.id);
+        console.log('this._socketIDs', this._socketIDs);
+
+
+
+
+
+
 
         // 1. hide
         this._alertMessage.hide();
@@ -325,8 +333,6 @@ module.exports.prototype = {
      */
     _onSocketDisconnect: function()
     {
-        // console.log('#._onSocketDisconnect', this._socket.id.toString());
-
         // 1. pause
         this._dataManager.pause();
 
@@ -405,32 +411,34 @@ module.exports.prototype = {
 
     /**
      * Handle device `ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND`
+     * @param bMightHaveBeenUnableToLogOffEarlier - OFFLINE_RESCUE_#1 - this parameter is only passed when the server lost track of a device that didn't manage to properly disconnect and unregister (for instance because the internet got cut off and the device wasn't able to communicate it's change in presence (all related parts of this solution are marked in the comments by OFFLINE_RESCUE_#1
      * @private
      */
-    _onErrorDeviceReconnectDeviceIDNotFound: function()
+    _onErrorDeviceReconnectDeviceIDNotFound: function(bMightHaveBeenUnableToLogOffEarlier)
     {
-        console.log('DeviceID not found', this._aSocketIDs);
+
+        console.log('DeviceID not found', this._socketIDs);
 
 
-        document.querySelector('[data-mimoto-id="footer"]').innerText = 'DeviceID not found = ' + JSON.stringify(this._aSocketIDs);
+        // 1. Verify - OFFLINE_RESCUE_#1 - The device might have lost the internet connection earlier and was unable to disconnect to the server, making the server think it's still online and connected
+        if (bMightHaveBeenUnableToLogOffEarlier === true)
+        {
 
-        // if (!this._bSecondTry)
-        // {
-        //     console.log('socket.disconnect');
-        //     this._socket.disconnect();
-        //
-        //     console.log('socket.connect');
-        //     this._socket.connect();
-        //
-        //     console.log('Does it register correctly now?');
-        //
-        //     this._bSecondTry = true;
-        //     return;
-        // }
+            console.log('TRY again', this._socketIDs);
+
+            if (this._socketIDs.previous)
+            {
+                console.log('Has previous device', this._socketIDs);
 
 
+                // I. request
+                this._socket.emit(ConnectorEvents.prototype.REQUEST_DEVICE_RECONNECT, this._sDeviceID, this._socketIDs.previous);
+            }
+
+        }
 
 
+        alert('DeviceID not found = ' + JSON.stringify(this._socketIDs));
 
 
 
@@ -507,10 +515,13 @@ module.exports.prototype = {
         // 1, store
         this._sDirection = sDirection;
 
-        // 2. resume
+        // 2. cleanup - OFFLINE_RESCUE_#1
+        delete this._socketIDs.previous;
+
+        // 3. resume
         this._dataManager.resume(bOtherDeviceConnected);
 
-        // 3. update interface
+        // 4. update interface
         this._setState(this._sState, bOtherDeviceConnected);
     },
 

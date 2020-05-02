@@ -87,7 +87,7 @@
                             <div class="sender_data_label_cover_label"><img class="sender_data_label_cover_label_indicator" src="static/images/waiting.svg">&nbsp;<span data-mimoto-id="progress">Encrypting data ...</span></div>
                         </div>
                         <div class="sender_data_label_data_input">
-                            <input data-mimoto-id="data_input_password" class="data_input selected" autofocus="1" type="password" placeholder="Enter password"/>
+                            <input data-mimoto-id="data_input_password" class="data_input selected" type="password" placeholder="Enter password"/>
                             <textarea data-mimoto-id="data_input_text" class="data_input" placeholder="Enter text"></textarea>
                             <div data-mimoto-id="data_input_file" class="data_input">
                                 <div class="data_input_file">

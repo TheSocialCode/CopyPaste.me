@@ -283,36 +283,63 @@ module.exports = {
      * Handle device `REQUEST_DEVICE_RECONNECT`
      * @param socket
      * @param sDeviceID
+     * @param sPreviousSocketID - OFFLINE_RESCUE_#1 - this parameter is only passed when the server lost track of a device that didn't manage to properly disconnect and unregister (for instance because the internet got cut off and the device wasn't able to communicate it's change in presence (all related parts of this solution are marked in the comments by OFFLINE_RESCUE_#1)
      * @private
      */
-    _onRequestDeviceReconnect: function(socket, sDeviceID)
+    _onRequestDeviceReconnect: function(socket, sDeviceID, sPreviousSocketID)
     {
         this.Mimoto.logger.log('ALERT - Trying to reconnect to sDeviceID = ' + sDeviceID);
 
-        // 1. load
+
+        // 1. verify - OFFLINE_RESCUE_#1 - this parameter is only passed when the server lost track of a device that didn't manage to properly disconnect and unregister (for instance because the internet got cut off and the device wasn't able to communicate it's change in presence
+        if (sPreviousSocketID)
+        {
+            // a. check if the device exists that might not have managed to log off officially
+            let undisconnectedDevice = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
+
+            // b. validate
+            if (undisconnectedDevice && undisconnectedDevice.getSocketID() === sPreviousSocketID)
+            {
+                this.Mimoto.logger.log('ALERT - The device DOES EXIST and seems to be the one we lost due to bad disconnect sDeviceID = ' + sDeviceID);
+
+                // I. force disconnect and set the state of the device to offline
+                this.Mimoto.deviceManager.unregisterSocket(undisconnectedDevice.getSocket())
+
+                // lock / unlock
+            }
+        }
+
+        // 2. load
         let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
         let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
 
-        // 2. validate
+        // 3. validate
         if (!newDevice || !originalDevice)
         {
             // a. output
             this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
 
-            // b. send
-            socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
 
-            // c. exit
+            // b. OFFLINE_RESCUE_#1 - check if the device has gone offline earlier, but hasn't managed to log off officially
+            let undisconnectedDevice = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
+
+            // c. OFFLINE_RESCUE_#1 - verify
+            let bMightHaveBeenUnableToLogOffEarlier = (undisconnectedDevice && !sPreviousSocketID) ? true : false;
+
+            // d. send
+            socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND, bMightHaveBeenUnableToLogOffEarlier);
+
+            // e. exit
             return;
         }
 
-        // 3. restore and merge
+        // 4. restore and merge
         let device = this.Mimoto.deviceManager.restoreAndMerge(originalDevice, newDevice);
 
-        // 4. load
+        // 5. load
         let pair = this.Mimoto.pairManager.getPairByDeviceID(sDeviceID);
 
-        // 5. validate
+        // 6. validate
         if (pair === false)
         {
             // a. output
@@ -325,10 +352,10 @@ module.exports = {
             return;
         }
 
-        // 6. init
+        // 7. init
         let bOtherDeviceConnected = false;
 
-        // 7. select
+        // 8. select
         switch(device.getType())
         {
             case Device.prototype.PRIMARYDEVICE:
@@ -370,14 +397,14 @@ module.exports = {
                 return;
         }
 
-        // 8. notify
+        // 9. notify
         socket.emit(ConnectorEvents.prototype.UPDATE_DEVICE_RECONNECTED, bOtherDeviceConnected ,pair.getDirection());
 
 
         // ---
 
 
-        // 9. output
+        // 10. output
         this._logUsers('Device `' + device.getType() + '` with sDeviceID = `' + sDeviceID + '`', 'Reconnected to pair (socket.id = ' + socket.id + ')');
     },
 
