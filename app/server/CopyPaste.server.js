@@ -287,6 +287,8 @@ module.exports = {
      */
     _onRequestDeviceReconnect: function(socket, sDeviceID)
     {
+        this.Mimoto.logger.log('ALERT - Trying to reconnect to sDeviceID = ' + sDeviceID);
+
         // 1. load
         let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
         let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
