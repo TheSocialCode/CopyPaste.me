@@ -139,7 +139,7 @@ module.exports = {
             this._app = Module_Express();
 
             // b. setup
-            this._server = new Module_HTTP.createServer(this._app, { pingTimeout: 30000 });
+            this._server = new Module_HTTP.createServer(this._app, { pingTimeout: 30000, allowUpgrades: false, upgradeTimeout: 30000});
         }
 
         // 2. setup
