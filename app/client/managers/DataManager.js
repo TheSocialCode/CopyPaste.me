@@ -188,7 +188,7 @@ module.exports.prototype = {
      */
     continueToNextPackage: function(data)
     {
-        // console.log('#.continueToNextPackage - this._packageCurrentlyInTransfer = ', this._packageCurrentlyInTransfer);
+        console.log('#.continueToNextPackage - this._packageCurrentlyInTransfer = ', this._packageCurrentlyInTransfer);
 
         // 1. validate
         if (this._packageCurrentlyInTransfer)
@@ -218,7 +218,7 @@ module.exports.prototype = {
      */
     _transferPackages: function()
     {
-        // console.log('#._transferPackages');
+        console.log('#._transferPackages');
 
         // 1. stop
         if (this._timerPackageTransfer) clearInterval(this._timerPackageTransfer);
@@ -287,6 +287,10 @@ module.exports.prototype = {
             receivedCount: this._aReceivedPackages[receivedData.id].receivedCount,
             totalCount: this._aReceivedPackages[receivedData.id].packageCount
         };
+
+
+        console.log('Received data', data);
+
 
         // 5. add metadata
         if (receivedData.sType === DataInput.prototype.DATATYPE_FILE && receivedData.metaData && receivedData.metaData.fileName)
