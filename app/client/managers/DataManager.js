@@ -188,8 +188,6 @@ module.exports.prototype = {
      */
     continueToNextPackage: function(data)
     {
-        console.log('#.continueToNextPackage - this._packageCurrentlyInTransfer = ', this._packageCurrentlyInTransfer);
-
         // 1. validate
         if (this._packageCurrentlyInTransfer)
         {
@@ -218,8 +216,6 @@ module.exports.prototype = {
      */
     _transferPackages: function()
     {
-        console.log('#._transferPackages');
-
         // 1. stop
         if (this._timerPackageTransfer) clearInterval(this._timerPackageTransfer);
 
