@@ -262,6 +262,8 @@ module.exports.prototype = {
      */
     _onSocketConnect: function ()
     {
+        console.log('#._onSocketConnect', this._socket.id.toString());
+
         // 1. hide
         this._alertMessage.hide();
 
@@ -319,6 +321,8 @@ module.exports.prototype = {
      */
     _onSocketDisconnect: function()
     {
+        console.log('#._onSocketDisconnect', this._socket.id.toString());
+
         // 1. pause
         this._dataManager.pause();
 
