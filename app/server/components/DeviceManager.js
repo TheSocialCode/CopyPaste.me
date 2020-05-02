@@ -88,15 +88,11 @@ module.exports.prototype = {
      */
     unregisterSocket: function(socket)
     {
-        console.log('#.unregisterSocket', socket.id);
-        console.log('this._aDevicesBySocketID', this._aDevicesBySocketID);
-        console.log('this._aDevicesByDeviceID', this._aDevicesByDeviceID);
-        console.log(' ');
-
-
-
         // 1. load
         let device = this._aDevicesBySocketID[socket.id];
+
+        // 2. validate - OFFLINE_RESCUE_#1 - The device has been cleanup up when restoring an offline device
+        if (!device) return;
 
         // 2. move and set moment of expiry
         this._aOfflineDevices[device.getID()] = {

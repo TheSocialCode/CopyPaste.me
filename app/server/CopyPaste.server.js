@@ -305,7 +305,13 @@ module.exports = {
                 // I. force disconnect and set the state of the device to offline
                 this.Mimoto.deviceManager.unregisterSocket(undisconnectedDevice.getSocket())
 
+
+
                 // lock / unlock
+
+
+
+
             }
         }
 
@@ -317,7 +323,7 @@ module.exports = {
         if (!newDevice || !originalDevice)
         {
             // a. output
-            this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
+            this.Mimoto.logger.log('ALERT - No original device after server restart or device offline - sDeviceID = ' + sDeviceID + '\n\n');
 
 
             // b. OFFLINE_RESCUE_#1 - check if the device has gone offline earlier, but hasn't managed to log off officially
