@@ -287,70 +287,45 @@ module.exports = {
      */
     _onRequestDeviceReconnect: function(socket, sDeviceID)
     {
-        // console.log('socket.id = ' + socket.id);
-        // console.log('sDeviceID = ' + sDeviceID);
+        // 1. load
+        let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
+        let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
 
+        // 2. validate
+        if (!newDevice || !originalDevice)
+        {
+            // a. output
+            this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
 
-        // // 1. check if device still exists
-        // let device = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
+            this.Mimoto.logger.log('Trying something else!');
 
-        // if (!device)
-        // {
-        //     console.log('#.Device DID NOT exist');
+            // a. see if the device is still active
+            let existingDevice = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
 
-            // 1. load
-            let newDevice = this.Mimoto.deviceManager.getDeviceBySocketID(socket.id);
-            let originalDevice = this.Mimoto.deviceManager.getOfflineDeviceByDeviceID(sDeviceID);
+            this.Mimoto.logger.log('existingDevice', existingDevice);
 
-            // console.log('###################################### - originalDevice = ', originalDevice);
-
-            // 2. check if device wasn;t registered as offline yet (find out why this could happen)
-            // if (!originalDevice === false) this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
-
-            // console.log('###################################### - originalDevice = ', originalDevice);
-
-
-            // 2. validate
-            if (!newDevice || !originalDevice)
+            if (!existingDevice)
             {
                 // a. output
                 this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
 
-                this.Mimoto.logger.log('Trying something else!');
+                // b. send
+                socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
 
-                // a. see if the device is still active
-                let existingDevice = this.Mimoto.deviceManager.getDeviceByDeviceID(sDeviceID);
-
-                this.Mimoto.logger.log('existingDevice', existingDevice);
-
-                if(!existingDevice)
-                {
-                    // a. output
-                    this.Mimoto.logger.log('ALERT - No original device after server restart sDeviceID = ' + sDeviceID + '\n\n');
-
-                    // b. send
-                    socket.emit(ConnectorEvents.prototype.ERROR_DEVICE_RECONNECT_DEVICEID_NOT_FOUND);
-
-                    // c. exit
-                    return;
-                }
-                else
-                {
-                    this.Mimoto.logger.log('ALERT - Tried to get existinbg device  succeeded sDeviceID = ' + sDeviceID + '\n\n');
-
-                    // replace
-                    originalDevice = existingDevice;
-                }
+                // c. exit
+                return;
             }
+            else
+            {
+                this.Mimoto.logger.log('ALERT - Tried to get existinbg device  succeeded sDeviceID = ' + sDeviceID + '\n\n');
 
-            // 3. restore and merge
-            let device = this.Mimoto.deviceManager.restoreAndMerge(originalDevice, newDevice);
-        // }
-        // else
-        // {
-        //     console.log('#.Device EXISTED! (p.s. find out why)');
-        // }
+                // a. replace
+                originalDevice = existingDevice;
+            }
+        }
 
+        // 3. restore and merge
+        let device = this.Mimoto.deviceManager.restoreAndMerge(originalDevice, newDevice);
 
         // 4. load
         let pair = this.Mimoto.pairManager.getPairByDeviceID(sDeviceID);
@@ -767,7 +742,8 @@ module.exports = {
         return {
             id: device.getID(),
             socketId: device.getSocketID(),
-            pairId: device.getPairID()
+            pairId: device.getPairID(),
+            type: device.getType()
         };
     },
 

@@ -157,7 +157,7 @@ module.exports.prototype = {
     reconnectPrimaryDevice: function(device)
     {
         // 1. validate
-        if (this.hasPrimaryDevice() || (this.getPrimaryDeviceID() && this.getPrimaryDeviceID() !== device.getID()))
+        if (/*this.hasPrimaryDevice() ||*/ (this.getPrimaryDeviceID() && this.getPrimaryDeviceID() !== device.getID()))
         {
             // a. act
             this._handlePossibleSecurityBreach(device, 'primary');
@@ -245,7 +245,7 @@ module.exports.prototype = {
     reconnectSecondaryDevice: function(device)
     {
         // 1. validate
-        if (this.hasSecondaryDevice() || (this.getSecondaryDeviceID() && this.getSecondaryDeviceID() !== device.getID()))
+        if (/*this.hasSecondaryDevice() ||*/ (this.getSecondaryDeviceID() && this.getSecondaryDeviceID() !== device.getID()))
         {
             // a. act
             this._handlePossibleSecurityBreach(device, 'secondary');
