@@ -262,7 +262,7 @@ module.exports.prototype = {
      */
     _onSocketConnect: function ()
     {
-        console.log('#._onSocketConnect', this._socket.id.toString());
+        // console.log('#._onSocketConnect', this._socket.id.toString());
 
         // 1. hide
         this._alertMessage.hide();
@@ -321,7 +321,7 @@ module.exports.prototype = {
      */
     _onSocketDisconnect: function()
     {
-        console.log('#._onSocketDisconnect', this._socket.id.toString());
+        // console.log('#._onSocketDisconnect', this._socket.id.toString());
 
         // 1. pause
         this._dataManager.pause();
@@ -405,21 +405,21 @@ module.exports.prototype = {
      */
     _onErrorDeviceReconnectDeviceIDNotFound: function()
     {
-        console.log('DeviceID not found');
+        // console.log('DeviceID not found');
 
-        if (!this._bSecondTry)
-        {
-            console.log('socket.disconnect');
-            this._socket.disconnect();
-
-            console.log('socket.connect');
-            this._socket.connect();
-
-            console.log('Does it register correctly now?');
-
-            this._bSecondTry = true;
-            return;
-        }
+        // if (!this._bSecondTry)
+        // {
+        //     console.log('socket.disconnect');
+        //     this._socket.disconnect();
+        //
+        //     console.log('socket.connect');
+        //     this._socket.connect();
+        //
+        //     console.log('Does it register correctly now?');
+        //
+        //     this._bSecondTry = true;
+        //     return;
+        // }
 
 
 
@@ -762,7 +762,7 @@ module.exports.prototype = {
      */
     _onReceiveData: function(receivedData)
     {
-        console.log('#._onReceiveData - receivedData = ', receivedData.packageNumber, 'of', receivedData.packageCount);
+        // console.log('#._onReceiveData - receivedData = ', receivedData.packageNumber, 'of', receivedData.packageCount);
 
 
         // 1. store
@@ -780,7 +780,7 @@ module.exports.prototype = {
     _onDataReceived: function(data)
     {
 
-        console.log('#._onDataReceived - data = ', data);
+        // console.log('#._onDataReceived - data = ', data);
 
         // 1. continue transfer
         this._dataManager.continueToNextPackage(data);
