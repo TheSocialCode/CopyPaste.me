@@ -290,7 +290,7 @@ module.exports.prototype = {
 
 
         console.log('Received data', data);
-        console.log('receivedData.jsonValue', receivedData.jsonValue);
+        console.log('encryptedData.length', receivedData.value.data.length);
 
 
         // 5. add metadata
