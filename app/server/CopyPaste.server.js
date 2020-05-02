@@ -466,16 +466,13 @@ module.exports = {
         // 5. validate
         if (!pair.connectSecondaryDevice(socket, sPublicKey, device, token.getType())) return false;
 
-        // 6. store
-        //pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_QR);
-
-        // 7. update
+        // 6. update
         socket.emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_QR, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
 
-        // 8. send
+        // 7. send
         if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey());
 
-        // 9. output
+        // 8. output
         this._logUsers('Secondary device with socket.id = ' + socket.id, 'Requests connection to token = ' + token.getValue());
     },
 
@@ -546,17 +543,14 @@ module.exports = {
         // 5. validate
         pair.registerUnconfirmedSecondaryDevice(socket, sPublicKey, device, token.getType());
 
-        // 6. store
-        //pair.setConnectionType(PairManager.prototype.CONNECTIONTYPE_MANUALCODE);
-
-        // 7. update
+        // 6. update
         socket.emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_MANUALCODE_ACCEPTED, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
 
 
         // ---
 
 
-        // 8. output
+        // 7. output
         this._logUsers('Secondary device with socket.id = ' + socket.id, 'Requests connection to manual code = ' + token.getValue());
     },
 

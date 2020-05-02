@@ -323,7 +323,7 @@ module.exports.prototype = {
         this._dataManager.pause();
 
         // 2. notify
-        this._alertMessage.show('We seem to have gone offline .. reconnecting ..');
+        this._alertMessage.show('You seem to have gone offline .. reconnecting ..');
     },
 
 
