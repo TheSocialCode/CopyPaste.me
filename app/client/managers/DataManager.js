@@ -290,6 +290,7 @@ module.exports.prototype = {
 
 
         console.log('Received data', data);
+        console.log('receivedData.jsonValue', receivedData.jsonValue);
 
 
         // 5. add metadata
