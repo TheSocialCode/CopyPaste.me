@@ -310,7 +310,7 @@ module.exports.prototype = {
         this._disableInterface();
 
         // 3. output
-        if (this._alertMessage) this._alertMessage.show('We lost the connection. Are you still online?');
+        if (this._alertMessage) this._alertMessage.show('No connection. Are you still online?');
     },
 
     /**
