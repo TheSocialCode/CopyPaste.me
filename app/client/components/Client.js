@@ -713,8 +713,12 @@ module.exports.prototype = {
         // 1. broadcast
         this._socket.emit(ConnectorEvents.prototype.SEND_DATA, packageToTransfer);
 
-        // 2. update
-        this._dataInput.showTransferProgress((packageToTransfer.packageNumber + 1) / packageToTransfer.packageCount);
+        // 2. verify
+        if (packageToTransfer.packageNumber === 0)
+        {
+            // a. show first percentage (instead of 0%) to let the user know the transfer started
+            this._dataInput.showTransferProgress((packageToTransfer.packageNumber + 1) / packageToTransfer.packageCount);
+        }
     },
 
     /**
@@ -758,7 +762,7 @@ module.exports.prototype = {
     _onReceiveData: function(receivedData)
     {
         // 1. report back
-        this._socket.emit(ConnectorEvents.prototype.DATA_RECEIVED, { dataID: receivedData.id, packageNumber: receivedData.packageNumber });
+        this._socket.emit(ConnectorEvents.prototype.DATA_RECEIVED, { dataID: receivedData.id, packageNumber: receivedData.packageNumber, packageCount: receivedData.packageCount });
 
         // 2. store
         this._dataManager.addPackage(receivedData);
@@ -771,7 +775,10 @@ module.exports.prototype = {
      */
     _onDataReceived: function(data)
     {
-        // 1. continue transfer
+        // 1. show progress
+        this._dataInput.showTransferProgress((data.packageNumber + 1) / data.packageCount);
+
+        // 2. continue transfer
         this._dataManager.continueToNextPackage(data);
     },
 
