@@ -11,6 +11,9 @@
 const QRCodeGenerator = require('qrcode-generator');
 const ManualConnectButton = require('./../ManualConnectButton/ManualConnectButton');
 
+// import helpers
+const Module_ClipboardCopy = require('clipboard-copy');
+
 // import extenders
 const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
 
@@ -39,6 +42,7 @@ module.exports.prototype = {
     _elManualCode: null,
     _elManualCodeCountdown: null,
     _elConnectURL: null,
+    _elButtonCopyInvite: null,
 
     // utils
     _timerTokenExpires: null,
@@ -85,25 +89,13 @@ module.exports.prototype = {
         this._elManualCode = this._elRoot.querySelector('[data-mimoto-id="manualcode"]');
         this._elManualCodeCountdown = this._elRoot.querySelector('[data-mimoto-id="countdown"]');
         this._elConnectURL = this._elBack.querySelector('[data-mimoto-id="connect_url"]');
+        this._elButtonCopyInvite = this._elRoot.querySelector('[data-mimoto-id="button-copyinvite"]');
 
         // 4. setup
         this.setToken(sToken, nTokenLifetime);
 
         // 5. configure
-        this._elContainer.addEventListener(
-            'click',
-            function(e)
-            {
-                // copy to clipboard
-                let elHelperTextArea = document.createElement('textarea');
-                elHelperTextArea.value = this._sTokenURL;
-                document.body.appendChild(elHelperTextArea);
-                elHelperTextArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(elHelperTextArea);
-
-            }.bind(this)
-        );
+        this._elFront.addEventListener('click', this._onQRClick.bind(this));
 
         // 6. init
         this._manualConnectButton = new ManualConnectButton();
@@ -321,6 +313,27 @@ module.exports.prototype = {
             // d. request new
             if (this._sCurrentState === this.STATE_MANUAL) this._requestNewManualCode();
         }
+    },
+
+    /**
+     * Handle QR `click`
+     * @private
+     */
+    _onQRClick: function()
+    {
+        // 1. copy
+        Module_ClipboardCopy(this._sTokenURL);
+
+        // 2. style
+        this._elButtonCopyInvite.classList.add('clicked');
+
+        // 3. animate
+        setTimeout(function ()
+        {
+            // a. cleanup
+            this._elButtonCopyInvite.classList.remove('clicked');
+
+        }.bind(this), 2000);
     }
 
 };

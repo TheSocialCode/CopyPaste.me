@@ -8,6 +8,10 @@
                 <div class="component_QR_card_label">Scan me</div>
                 <div class="component_QR_card_sublabel">to connect your phone</div>
                 <div data-mimoto-id="component_QR_container"></div>
+                <div data-mimoto-id="button-copyinvite" class="component_QR_clicktocopy">
+                    <div class="component_QR_clicktocopy_default">or click to copy invite</div>
+                    <div class="component_QR_clicktocopy_clicked">Copied to clipboard!</div>
+                </div>
             </div>
             <div data-mimoto-id="component_QR_back" class="component_QR_card component_QR_card_back">
                 <div class="component_QR_card_label">Use this URL</div>

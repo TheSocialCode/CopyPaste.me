@@ -26,6 +26,12 @@ div.component_QR_inner {
 div.component_QR_card {
     background-color: $background-light;
     border-radius: 5px;
+    cursor: pointer;
+
+    &:hover div.component_QR_clicktocopy {
+        //text-decoration: underline;
+        color: #000000;
+    }
 }
 
 div.component_QR_card_front, div.component_QR_card_back {
@@ -38,7 +44,7 @@ div.component_QR_card_front, div.component_QR_card_back {
 }
 
 div.component_QR_card_front {
-    padding: 15px 5px 5px 5px;
+    padding: 15px 5px 15px 5px;
     box-shadow: 1px 3px 10px $support-color-dark;
 }
 
@@ -56,6 +62,33 @@ div.component_QR_card_label {
 div.component_QR_card_sublabel {
     text-align: center;
     font-size: smaller;
+}
+
+div.component_QR_clicktocopy {
+
+    text-align: center;
+    font-size: smaller;
+    margin-top: -12px;
+    color: $color-button-dark;
+}
+
+div.component_QR_clicktocopy_default {
+    display: block;
+    text-decoration: none;
+
+    .clicked & {
+        display: none;
+    }
+}
+
+div.component_QR_clicktocopy_clicked {
+    display: none;
+    color: #000000;
+    text-decoration: none;
+
+    .clicked & {
+        display: block;
+    }
 }
 
 div.component_QR_manualurl {

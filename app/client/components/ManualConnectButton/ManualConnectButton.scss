@@ -9,6 +9,7 @@ div.component_ManualConnectButton {
 
 span.module_ToggleButton_manually {
     display: inline-block;
+    white-space: nowrap;
 
     .flip & {
         display: none;
@@ -17,8 +18,10 @@ span.module_ToggleButton_manually {
 
 span.module_ToggleButton_qr {
     display: none;
+    white-space: nowrap;
 
     .flip & {
         display: inline-block;
     }
 }
+
