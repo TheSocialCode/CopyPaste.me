@@ -169,10 +169,6 @@ module.exports.prototype = {
         // 2. compose
         this._sTokenURL = window.location.protocol + '//' + window.location.hostname + '/' + sToken;
 
-
-        console.log('this._sTokenURL', this._sTokenURL);
-
-
         // 3. setup
         var typeNumber = 4;
         var errorCorrectionLevel = 'L';
@@ -303,6 +299,7 @@ module.exports.prototype = {
 
         // 3. cleanup
         if (this._timerTokenExpires) clearTimeout(this._timerTokenExpires);
+        if (this._timerTokenUpdate) clearInterval(this._timerTokenUpdate);
         if (this._timerManualCodeCountdown) clearInterval(this._timerManualCodeCountdown);
     },
 
