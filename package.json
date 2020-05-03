@@ -5,6 +5,7 @@
     "repository": "https://github.com/SebastianKersten/CopyPaste.me",
     "license": "UNLICENSED",
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^5.13.0",
         "asymmetric-crypto": "^1.0.2",
         "clipboard-copy": "^3.1.0",
         "express": "^4.17.1",

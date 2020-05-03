@@ -29,6 +29,7 @@ module.exports.prototype = {
 
     // settings
     TOKEN_LIFETIME: 2 * 60 * 1000,
+    TOKEN_LIFETIME_INVITE: 5 * 60 * 1000,
 
     // types
     TYPE_QR: 'QR',
@@ -54,10 +55,10 @@ module.exports.prototype = {
         this._sType = sType;
 
         // 2. init
-        this._sValue = (sType === this.TYPE_QR) ? this._initValueQR() : (sType === this.TYPE_MANUALCODE) ? this._initValueManualCode() : false;
+        this._sValue = (sType === this.TYPE_QR || sType === this.TYPE_INVITE) ? this._initValueQR() : (sType === this.TYPE_MANUALCODE) ? this._initValueManualCode() : false;
 
         // 3. configure
-        this._nExpires = new Date().getTime() + ((this._sValue !== false) ? this.TOKEN_LIFETIME : 0);
+        this._nExpires = new Date().getTime() + ((this._sValue !== false) ? ((this._sType === this.TYPE_INVITE) ? this.TOKEN_LIFETIME_INVITE : this.TOKEN_LIFETIME) : 0);
     },
 
 
@@ -84,7 +85,7 @@ module.exports.prototype = {
     getLifetime: function()
     {
         // 1. send
-        return this.TOKEN_LIFETIME;
+        return (this._sType === this.TYPE_INVITE) ? this.TOKEN_LIFETIME_INVITE : this.TOKEN_LIFETIME;
     },
 
     /**

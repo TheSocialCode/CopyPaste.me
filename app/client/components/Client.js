@@ -380,12 +380,13 @@ module.exports.prototype = {
 
     /**
      * Handle connector `REQUEST_TOKEN_REFRESH`
+     * @param bGetInviteToken
      * @private
      */
-    _onConnectorRequestTokenRefresh: function()
+    _onConnectorRequestTokenRefresh: function(bGetInviteToken)
     {
         // 1. request
-        this._socket.emit(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_FRESH_TOKEN);
+        this._socket.emit(ConnectorEvents.prototype.REQUEST_PRIMARYDEVICE_FRESH_TOKEN, bGetInviteToken);
     },
 
     /**

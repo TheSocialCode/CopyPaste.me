@@ -26,12 +26,6 @@ div.component_QR_inner {
 div.component_QR_card {
     background-color: $background-light;
     border-radius: 5px;
-    cursor: pointer;
-
-    &:hover div.component_QR_clicktocopy {
-        //text-decoration: underline;
-        color: #000000;
-    }
 }
 
 div.component_QR_card_front, div.component_QR_card_back {
@@ -58,35 +52,85 @@ div.component_QR_card_label {
     text-align: center;
     font-weight: bold;
     font-size: large;
+
+    & > div.component_QR_card_label_scan {
+        display: block;
+    }
+
+    &.swapped > div.component_QR_card_label_scan {
+        display: none;
+    }
+
+    & > div.component_QR_card_label_invite {
+        display: none;
+    }
+
+    &.swapped > div.component_QR_card_label_invite {
+        display: block;
+    }
 }
+
 div.component_QR_card_sublabel {
     text-align: center;
     font-size: smaller;
+
+    & > div.component_QR_card_sublabel_scan {
+        display: block;
+    }
+
+    &.swapped > div.component_QR_card_sublabel_scan {
+        display: none;
+    }
+
+    & > div.component_QR_card_sublabel_invite {
+        display: none;
+
+        & > a {
+            cursor: pointer;
+            color: $color-button-dark;
+            text-decoration: underline;
+        }
+
+        & > a:hover {
+            color: #000000;
+        }
+    }
+
+    &.swapped > div.component_QR_card_sublabel_invite {
+        display: block;
+    }
 }
 
-div.component_QR_clicktocopy {
+div.component_QR_card_sublabel_invite_expirationlabel {
+    font-family: monospace;
+    font-size: 13px;
+}
+
+div.component_QR_button_toggleconnectionview {
 
     text-align: center;
     font-size: smaller;
     margin-top: -12px;
     color: $color-button-dark;
-}
+    cursor: pointer;
 
-div.component_QR_clicktocopy_default {
-    display: block;
-    text-decoration: none;
+    &:hover {
+        color: #000000;
+    }
 
-    .clicked & {
+    & > div {
+        display: none;
+
+        &.show {
+            display: block;
+        }
+    }
+
+    &.copiedtoclipboard > div {
         display: none;
     }
-}
 
-div.component_QR_clicktocopy_clicked {
-    display: none;
-    color: #000000;
-    text-decoration: none;
-
-    .clicked & {
+    &.copiedtoclipboard > div:last-child {
         display: block;
     }
 }
@@ -135,6 +179,122 @@ div.component_QR_manualurl {
     }
 }
 
-div.component_QR_manualurl_inner {
 
+// ----------------------------------------------------------------
+// --- Send invite ------------------------------------------------
+// ----------------------------------------------------------------
+
+
+div.component_QR_sendinvite_container {
+
+    display: none;
+
+    width: 205px;
+
+    background-color: #ffffff;
+
+    &.show {
+        display: block;
+    }
+}
+
+div.component_QR_container {
+    display: none;
+    cursor: pointer;
+
+    &.show {
+        display: block;
+    }
+}
+
+div.component_QR_sendinvite_channels {
+    width: 166px;
+    margin: 20px;
+    background-color: #ffffff;
+
+    & > div.component_QR_sendinvite_channel_row {
+        margin-bottom: 3px;
+    }
+
+    & > div.component_QR_sendinvite_channel_row:last-child {
+        margin-bottom: 0;
+    }
+}
+
+div.component_QR_sendinvite_channel_row {
+    display: flex;
+    flex-direction: row;
+
+    & > div.component_QR_sendinvite_channel {
+        margin-right: 3px;
+    }
+
+    & > div.component_QR_sendinvite_channel:last-child {
+        margin-right: 0;
+    }
+}
+
+div.component_QR_sendinvite_channel {
+    flex: auto;
+    cursor: pointer;
+    background-color: #f4f4f4;
+}
+
+div.component_QR_sendinvite_channel_name {
+    width: 82px;
+    height: 25px;
+}
+
+div.component_QR_sendinvite_channel_name_label {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 12px;
+    color: #7c7c7c;
+
+    div.component_QR_sendinvite_channel:hover & {
+        color: $color-button-dark;
+    }
+}
+
+div.component_QR_sendinvite_channel_icon {
+
+    width: 82px;
+    height: 50px;
+
+    background-color: #C25B56;
+    background: url('/static/images/channelicons.png');
+    background-repeat: no-repeat;
+    background-size: 166px 292px;
+
+    &.whatsapp {
+        background-position: 0 -23px;
+
+        div.component_QR_sendinvite_channel:hover & {
+            background-position: 0 -169px;
+        }
+    }
+
+    &.telegram {
+        background-position: -82px -25px;
+
+        div.component_QR_sendinvite_channel:hover & {
+            background-position: -82px -171px;
+        }
+    }
+
+    &.email {
+        background-position: -1px -97px;
+
+        div.component_QR_sendinvite_channel:hover & {
+            background-position: -1px -243px;
+        }
+    }
+
+    &.copylink {
+        background-position: -82px -97px;
+
+        div.component_QR_sendinvite_channel:hover & {
+            background-position: -82px -243px;
+        }
+    }
 }

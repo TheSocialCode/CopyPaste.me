@@ -53,7 +53,8 @@ module.exports = {
             connected: 0,
             connectionTypes: {
                 qr: 0,
-                manualcode: 0
+                manualcode: 0,
+                invite: 0
             },
             averageTimeTillConnection: 0,
             used: 0,
@@ -430,6 +431,7 @@ module.exports = {
                         "connectedCount": { $sum: { $cond: [ { $eq: [ "$connected", true ] }, 1, 0 ] } },
                         "connectionTypeQR": { $sum: { $cond: [ { $eq: [ "$connectionType", Token.prototype.TYPE_QR ] }, 1, 0 ] } },
                         "connectionTypeManualcode": { $sum: { $cond: [ { $eq: [ "$connectionType", Token.prototype.TYPE_MANUALCODE ] }, 1, 0 ] } },
+                        "connectionTypeInvite": { $sum: { $cond: [ { $eq: [ "$connectionType", Token.prototype.TYPE_INVITE ] }, 1, 0 ] } },
                         "usedCount": { $sum: { $cond: [ { $eq: [ "$used", true ] }, 1, 0 ] } },
                         "archivedCount": { $sum: { $cond: [ { $eq: [ "$archived", true ] }, 1, 0 ] } }
                     }
@@ -456,6 +458,8 @@ module.exports = {
             this._stats.pairs.idle = result.pairCount - result.activeCount - result.archivedCount;
             this._stats.pairs.connected = result.connectedCount;
             this._stats.pairs.connectionTypes.qr = result.connectionTypeQR;
+            this._stats.pairs.connectionTypes.manualcode = result.connectionTypeManualcode;
+            this._stats.pairs.connectionTypes.invite = result.connectionTypeInvite;
             this._stats.pairs.used = result.usedCount;
             this._stats.pairs.archived = result.archivedCount;
 

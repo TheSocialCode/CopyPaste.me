@@ -408,9 +408,10 @@ module.exports = {
     /**
      * Handle primary device `REQUEST_PRIMARYDEVICE_FRESH_TOKEN`
      * @param socket
+     * @param bGetInviteToken
      * @private
      */
-    _onRequestPrimaryDeviceFreshToken: function(socket)
+    _onRequestPrimaryDeviceFreshToken: function(socket, bGetInviteToken)
     {
         // 1. load
         let pair = this.Mimoto.pairManager.getPairBySocketID(socket.id);
@@ -419,7 +420,7 @@ module.exports = {
         if (pair === false) return;
 
         // 3. refresh
-        let token = this._tokenManager.createToken(pair, Token.prototype.TYPE_QR);
+        let token = this._tokenManager.createToken(pair, ((bGetInviteToken === true) ? Token.prototype.TYPE_INVITE : Token.prototype.TYPE_QR));
 
         // 4. send
         pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_PRIMARYDEVICE_FRESH_TOKEN, token.getValue(), token.getLifetime());
