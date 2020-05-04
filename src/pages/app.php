@@ -31,7 +31,7 @@
                             </div>
                         </div>
                         <div class="component_QR_sendinvite_channel_row">
-                            <div data-mimoto-id="sendinvite-channel-email" class="component_QR_sendinvite_channel" data-sharer="email" data-title="Let's exchange data privately and securely" data-url="https://copypaste.me" data-subject="Let's exchange data securely">
+                            <div data-mimoto-id="sendinvite-channel-email" class="component_QR_sendinvite_channel" data-sharer="email" data-title="Let's exchange data privately and securely" data-url="https://copypaste.me" data-subject="Let's exchange data securely" data-to="">
 
                                 <div class="component_QR_sendinvite_channel_name">
                                     <div class="component_QR_sendinvite_channel_name_label">Email</div>
