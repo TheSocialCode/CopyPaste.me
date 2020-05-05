@@ -120,7 +120,7 @@
                         </div>
                     </div>
                     <div class="footer_table_column right">
-                        <div class="footer_socialicons_title">Follow the project</div>
+                        <div class="footer_socialicons_title">Follow this project</div>
                         <div class="footer_socialicons">
                             <a href="https://www.facebook.com/frictionless.sharing/" target="_blank"><div class="footer_socialicon facebook"></div></a>
                             <a href="https://www.instagram.com/the.social.code" target="_blank"><div class="footer_socialicon instagram"></div></a>
@@ -128,7 +128,7 @@
                             <a href="https://www.getrevue.co/profile/TheSocialCode" target="_blank"><div class="footer_socialicon email"></div></a>
                             <a href="https://patreon.com/thesocialcode" target="_blank"><div class="footer_socialicon patreon"></div></a>
                         </div>
-                        <div class="footer_socialicons_title">Share the project</div>
+                        <div class="footer_socialicons_title">Share this project</div>
                         <div class="footer_socialicons">
                             <div class="footer_socialicon facebook" data-sharer="facebook" data-hashtag="" data-url="<?php echo $sURL; ?>"></div>
                             <div class="footer_socialicon twitter" data-sharer="twitter" data-title="Frictionless sharing between devices" data-hashtags="sharing,data,privacy,securely,copypaste.me" data-url="<?php echo $sURL; ?>"></div>
