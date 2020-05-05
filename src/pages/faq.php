@@ -5,6 +5,8 @@
     <br>
     <h1 class="faq_title">Frequently Asked Question</h1>
 
+    <img src="/static/images/mockup-min.png" style="width:80%;">
+
     <div class="main-information">
         <div class="main-interface-information">
             <div class="main-interface-information-section left">

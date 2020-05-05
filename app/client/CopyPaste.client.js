@@ -10,6 +10,9 @@
 // import
 const Client = require('./components/Client');
 
+// import external classes
+const Module_ClipboardCopy = require('clipboard-copy');
+
 
 // connect
 document.addEventListener('DOMContentLoaded', function () {
@@ -22,49 +25,63 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('');
     }
 
-    // 2. verify
-    if (window.location.pathname.toLowerCase() === '/faq') return;
-
-    // 3. prepare
+    // 2. prepare
     let sPort = (document.CopyPaste.config.socketio.port) ? ':' + document.CopyPaste.config.socketio.port : '';
 
-    // 4. startup
-    this.client = new Client(window.location.protocol + '//' + window.location.hostname + sPort);
+    // 3. compose
+    let sURL = window.location.protocol + '//' + window.location.hostname;
 
 
     // ---
 
 
-    // 5. store
+    // 4. store
     let elInterfaceContent = document.querySelector('[data-mimoto-id="interface-content"]');
     var elFooterCollapsed = document.querySelector('[data-mimoto-id="footer-collapsed"]');
     var elFooterExpanded = document.querySelector('[data-mimoto-id="footer-expanded"]');
 
-    // 6. define
+    // 5. define
     this._toggleFooter = function(e)
     {
         // a. read
         let rectInterfaceContent = elInterfaceContent.getBoundingClientRect();
 
+        // b. calculate
         var limit = Math.max( document.body.scrollHeight, document.body.offsetHeight,
             document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );
 
-        // b. toggle
+        // c. toggle
         if (window.scrollY > limit - window.innerHeight - elFooterExpanded.clientHeight + elFooterCollapsed.clientHeight)
         {
+            // I. toggle visibility
             elFooterCollapsed.classList.add('animate');
             elFooterCollapsed.classList.remove('show');
         }
         else
         {
+            // I. toggle visibility
             elFooterCollapsed.classList.add('show');
         }
     };
 
-    // 7. init
+    // 6. init
     this._toggleFooter();
+
+    // 7. configure
+    document.querySelector('[data-mimoto-id="footer-copylink"]').addEventListener('click', function(sURL)
+    {
+        // a. copy
+        Module_ClipboardCopy(sURL);
+
+    }.bind(this, sURL));
 
     // 8. configure
     window.addEventListener('scroll', this._toggleFooter.bind(this));
+
+    // 9. verify
+    if (window.location.pathname.toLowerCase() === '/faq') return;
+
+    // 10. startup
+    this.client = new Client(sURL + sPort);
 
 }, true);
