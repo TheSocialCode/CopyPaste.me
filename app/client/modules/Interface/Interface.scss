@@ -162,6 +162,20 @@ div.main-interface-footer-collapsed a:hover {
     text-decoration: underline;
 }
 
+div.main-interface-footer-collapsed-background {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+div.main-interface-footer-collapsed-content {
+    display: inline-block;
+    position: relative;
+}
+
 div.main-interface-footer-expanded {
 
     color: $textcolor-light;

@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 4. store
     let elInterfaceContent = document.querySelector('[data-mimoto-id="interface-content"]');
     var elFooterCollapsed = document.querySelector('[data-mimoto-id="footer-collapsed"]');
+    var elFooterCollapsedBackground = document.querySelector('[data-mimoto-id="footer-collapsed-background"]');
     var elFooterExpanded = document.querySelector('[data-mimoto-id="footer-expanded"]');
 
     // 5. define
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let rectInterfaceContent = elInterfaceContent.getBoundingClientRect();
 
         // b. calculate
-        var limit = Math.max( document.body.scrollHeight, document.body.offsetHeight,
+        var limit = Math.max(document.body.scrollHeight, document.body.offsetHeight,
             document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );
 
         // c. toggle
@@ -78,10 +79,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // 8. configure
     window.addEventListener('scroll', this._toggleFooter.bind(this));
 
-    // 9. verify
+    // 9. configure
+    elFooterCollapsedBackground.addEventListener('click', function()
+    {
+        // a. animated scroll
+        window.scrollTo( { top:document.body.scrollHeight, left:0, behavior: 'smooth' });
+
+    }.bind(this));
+
+    // 10. verify
     if (window.location.pathname.toLowerCase() === '/faq') return;
 
-    // 10. startup
+    // 11. startup
     this.client = new Client(sURL + sPort);
 
 }, true);

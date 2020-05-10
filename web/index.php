@@ -143,7 +143,8 @@
                 </div>
             </div>
             <div data-mimoto-id="footer-collapsed" class="main-interface-footer-collapsed show">
-                Offered by <a href="https://thesocialcodefoundation.org" target="_blank">The Social Code</a> - <!--<a href="/faq">FAQ</a> - --><a href="https://paypal.me/thesocialcode" target="_blank">Donate now</a>
+                <div data-mimoto-id="footer-collapsed-background" class="main-interface-footer-collapsed-background"></div>
+                <div class="main-interface-footer-collapsed-content">Offered by <a href="https://thesocialcodefoundation.org" target="_blank">The Social Code</a> - <a href="/faq">FAQ</a> - <a href="https://paypal.me/thesocialcode" target="_blank">Donate now</a></div>
             </div>
         </div>
     </div>
