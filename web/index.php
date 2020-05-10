@@ -114,7 +114,7 @@
                             <div class="footer_table_center_column_cell"><a href="/faq">FAQ</a></div>
                         </div>
                         <div class="footer_table_center_column">
-                            <div class="footer_table_center_column_cell"><a href="#support">Support</a></div>
+                            <div class="footer_table_center_column_cell"><a href="mailto:sebastian@thesocialcode.com">Support</a></div>
                             <div class="footer_table_center_column_cell"><a href="mailto:sebastian@thesocialcode.com">Contact</a></div>
                         </div>
                     </div>
