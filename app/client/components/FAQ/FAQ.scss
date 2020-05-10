@@ -1,52 +1,22 @@
-
-div.interface-faq {
+div.module_FAQ_header {
+    display: inline-block;
     width: 100%;
+    max-width: 900px;
+    padding: 40px 30px 0 30px;
     margin-left: auto;
     margin-right: auto;
-    max-width: 600px;
-    text-align: center;
-    margin-bottom: 70px;
-    line-height: 24px;
-    padding: 25px 10px 0 10px;
 }
 
 h1.faq_title {
-    font-size: x-large;
+    font-size: 35px;
     font-weight: bold;
-    color: $textcolor-dark;
     margin-bottom: 35px;
     clear: both;
+
+    font-family: Montserrat, sans-serif;
+    color: $color-text-dark;
 }
 
-h2.faq_question {
-    font-size: large;
-    font-weight: bold;
-    color: $textcolor-dark;
-}
-
-p.faq_answer {
-
-    font-size: medium;
-    color: $textcolor-dark;
-    margin-bottom: 35px;
-
-    & a {
-        color: $textcolor-dark;
-        text-decoration: underline;
-    }
-
-    & a:hover {
-        color: $textcolor-alert;
-        text-decoration: none;
-    }
-}
-
-@media screen and (max-width: 450px) {
-
-    h2.faq_question {
-        text-align: left;
-    }
-    p.faq_answer {
-        text-align: left;
-    }
+img.faq_mockup {
+    width: 100%;
 }
