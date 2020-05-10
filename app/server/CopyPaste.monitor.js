@@ -52,8 +52,8 @@ module.exports = {
             idle: 0,
             connected: 0,
             connectionTypes: {
-                qr: 0,
-                manualcode: 0,
+                scan: 0,
+                manually: 0,
                 invite: 0
             },
             averageTimeTillConnection: 0,
@@ -429,8 +429,8 @@ module.exports = {
                         "pairCount": { $sum: 1 },
                         "activeCount": { $sum: { $cond: [ { $eq: [ "$active", true ] }, 1, 0 ] } },
                         "connectedCount": { $sum: { $cond: [ { $eq: [ "$connected", true ] }, 1, 0 ] } },
-                        "connectionTypeQR": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_SCAN ] }, 1, 0 ] } },
-                        "connectionTypeManualcode": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_MANUALLY ] }, 1, 0 ] } },
+                        "connectionTypeScan": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_SCAN ] }, 1, 0 ] } },
+                        "connectionTypeManually": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_MANUALLY ] }, 1, 0 ] } },
                         "connectionTypeInvite": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_INVITE ] }, 1, 0 ] } },
                         "usedCount": { $sum: { $cond: [ { $eq: [ "$used", true ] }, 1, 0 ] } },
                         "archivedCount": { $sum: { $cond: [ { $eq: [ "$archived", true ] }, 1, 0 ] } }
@@ -457,8 +457,8 @@ module.exports = {
             this._stats.pairs.active = result.activeCount;
             this._stats.pairs.idle = result.pairCount - result.activeCount - result.archivedCount;
             this._stats.pairs.connected = result.connectedCount;
-            this._stats.pairs.connectionTypes.qr = result.connectionTypeQR;
-            this._stats.pairs.connectionTypes.manualcode = result.connectionTypeManualcode;
+            this._stats.pairs.connectionTypes.scan = result.connectionTypeScan;
+            this._stats.pairs.connectionTypes.manually = result.connectionTypeManually;
             this._stats.pairs.connectionTypes.invite = result.connectionTypeInvite;
             this._stats.pairs.used = result.usedCount;
             this._stats.pairs.archived = result.archivedCount;
