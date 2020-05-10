@@ -127,16 +127,16 @@
                             <a href="https://www.getrevue.co/profile/TheSocialCode" target="_blank"><div class="footer_socialicon email"></div></a>
                             <a href="https://patreon.com/thesocialcode" target="_blank"><div class="footer_socialicon patreon"></div></a>
                         </div>
-                        <div class="footer_socialicons_title">Share this project</div>
-                        <div class="footer_socialicons">
-                            <div class="footer_socialicon facebook" data-sharer="facebook" data-hashtag="" data-url="<?php echo $sURL; ?>"></div>
-                            <div class="footer_socialicon twitter" data-sharer="twitter" data-title="Frictionless sharing between devices" data-hashtags="sharing,data,privacy,securely,copypaste.me" data-url="<?php echo $sURL; ?>"></div>
-                            <div class="footer_socialicon linkedin" data-sharer="linkedin" data-url="<?php echo $sURL; ?>"></div>
-                            <div class="footer_socialicon whatsapp" data-sharer="whatsapp" data-title="Frictionless sharing between devices" data-url="<?php echo $sURL; ?>"></div>
-                            <div class="footer_socialicon telegram" data-sharer="telegram" data-title="Frictionless sharing between devices" data-url="<?php echo $sURL; ?>" data-to=""></div>
-                            <div class="footer_socialicon email" data-sharer="email" data-title="Frictionless sharing between devices" data-url="<?php echo $sURL; ?>" data-subject="Frictionless sharing between devices" data-to=""></div>
-                            <div data-mimoto-id="footer-copylink" class="footer_socialicon copylink"></div>
-                        </div>
+<!--                        <div class="footer_socialicons_title">Share this project</div>-->
+<!--                        <div class="footer_socialicons">-->
+<!--                            <div class="footer_socialicon facebook" data-sharer="facebook" data-hashtag="" data-url="--><?php //echo $sURL; ?><!--"></div>-->
+<!--                            <div class="footer_socialicon twitter" data-sharer="twitter" data-title="Frictionless sharing between devices" data-hashtags="sharing,data,privacy,securely,copypaste.me" data-url="--><?php //echo $sURL; ?><!--"></div>-->
+<!--                            <div class="footer_socialicon linkedin" data-sharer="linkedin" data-url="--><?php //echo $sURL; ?><!--"></div>-->
+<!--                            <div class="footer_socialicon whatsapp" data-sharer="whatsapp" data-title="Frictionless sharing between devices" data-url="--><?php //echo $sURL; ?><!--"></div>-->
+<!--                            <div class="footer_socialicon telegram" data-sharer="telegram" data-title="Frictionless sharing between devices" data-url="--><?php //echo $sURL; ?><!--" data-to=""></div>-->
+<!--                            <div class="footer_socialicon email" data-sharer="email" data-title="Frictionless sharing between devices" data-url="--><?php //echo $sURL; ?><!--" data-subject="Frictionless sharing between devices" data-to=""></div>-->
+<!--                            <div data-mimoto-id="footer-copylink" class="footer_socialicon copylink"></div>-->
+<!--                        </div>-->
 
                     </div>
                 </div>
