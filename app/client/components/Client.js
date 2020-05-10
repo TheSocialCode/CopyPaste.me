@@ -36,7 +36,6 @@ module.exports.prototype = {
     // connection
     _socket: null,
     _sToken: null,
-    _nTokenLifetime: null,
     _sDeviceID: null,
 
     _sManualCode: '',
@@ -101,7 +100,6 @@ module.exports.prototype = {
         this._dataManager.addEventListener(DataManager.prototype.DATA_READY_FOR_TRANSFER, this._onDataManagerDataReadyForTransfer.bind(this));
         this._dataManager.addEventListener(DataManager.prototype.DATA_LOADING, this._onDataManagerDataLoading.bind(this));
         this._dataManager.addEventListener(DataManager.prototype.DATA_READY_FOR_DISPLAY, this._onDataManagerDataReadyForDisplay.bind(this));
-
 
 
         // ---

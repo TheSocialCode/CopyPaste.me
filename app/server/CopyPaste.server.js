@@ -271,7 +271,7 @@ module.exports = {
         let pair = this.Mimoto.pairManager.initPair(primaryDeviceSocket, sPrimaryDevicePublicKey);
 
         // 2. create
-        let token = this._tokenManager.createToken(pair, Token.prototype.TYPE_SCAN);
+        let token = this._tokenManager.createToken(pair, ConnectionTypes.prototype.TYPE_SCAN);
 
         // 3. send
         pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_PRIMARYDEVICE_CONNECTED, pair.getPrimaryDeviceID(), token.getValue(), token.getLifetime());
