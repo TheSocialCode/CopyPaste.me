@@ -1,78 +1,95 @@
 <div data-mimoto-id="component_Client" class="component_Client">
 
-    <!-- QR code -->
+    <!-- Connector -->
 
-    <div data-mimoto-id="component_QR" class="component_QR">
-        <div class="component_QR_inner">
-            <div data-mimoto-id="component_QR_front" class="component_QR_card component_QR_card_front">
-                <div data-mimoto-id="component_QR_front_label" class="component_QR_card_label">
-                    <div class="component_QR_card_label_scan">Scan me</div>
-                    <div class="component_QR_card_label_invite">Send invite</div>
-                </div>
-                <div data-mimoto-id="component_QR_front_sublabel" class="component_QR_card_sublabel">
-                    <div class="component_QR_card_sublabel_scan">to connect your phone</div>
-                    <div class="component_QR_card_sublabel_invite">valid for <span data-mimoto-id="output-timetillexpiration" class="component_QR_card_sublabel_invite_expirationlabel">x min</span> - <a data-mimoto-id="button-refreshtoken" class="">refresh</a></div>
-                </div>
-                <div data-mimoto-id="component_QR_container" class="component_QR_container show"></div>
-                <div data-mimoto-id="component_sendinvite" class="component_QR_sendinvite_container">
-                    <div class="component_QR_sendinvite_channels">
-                        <div class="component_QR_sendinvite_channel_row">
-                            <div data-mimoto-id="sendinvite-channel-whatsapp" class="component_QR_sendinvite_channel" data-sharer="whatsapp" data-title="Let's exchange data privately and securely" data-url="https://copypaste.me">
-                                <div class="component_QR_sendinvite_channel_name">
-                                    <div class="component_QR_sendinvite_channel_name_label">Whatsapp</div>
-                                </div>
-                                <div class="component_QR_sendinvite_channel_icon whatsapp"></div>
-                            </div>
-                            <div data-mimoto-id="sendinvite-channel-telegram" class="component_QR_sendinvite_channel" data-sharer="telegram" data-title="Let's exchange data privately and securely" data-url="https://copypaste.me">
-                                <div class="component_QR_sendinvite_channel_name">
-                                    <div class="component_QR_sendinvite_channel_name_label">Telegram</div>
-                                </div>
-                                <div class="component_QR_sendinvite_channel_icon telegram"></div>
-                            </div>
-                        </div>
-                        <div class="component_QR_sendinvite_channel_row">
-                            <div data-mimoto-id="sendinvite-channel-email" class="component_QR_sendinvite_channel" data-sharer="email" data-title="Let's exchange data privately and securely" data-url="https://copypaste.me" data-subject="Let's exchange data securely" data-to="">
+    <div data-mimoto-id="component_Connector" class="component_Connector">
+        <div class="component_Connector_inner">
 
-                                <div class="component_QR_sendinvite_channel_name">
-                                    <div class="component_QR_sendinvite_channel_name_label">Email</div>
-                                </div>
-                                <div class="component_QR_sendinvite_channel_icon email"></div>
-                            </div>
-                            <div data-mimoto-id="button-copylink" class="component_QR_sendinvite_channel">
-                                <div class="component_QR_sendinvite_channel_name">
-                                    <div class="component_QR_sendinvite_channel_name_label">Copy link</div>
-                                </div>
-                                <div class="component_QR_sendinvite_channel_icon copylink"></div>
-                            </div>
+            <div data-mimoto-id="card_front" class="component_Connector_card component_Connector_card_front"></div>
+            <div data-mimoto-id="card_back" class="component_Connector_card component_Connector_card_back"></div>
+
+            <div data-mimoto-id="connectiontypes-container" class="component_Connector_connectiontypes_container">
+
+                <!--- Scan -->
+                <div data-mimoto-id="type_scan">
+                    <div class="component_Connector_card_label">Scan me</div>
+                    <div class="component_Connector_card_sublabel">to connect your phone</div>
+                    <div data-mimoto-id="container" class="component_Connector_container"></div>
+                </div>
+
+                <!--- Manually -->
+                <div data-mimoto-id="type_manually">
+                    <div class="component_Connector_card_label">Use this URL</div>
+                    <div class="component_Connector_card_sublabel">on the other device</div>
+                    <div data-mimoto-id="instructions" class="component_Connector_instructions">
+                        <div>
+                            <div class="component_Connector_instructions_url"><a href="/connect" target="_blank"><span data-mimoto-id="connect_url">https://copypaste.me</span>/connect</a></div>
+                            <div class="component_Connector_instructions_guidance">and enter<br>the following code:</div>
+                            <div data-mimoto-id="code" class="component_Connector_instructions_code"></div>
+                            <div data-mimoto-id="countdown" class="component_Connector_instructions_validity"></div>
                         </div>
                     </div>
                 </div>
-                <div data-mimoto-id="button-toggleconnectionview" class="component_QR_button_toggleconnectionview">
-                    <div data-mimoto-id="button-sendinvite" class="show">or click to send invite</div>
-                    <div data-mimoto-id="button-scanqr">scan QR code</div>
-                    <div data-mimoto-id="notification-copiedtoclipboard">Copied to clipboard!</div>
-                </div>
-            </div>
-            <div data-mimoto-id="component_QR_back" class="component_QR_card component_QR_card_back">
-                <div class="component_QR_card_label">Use this URL</div>
-                <div class="component_QR_card_sublabel">on the other device</div>
-                <div data-mimoto-id="component_QR_manualurl" class="component_QR_manualurl show">
-                    <div>
-                        <div class="component_QR_manualurl_url"><a href="/connect" target="_blank"><span data-mimoto-id="connect_url">https://copypaste.me</span>/connect</a></div>
-                        <div class="component_QR_manualurl_guidance">and enter<br>the following code:</div>
-                        <div data-mimoto-id="manualcode" class="component_QR_manualurl_code"></div>
-                        <div data-mimoto-id="countdown" class="component_QR_manualurl_validity"></div>
+
+                <!--- Invite -->
+                <div data-mimoto-id="type_invite">
+                    <div data-mimoto-id="component_Connector_front_label" class="component_Connector_card_label">Send invite</div>
+                    <div data-mimoto-id="component_Connector_front_sublabel" class="component_Connector_card_sublabel">
+                        valid for <span data-mimoto-id="timetillexpiration" class="component_Connector_card_sublabel_invite_expirationlabel">x min</span> - <a data-mimoto-id="button-refreshtoken" class="">refresh</a>
+                    </div>
+                    <div data-mimoto-id="inviteoptions" class="component_Connector_sendinvite_container">
+                        <div class="component_Connector_sendinvite_channels">
+                            <div class="component_Connector_sendinvite_channel_row">
+                                <div data-mimoto-id="button-whatsapp" class="component_Connector_sendinvite_channel" data-sharer="whatsapp" data-title="Let's exchange data privately and securely" data-url="https://copypaste.me">
+                                    <div class="component_Connector_sendinvite_channel_name">
+                                        <div class="component_Connector_sendinvite_channel_name_label">Whatsapp</div>
+                                    </div>
+                                    <div class="component_Connector_sendinvite_channel_icon whatsapp"></div>
+                                </div>
+                                <div data-mimoto-id="button-telegram" class="component_Connector_sendinvite_channel" data-sharer="telegram" data-title="Let's exchange data privately and securely" data-url="https://copypaste.me">
+                                    <div class="component_Connector_sendinvite_channel_name">
+                                        <div class="component_Connector_sendinvite_channel_name_label">Telegram</div>
+                                    </div>
+                                    <div class="component_Connector_sendinvite_channel_icon telegram"></div>
+                                </div>
+                            </div>
+                            <div class="component_Connector_sendinvite_channel_row">
+                                <div data-mimoto-id="button-email" class="component_Connector_sendinvite_channel" data-sharer="email" data-title="Let's exchange data privately and securely" data-url="https://copypaste.me" data-subject="Let's exchange data securely" data-to="">
+
+                                    <div class="component_Connector_sendinvite_channel_name">
+                                        <div class="component_Connector_sendinvite_channel_name_label">Email</div>
+                                    </div>
+                                    <div class="component_Connector_sendinvite_channel_icon email"></div>
+                                </div>
+                                <div data-mimoto-id="button-copylink" class="component_Connector_sendinvite_channel">
+                                    <div class="component_Connector_sendinvite_channel_name">
+                                        <div class="component_Connector_sendinvite_channel_name_label">Copy link</div>
+                                    </div>
+                                    <div class="component_Connector_sendinvite_channel_icon copylink"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-mimoto-id="button-toggleconnectionview" class="component_Connector_button_toggleconnectionview">
+                        <div data-mimoto-id="notification-copiedtoclipboard">Copied to clipboard!</div>
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <!-- Manual connect button -->
+        <!-- Menu connection type -->
 
-        <div data-mimoto-id="component_ManualConnectButton" class="component_ManualConnectButton">
-            <div data-mimoto-id="button" class="module_ToggleButton">
-                <span class="module_ToggleButton_manually">Connect manually</span>
-                <span class="module_ToggleButton_qr">Connect by QR</span>
+        <div data-mimoto-id="component_MenuConnectionType" class="component_MenuConnectionType">
+            <div data-mimoto-id="arrow" class="component_MenuConnectionType_arrowcontainer">
+                <div class="component_MenuConnectionType_arrow">
+                    <svg width="14px" height="10px"><polygon points="7,0 14,10 0,10" /></svg>
+                </div>
+            </div>
+            <div data-mimoto-id="button-container" class="component_MenuConnectionType_buttons">
+                <div data-mimoto-id="button-scan" class="component_MenuConnectionType_button selected">Scan</div>
+                <div data-mimoto-id="button-manually" class="component_MenuConnectionType_button">Manually</div>
+                <div data-mimoto-id="button-invite" class="component_MenuConnectionType_button">Invite</div>
             </div>
         </div>
     </div>

@@ -9,7 +9,8 @@
 
 // import
 const QRCodeGenerator = require('qrcode-generator');
-const ManualConnectButton = require('./../ManualConnectButton/ManualConnectButton');
+const MenuConnectionType = require('./../MenuConnectionType/MenuConnectionType');
+const ConnectionTypes = require('./ConnectionTypes');
 
 // import helpers
 const Module_ClipboardCopy = require('clipboard-copy');
@@ -32,31 +33,40 @@ module.exports.prototype = {
 
     // components
     _qrcode: null,
-    _manualConnectButton: null,
+    _menuConnectionType: null,
 
     // views
     _elRoot: null,
-    _elContainer: null,
-    _elFront: null,
-    _elFrontLabel: null,
-    _elFrontSublabel: null,
-    _elBack: null,
-    _elManualURL: null,
-    _elManualCode: null,
-    _elManualCodeCountdown: null,
-    _elConnectURL: null,
-    _elSendInvite: null,
-    _elButtonRefreshToken: null,
-    _elOutputTimeTillExpiration: null,
-    _elButtonToggleConnectionView: null,
-    _elButtonToggleConnectionView_sendInvite: null,
-    _elButtonToggleConnectionView_scanQR: null,
-    _elButtonToggleConnectionView_copiedToClipboard: null,
+    _elCardFront: null,
+    _elCardBack: null,
+    _elConectionTypes: null,
+
+    // connection types
+    _elConnectionTypeScan: null,
+    _elConnectionTypeManually: null,
+    _elConnectionTypeInvite: null,
+    _aConnectionTypes: [],
+    
+    // connection type - scan
+    _elConnectionTypeScan_QRContainer: null,
+
+    // connection type - manually
+    _elConnectionTypeManually_Instructions: null,
+    _elConnectionTypeManually_Code: null,
+    _elConnectionTypeManually_Countdown: null,
+    _elConnectionTypeManually_URL: null,
+
+    // connection type - invite
+    _elConnectionTypeInvite_Options: null,
+    _elConnectionTypeInvite_ButtonRefreshToken: null,
+    _elConnectionTypeInvite_TimeTillExpiration: null,
+    
+    _elConnectionTypeInvite_NotificationCopiedToClipboard: null,
 
     // channel views
-    _elSendInviteChannelWhatsapp: null,
-    _elSendInviteChannelTelegram: null,
-    _elSendInviteChannelEmail: null,
+    _elConnectionTypeInvite_ButtonWhatsapp: null,
+    _elConnectionTypeInvite_ButtonTelegram: null,
+    _elConnectionTypeInvite_ButtonEmail: null,
 
     // utils
     _timerTokenExpires: null,
@@ -66,11 +76,8 @@ module.exports.prototype = {
     _timerManualCodeCountdown: null,
 
     // states
-    _sCurrentState: '',
-    STATE_QR: 'qr',
-    STATE_MANUAL: 'manual',
-
-    _bIsInInviteMode: false,
+    _sCurrentConnectionType: '',
+    _bIsFrontCardFocused: true,
 
     // data
     _manualCode: null,
@@ -94,59 +101,82 @@ module.exports.prototype = {
         // 1. extend
         new EventDispatcherExtender(this);
 
+
         // ---
 
-        // 2. init
-        this._sCurrentState = this.STATE_QR;
 
         // 3. register
-        this._elRoot = document.querySelector('[data-mimoto-id="component_QR"]');
-        this._elContainer = document.querySelector('[data-mimoto-id="component_QR_container"]');
-        this._elFront = document.querySelector('[data-mimoto-id="component_QR_front"]');
-        this._elFrontLabel = document.querySelector('[data-mimoto-id="component_QR_front_label"]');
-        this._elFrontSublabel = document.querySelector('[data-mimoto-id="component_QR_front_sublabel"]');
-        this._elBack = document.querySelector('[data-mimoto-id="component_QR_back"]');
-        this._elManualURL = document.querySelector('[data-mimoto-id="component_QR_manualurl"]');
-        this._elManualCode = this._elRoot.querySelector('[data-mimoto-id="manualcode"]');
-        this._elManualCodeCountdown = this._elRoot.querySelector('[data-mimoto-id="countdown"]');
-        this._elConnectURL = this._elBack.querySelector('[data-mimoto-id="connect_url"]');
-        this._elSendInvite = this._elRoot.querySelector('[data-mimoto-id="component_sendinvite"]');
-        this._elButtonRefreshToken = this._elRoot.querySelector('[data-mimoto-id="button-refreshtoken"]');
-        this._elOutputTimeTillExpiration = this._elRoot.querySelector('[data-mimoto-id="output-timetillexpiration"]');
-        this._elButtonCopyLink = this._elSendInvite.querySelector('[data-mimoto-id="button-copylink"]');
+        this._elRoot = document.querySelector('[data-mimoto-id="component_Connector"]');
+        this._elCardFront = this._elRoot.querySelector('[data-mimoto-id="card_front"]');
+        this._elCardBack = this._elRoot.querySelector('[data-mimoto-id="card_back"]');
+        this._elConnectionTypesContainer = this._elRoot.querySelector('[data-mimoto-id="connectiontypes-container"]');
 
-        // 4. register
-        this._elButtonToggleConnectionView = this._elRoot.querySelector('[data-mimoto-id="button-toggleconnectionview"]');
-        this._elButtonToggleConnectionView_sendInvite = this._elButtonToggleConnectionView.querySelector('[data-mimoto-id="button-sendinvite"]');
-        this._elButtonToggleConnectionView_scanQR = this._elButtonToggleConnectionView.querySelector('[data-mimoto-id="button-scanqr"]');
-        this._elButtonToggleConnectionView_copiedToClipboard = this._elButtonToggleConnectionView.querySelector('[data-mimoto-id="notification-copiedtoclipboard"]');
+        // 4. register - connection types
+        this._elConnectionTypeScan = this._elConnectionTypesContainer.querySelector('[data-mimoto-id="type_scan"]');
+        this._elConnectionTypeManually = this._elConnectionTypesContainer.querySelector('[data-mimoto-id="type_manually"]');
+        this._elConnectionTypeInvite = this._elConnectionTypesContainer.querySelector('[data-mimoto-id="type_invite"]');
 
-        // 5. register
-        this._elSendInviteChannelWhatsapp = this._elSendInvite.querySelector('[data-mimoto-id="sendinvite-channel-whatsapp"]');
-        this._elSendInviteChannelTelegram = this._elSendInvite.querySelector('[data-mimoto-id="sendinvite-channel-telegram"]');
-        this._elSendInviteChannelEmail = this._elSendInvite.querySelector('[data-mimoto-id="sendinvite-channel-email"]');
+        // 5. store
+        this._aConnectionTypes[ConnectionTypes.prototype.TYPE_SCAN] = this._elConnectionTypeScan;
+        this._aConnectionTypes[ConnectionTypes.prototype.TYPE_MANUALLY] = this._elConnectionTypeManually;
+        this._aConnectionTypes[ConnectionTypes.prototype.TYPE_INVITE] = this._elConnectionTypeInvite;
 
-        // 6. setup
-        this.setToken(sToken, nTokenLifetime);
 
-        // 7. init
-        this._manualConnectButton = new ManualConnectButton();
+        // --- connection type `scan`
 
-        // 8. configure
-        this._manualConnectButton.addEventListener(ManualConnectButton.prototype.REQUEST_TOGGLE_MANUALCONNECT, this._onRequestToggleManualConnect.bind(this));
+        // 6. register
+        this._elConnectionTypeScan_QRContainer = this._elConnectionTypeScan.querySelector('[data-mimoto-id="container"]');
 
-        // 9. output
-        this._elConnectURL.innerText = window.location.protocol + '//' + window.location.hostname;
+
+        // --- connection type `manually`
+
+        // 7. register
+        this._elConnectionTypeManually_Instructions = this._elConnectionTypeManually.querySelector('[data-mimoto-id="instructions"]');
+        this._elConnectionTypeManually_Code = this._elConnectionTypeManually.querySelector('[data-mimoto-id="code"]');
+        this._elConnectionTypeManually_Countdown = this._elConnectionTypeManually.querySelector('[data-mimoto-id="countdown"]');
+        this._elConnectionTypeManually_URL = this._elConnectionTypeManually.querySelector('[data-mimoto-id="connect_url"]');
+
+        // 8. setup
+        this._elConnectionTypeManually_URL.innerText = window.location.protocol + '//' + window.location.hostname;
+
+
+        // --- connection type `invite`
+
+        // 9. register
+        this._elConnectionTypeInvite_ButtonRefreshToken = this._elConnectionTypeInvite.querySelector('[data-mimoto-id="button-refreshtoken"]');
+        this._elConnectionTypeInvite_TimeTillExpiration = this._elConnectionTypeInvite.querySelector('[data-mimoto-id="timetillexpiration"]');
+        this._elConnectionTypeInvite_NotificationCopiedToClipboard = this._elConnectionTypeInvite.querySelector('[data-mimoto-id="notification-copiedtoclipboard"]');
+        this._elConnectionTypeInvite_Options = this._elConnectionTypeInvite.querySelector('[data-mimoto-id="inviteoptions"]');
+        this._elConnectionTypeInvite_ButtonWhatsapp = this._elConnectionTypeInvite_Options.querySelector('[data-mimoto-id="button-whatsapp"]');
+        this._elConnectionTypeInvite_ButtonTelegram = this._elConnectionTypeInvite_Options.querySelector('[data-mimoto-id="button-telegram"]');
+        this._elConnectionTypeInvite_ButtonEmail = this._elConnectionTypeInvite_Options.querySelector('[data-mimoto-id="button-email"]');
+        this._elConnectionTypeInvite_ButtonCopyLink = this._elConnectionTypeInvite_Options.querySelector('[data-mimoto-id="button-copylink"]');
 
         // 10. configure
-        this._elContainer.addEventListener('click', this._onButtonToggleConnectionViewClick.bind(this));
-        this._elButtonToggleConnectionView.addEventListener('click', this._onButtonToggleConnectionViewClick.bind(this));
+        this._elConnectionTypeInvite_ButtonCopyLink.addEventListener('click', this._onButtonCopyLinkClick.bind(this));
+        this._elConnectionTypeInvite_ButtonRefreshToken.addEventListener('click', this._onButtonRefreshTokenClick.bind(this));
 
-        // 11. configure
-        this._elButtonCopyLink.addEventListener('click', this._onButtonCopyLinkClick.bind(this));
 
-        // 12. configure
-        this._elButtonRefreshToken.addEventListener('click', this._onButtonRefreshTokenClick.bind(this));
+        // ---
+
+
+        // 11. store
+        this._sCurrentConnectionType = ConnectionTypes.prototype.TYPE_SCAN;
+
+        // 12. setup
+        this.setToken(sToken, nTokenLifetime);
+
+        // 13. show
+        this._elCardFront.appendChild(this._aConnectionTypes[this._sCurrentConnectionType]);
+
+
+        // ---
+
+        // 14. init
+        this._menuConnectionType = new MenuConnectionType();
+
+        // 15. configure
+        this._menuConnectionType.addEventListener(MenuConnectionType.prototype.REQUEST_TOGGLE_CONNECTIONTYPE, this._onRequestToggleConnectionType.bind(this));
     },
 
 
@@ -155,6 +185,44 @@ module.exports.prototype = {
     // --- Public methods ---------------------------------------------------------
     // ----------------------------------------------------------------------------
 
+
+    /**
+     * Show component
+     */
+    show: function()
+    {
+        // 1. toggle visibility
+        this._elRoot.classList.add('show');
+        document.body.classList.add('app');
+
+        // 2. apply dimensions to main component
+        this._elRoot.style.width = 0;
+        this._elRoot.style.height = (this._elCardFront.offsetHeight + 15) + 'px';
+
+        // 3. position
+        this._elCardFront.style.left = (-Math.floor(this._elCardFront.offsetWidth) / 2) + 'px';
+
+        // 4. toggle visibility
+        this._menuConnectionType.show();
+    },
+
+    /**
+     * Hide component
+     */
+    hide: function()
+    {
+        // 1. toggle visibility
+        this._elRoot.classList.remove('show');
+        document.body.classList.remove('app');
+
+        // 2. toggle visibility
+        this._menuConnectionType.hide();
+
+        // 3. cleanup
+        if (this._timerTokenExpires) clearTimeout(this._timerTokenExpires);
+        if (this._timerTokenUpdate) clearInterval(this._timerTokenUpdate);
+        if (this._timerManualCodeCountdown) clearInterval(this._timerManualCodeCountdown);
+    },
 
     /**
      * Set token
@@ -175,12 +243,12 @@ module.exports.prototype = {
         var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
         qr.addData(this._sTokenURL);
         qr.make();
-        this._elContainer.innerHTML = qr.createImgTag(5);
+        this._elConnectionTypeScan_QRContainer.innerHTML = qr.createImgTag(5);
 
         // 4. output
-        this._elSendInviteChannelWhatsapp.setAttribute('data-url', this._sTokenURL);
-        this._elSendInviteChannelTelegram.setAttribute('data-url', this._sTokenURL);
-        this._elSendInviteChannelEmail.setAttribute('data-url', this._sTokenURL);
+        this._elConnectionTypeInvite_ButtonWhatsapp.setAttribute('data-url', this._sTokenURL);
+        this._elConnectionTypeInvite_ButtonTelegram.setAttribute('data-url', this._sTokenURL);
+        this._elConnectionTypeInvite_ButtonEmail.setAttribute('data-url', this._sTokenURL);
 
         // 4. start
         this._timerTokenExpires = setTimeout(this._onTimerTokenExpires.bind(this), nTokenLifetime);
@@ -188,6 +256,103 @@ module.exports.prototype = {
 
         // 5. output
         this._onTimerTokenUpdate();
+    },
+
+    /**
+     * Set manual code
+     * @param sToken
+     * @param nTokenLifetime
+     */
+    setManualCode: function(sToken, nTokenLifetime)
+    {
+        // 1. store
+        this._manualCode = {};
+
+        // 2. output
+        this._elConnectionTypeManually_Code.innerText = sToken.substr(0, 3) + '-' + sToken.substr(3);
+
+        // 3. setup
+        this._manualCode.localCreated = new Date().getTime();
+        this._manualCode.localExpires = this._manualCode.localCreated + nTokenLifetime;
+
+        // 4. reset
+        this._manualCode.almostExpired = false;
+        this._elConnectionTypeManually_Countdown.classList.remove('almostexpired');
+
+        // 5. output
+        this._updateExpirationLabel();
+
+        // 6. start
+        this._timerManualCodeCountdown = setInterval(this._onTimerManualCodeCountdown.bind(this), 100);
+    },
+
+
+
+    // ----------------------------------------------------------------------------
+    // --- Private methods - events -----------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
+     * Handle event `REQUEST_TOGGLE_CONNECTIONTYPE`
+     * @param sConnectionType
+     * @private
+     */
+    _onRequestToggleConnectionType: function(sConnectionType)
+    {
+        // 1. verify or exit
+        if (sConnectionType === this._sCurrentConnectionType) return;
+
+        // 2. prepare
+        switch(sConnectionType)
+        {
+            case ConnectionTypes.prototype.TYPE_SCAN:
+
+                break;
+
+            case ConnectionTypes.prototype.TYPE_MANUALLY:
+
+                if (!this._manualCode) this._requestNewManualCode();
+                break;
+
+            case ConnectionTypes.prototype.TYPE_INVITE:
+
+                this._onTimerTokenExpires(true);
+                break;
+        }
+
+        // 3. select
+        if (this._bIsFrontCardFocused)
+        {
+            // a. cleanup
+            while (this._elCardBack.children.length > 0) this._elCardBack.removeChild(this._elCardBack.children[0]);
+
+            // b. show
+            this._elCardBack.appendChild(this._aConnectionTypes[sConnectionType]);
+
+            // c. position
+            this._elCardBack.style.left = (-Math.floor(this._elCardBack.offsetWidth) / 2) + 'px';
+        }
+        else
+        {
+            // a. cleanup
+            while (this._elCardFront.children.length > 0) this._elCardFront.removeChild(this._elCardFront.children[0]);
+
+            // b. show
+            this._elCardFront.appendChild(this._aConnectionTypes[sConnectionType]);
+
+            // c. position
+            this._elCardFront.style.left = (-Math.floor(this._elCardFront.offsetWidth) / 2) + 'px';
+        }
+
+        // 5. toggle
+        this._bIsFrontCardFocused = !this._bIsFrontCardFocused;
+
+        // 6. store new state
+        this._sCurrentConnectionType = sConnectionType;
+
+        // 7. toggle
+        this._elRoot.classList.toggle('flip');
     },
 
     /**
@@ -214,7 +379,7 @@ module.exports.prototype = {
         let nDifference = this._nTokenQRExpires - new Date().getTime();
 
         // 2. if in send invite state -> auto renew
-        if (this._bIsInInviteMode && nDifference < 3 * 60 * 1000)
+        if (this._sCurrentConnectionType === ConnectionTypes.prototype.TYPE_INVITE && nDifference < 3 * 60 * 1000)
         {
             // a. auto refresh
             this._onTimerTokenExpires(true);
@@ -227,105 +392,8 @@ module.exports.prototype = {
         let nMinutes = Math.round(10 * (nDifference % (1000 * 60 * 60)) / (1000 * 60)) / 10;
 
         // 4. output
-        this._elOutputTimeTillExpiration.innerText = nMinutes + ' mins';
+        this._elConnectionTypeInvite_TimeTillExpiration.innerText = nMinutes + ' mins';
     },
-
-    /**
-     * Set manual code
-     * @param sToken
-     * @param nTokenLifetime
-     */
-    setManualCode: function(sToken, nTokenLifetime)
-    {
-        // 1. store
-        this._manualCode = {};
-
-        // 2. output
-        this._elManualCode.innerText = sToken.substr(0, 3) + '-' + sToken.substr(3);
-
-        // 3. setup
-        this._manualCode.localCreated = new Date().getTime();
-        this._manualCode.localExpires = this._manualCode.localCreated + nTokenLifetime;
-
-        // 4. reset
-        this._manualCode.almostExpired = false;
-        this._elManualCodeCountdown.classList.remove('almostexpired');
-
-        // 5. output
-        this._updateExpirationLabel();
-
-        // 6. start
-        this._timerManualCodeCountdown = setInterval(this._onTimerManualCodeCountdown.bind(this), 100);
-    },
-
-    /**
-     * Show component
-     */
-    show: function()
-    {
-        // 1. toggle visibility
-        this._elRoot.classList.add('show');
-        document.body.classList.add('app');
-
-        // 2. apply dimensions to main component
-        this._elRoot.style.width = this._elFront.offsetWidth + 'px';
-        this._elRoot.style.height = this._elFront.offsetHeight + 'px';
-
-        // 3. register
-        let nInitialBackHeight = this._elBack.offsetHeight;
-
-        // 4. resize
-        this._elBack.style.height = this._elFront.offsetHeight + 'px';
-        this._elManualURL.style.height = (this._elManualURL.offsetHeight + this._elFront.offsetHeight - nInitialBackHeight) + 'px';
-
-        // 5. position
-        this._elBack.style.left = (-Math.floor(Math.abs(this._elBack.offsetWidth - this._elFront.offsetWidth) / 2)) + 'px';
-
-        // 6. toggle visibility
-        this._manualConnectButton.show();
-    },
-
-    /**
-     * Hide component
-     */
-    hide: function()
-    {
-        // 1. toggle visibility
-        this._elRoot.classList.remove('show');
-        document.body.classList.remove('app');
-
-        // 2. toggle visibility
-        this._manualConnectButton.hide();
-
-        // 3. cleanup
-        if (this._timerTokenExpires) clearTimeout(this._timerTokenExpires);
-        if (this._timerTokenUpdate) clearInterval(this._timerTokenUpdate);
-        if (this._timerManualCodeCountdown) clearInterval(this._timerManualCodeCountdown);
-    },
-
-
-
-    // ----------------------------------------------------------------------------
-    // --- Private methods - events -----------------------------------------------
-    // ----------------------------------------------------------------------------
-
-
-    /**
-     * Handle event `request_toggle_manualconnect`
-     * @private
-     */
-    _onRequestToggleManualConnect: function()
-    {
-        // 1. forward
-        if (!this._manualCode) this._requestNewManualCode();
-
-        // 2. store new state
-        this._sCurrentState = (this._sCurrentState === this.STATE_QR) ? this.STATE_MANUAL : this.STATE_QR;
-
-        // 3. toggle
-        this._elRoot.classList.toggle('flip');
-    },
-
 
 
     // ----------------------------------------------------------------------------
@@ -371,7 +439,7 @@ module.exports.prototype = {
         sRemainingTime += ((nSeconds === 60) ? ((nMinutes !== 0) ? 0 : nSeconds) : nSeconds) + ' ' + ((nSeconds === 1) ? 'sec' : 'secs');
 
         // 4. output
-        this._elManualCodeCountdown.innerText = '(valid for ' + sRemainingTime + ')';
+        this._elConnectionTypeManually_Countdown.innerText = '(valid for ' + sRemainingTime + ')';
 
         // 5. show warning
         if (!this._manualCode.almostExpired && nMinutes === 0 && nSeconds <= 10)
@@ -380,7 +448,7 @@ module.exports.prototype = {
             this._manualCode.almostExpired = true;
 
             // b. output
-            this._elManualCodeCountdown.classList.add('almostexpired');
+            this._elConnectionTypeManually_Countdown.classList.add('almostexpired');
         }
 
         // 6. verify and stop countdown
@@ -394,54 +462,10 @@ module.exports.prototype = {
             this._timerManualCodeCountdown = null;
 
             // c. output
-            this._elManualCodeCountdown.innerText = '(expired)';
+            this._elConnectionTypeManually_Countdown.innerText = '(expired)';
 
             // d. request new
-            if (this._sCurrentState === this.STATE_MANUAL) this._requestNewManualCode();
-        }
-    },
-
-    /**
-     * Handle button Toggle Connection View `click`
-     * @private
-     */
-    _onButtonToggleConnectionViewClick: function()
-    {
-        // 1. select
-        if (!this._bIsInInviteMode)
-        {
-            // a. toggle
-            this._bIsInInviteMode = true;
-
-            // b. toggle view
-            this._elContainer.classList.remove('show');
-            this._elSendInvite.classList.add('show');
-
-            // c. toggle view
-            this._elFrontLabel.classList.add('swapped');
-            this._elFrontSublabel.classList.add('swapped');
-            this._elButtonToggleConnectionView_sendInvite.classList.remove('show');
-            this._elButtonToggleConnectionView_scanQR.classList.add('show');
-            this._elButtonToggleConnectionView_copiedToClipboard.classList.remove('show');
-
-            // d. refresh token
-            this._onTimerTokenExpires(true);
-        }
-        else
-        {
-            // a. toggle
-            this._bIsInInviteMode = false;
-
-            // b. toggle view
-            this._elContainer.classList.add('show');
-            this._elSendInvite.classList.remove('show');
-
-            // c. toggle view
-            this._elFrontLabel.classList.remove('swapped');
-            this._elFrontSublabel.classList.remove('swapped');
-            this._elButtonToggleConnectionView_sendInvite.classList.add('show');
-            this._elButtonToggleConnectionView_scanQR.classList.remove('show');
-            this._elButtonToggleConnectionView_copiedToClipboard.classList.remove('show');
+            if (this._sCurrentConnectionType === ConnectionTypes.prototype.TYPE_MANUALLY) this._requestNewManualCode();
         }
     },
 
@@ -455,13 +479,13 @@ module.exports.prototype = {
         Module_ClipboardCopy(this._sTokenURL);
 
         // 2. style
-        this._elButtonToggleConnectionView.classList.add('copiedtoclipboard');
+        this._elConnectionTypeInvite_NotificationCopiedToClipboard.classList.add('copiedtoclipboard');
 
         // 3. animate
         setTimeout(function ()
         {
             // a. cleanup
-            this._elButtonToggleConnectionView.classList.remove('copiedtoclipboard');
+            this._elConnectionTypeInvite_NotificationCopiedToClipboard.classList.remove('copiedtoclipboard');
 
         }.bind(this), 2000);
     },

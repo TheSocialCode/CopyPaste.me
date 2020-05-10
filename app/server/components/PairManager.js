@@ -38,7 +38,7 @@ module.exports.prototype = {
     _aIdlePairs: [],
 
     // events
-    DATA_READY_FOR_TRANSFER: 'data_ready_for_transfer',
+    DATA_READY_FOR_TRANSFER: 'DATA_READY_FOR_TRANSFER',
 
     // utils
     _timerLog: null,
@@ -50,10 +50,6 @@ module.exports.prototype = {
     // logs
     _aConnectedPairs: [],       // which pairs actually had two devices connected at one point
     _aUsedPairs: [],            // which pairs where actually used to share data
-
-    // connection types
-    CONNECTIONTYPE_QR: 'QR',
-    CONNECTIONTYPE_MANUALCODE: 'MANUALCODE',
 
 
 

@@ -8,8 +8,8 @@
 
 
 // import project classes
-const Token = require('./components/Token');
 const MongoDB = require('./components/MongoDB');
+const ConnectionTypes = require('./../client/components/Connector/ConnectionTypes');
 
 // import external classes
 const Module_FS = require('fs');
@@ -429,9 +429,9 @@ module.exports = {
                         "pairCount": { $sum: 1 },
                         "activeCount": { $sum: { $cond: [ { $eq: [ "$active", true ] }, 1, 0 ] } },
                         "connectedCount": { $sum: { $cond: [ { $eq: [ "$connected", true ] }, 1, 0 ] } },
-                        "connectionTypeQR": { $sum: { $cond: [ { $eq: [ "$connectionType", Token.prototype.TYPE_QR ] }, 1, 0 ] } },
-                        "connectionTypeManualcode": { $sum: { $cond: [ { $eq: [ "$connectionType", Token.prototype.TYPE_MANUALCODE ] }, 1, 0 ] } },
-                        "connectionTypeInvite": { $sum: { $cond: [ { $eq: [ "$connectionType", Token.prototype.TYPE_INVITE ] }, 1, 0 ] } },
+                        "connectionTypeQR": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_SCAN ] }, 1, 0 ] } },
+                        "connectionTypeManualcode": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_MANUALLY ] }, 1, 0 ] } },
+                        "connectionTypeInvite": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_INVITE ] }, 1, 0 ] } },
                         "usedCount": { $sum: { $cond: [ { $eq: [ "$used", true ] }, 1, 0 ] } },
                         "archivedCount": { $sum: { $cond: [ { $eq: [ "$archived", true ] }, 1, 0 ] } }
                     }

@@ -1,4 +1,4 @@
-div.component_QR {
+div.component_Connector {
 
     display: none;
 
@@ -9,7 +9,7 @@ div.component_QR {
     perspective: 1000px;
 }
 
-div.component_QR_inner {
+div.component_Connector_inner {
     position: relative;
     width: 100%;
     height: 100%;
@@ -17,18 +17,18 @@ div.component_QR_inner {
     transition: transform 0.5s;
     transform-style: preserve-3d;
 
-
     .flip & {
         transform: rotateX(-180deg);
     }
 }
 
-div.component_QR_card {
+div.component_Connector_card {
     background-color: $background-light;
     border-radius: 5px;
+    padding: 15px 5px 5px 5px;
 }
 
-div.component_QR_card_front, div.component_QR_card_back {
+div.component_Connector_card_front, div.component_Connector_card_back {
     position: absolute;
     -webkit-perspective: 0;
     -webkit-backface-visibility: hidden;
@@ -37,76 +37,43 @@ div.component_QR_card_front, div.component_QR_card_back {
     backface-visibility: hidden;
 }
 
-div.component_QR_card_front {
-    padding: 15px 5px 15px 5px;
+div.component_Connector_card_front {
     box-shadow: 1px 3px 10px $support-color-dark;
 }
 
-div.component_QR_card_back {
-    padding: 15px 10px 10px 10px;
+div.component_Connector_card_back {
+    margin-top: 15px;
     transform: rotateX(180deg);
     box-shadow: 1px 3px 10px $support-color-dark;
 }
 
-div.component_QR_card_label {
+div.component_Connector_card_label {
     text-align: center;
     font-weight: bold;
     font-size: large;
-
-    & > div.component_QR_card_label_scan {
-        display: block;
-    }
-
-    &.swapped > div.component_QR_card_label_scan {
-        display: none;
-    }
-
-    & > div.component_QR_card_label_invite {
-        display: none;
-    }
-
-    &.swapped > div.component_QR_card_label_invite {
-        display: block;
-    }
 }
 
-div.component_QR_card_sublabel {
+div.component_Connector_card_sublabel {
     text-align: center;
     font-size: smaller;
 
-    & > div.component_QR_card_sublabel_scan {
-        display: block;
+    & > a {
+        cursor: pointer;
+        color: $color-button-dark;
+        text-decoration: underline;
     }
 
-    &.swapped > div.component_QR_card_sublabel_scan {
-        display: none;
-    }
-
-    & > div.component_QR_card_sublabel_invite {
-        display: none;
-
-        & > a {
-            cursor: pointer;
-            color: $color-button-dark;
-            text-decoration: underline;
-        }
-
-        & > a:hover {
-            color: #000000;
-        }
-    }
-
-    &.swapped > div.component_QR_card_sublabel_invite {
-        display: block;
+    & > a:hover {
+        color: #000000;
     }
 }
 
-div.component_QR_card_sublabel_invite_expirationlabel {
+div.component_Connector_card_sublabel_invite_expirationlabel {
     font-family: monospace;
     font-size: 13px;
 }
 
-div.component_QR_button_toggleconnectionview {
+div.component_Connector_button_toggleconnectionview {
 
     text-align: center;
     font-size: smaller;
@@ -135,18 +102,19 @@ div.component_QR_button_toggleconnectionview {
     }
 }
 
-div.component_QR_manualurl {
+div.component_Connector_instructions {
     border-radius: 3px;
     background-color: $background-lightestgray;
     border: $background-lightgray 1px solid;
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 190px;
 
-    margin-top: 10px;
+    margin: 10px 5px 5px 5px;
     padding: 15px;
 
-    & div.component_QR_manualurl_url {
+    & div.component_Connector_instructions_url {
         font-weight: bold;
 
         & a {
@@ -159,17 +127,17 @@ div.component_QR_manualurl {
         }
     }
 
-    & div.component_QR_manualurl_guidance {
+    & div.component_Connector_instructions_guidance {
         margin: 20px 0 20px 0;
         font-size: smaller;
     }
 
-    & div.component_QR_manualurl_code {
+    & div.component_Connector_instructions_code {
         font-size: x-large;
         font-weight: bold;
     }
 
-    & div.component_QR_manualurl_validity {
+    & div.component_Connector_instructions_validity {
         margin-top: 5px;
         font-size: smaller;
 
@@ -185,78 +153,70 @@ div.component_QR_manualurl {
 // ----------------------------------------------------------------
 
 
-div.component_QR_sendinvite_container {
-
-    display: none;
-
-    width: 205px;
-
+div.component_Connector_sendinvite_container {
+    display: block;
     background-color: #ffffff;
-
-    &.show {
-        display: block;
-    }
 }
 
-div.component_QR_container {
-    display: none;
+div.component_Connector_container {
+    display: block;
     cursor: pointer;
-
-    &.show {
-        display: block;
-    }
 }
 
-div.component_QR_sendinvite_channels {
+div.component_Connector_connectiontypes_container {
+    display: none;
+}
+
+div.component_Connector_sendinvite_channels {
     width: 166px;
-    margin: 20px;
+    margin: 20px 15px 25px 15px;
     background-color: #ffffff;
 
-    & > div.component_QR_sendinvite_channel_row {
+    & > div.component_Connector_sendinvite_channel_row {
         margin-bottom: 3px;
     }
 
-    & > div.component_QR_sendinvite_channel_row:last-child {
+    & > div.component_Connector_sendinvite_channel_row:last-child {
         margin-bottom: 0;
     }
 }
 
-div.component_QR_sendinvite_channel_row {
+div.component_Connector_sendinvite_channel_row {
     display: flex;
     flex-direction: row;
 
-    & > div.component_QR_sendinvite_channel {
+    & > div.component_Connector_sendinvite_channel {
         margin-right: 3px;
     }
 
-    & > div.component_QR_sendinvite_channel:last-child {
+    & > div.component_Connector_sendinvite_channel:last-child {
         margin-right: 0;
     }
 }
 
-div.component_QR_sendinvite_channel {
+div.component_Connector_sendinvite_channel {
     flex: auto;
     cursor: pointer;
     background-color: #f4f4f4;
 }
 
-div.component_QR_sendinvite_channel_name {
+div.component_Connector_sendinvite_channel_name {
     width: 82px;
     height: 25px;
 }
 
-div.component_QR_sendinvite_channel_name_label {
+div.component_Connector_sendinvite_channel_name_label {
     margin-top: 8px;
     text-align: center;
     font-size: 12px;
     color: #7c7c7c;
 
-    div.component_QR_sendinvite_channel:hover & {
+    div.component_Connector_sendinvite_channel:hover & {
         color: $color-button-dark;
     }
 }
 
-div.component_QR_sendinvite_channel_icon {
+div.component_Connector_sendinvite_channel_icon {
 
     width: 82px;
     height: 50px;
@@ -269,7 +229,7 @@ div.component_QR_sendinvite_channel_icon {
     &.whatsapp {
         background-position: 0 -23px;
 
-        div.component_QR_sendinvite_channel:hover & {
+        div.component_Connector_sendinvite_channel:hover & {
             background-position: 0 -169px;
         }
     }
@@ -277,7 +237,7 @@ div.component_QR_sendinvite_channel_icon {
     &.telegram {
         background-position: -82px -25px;
 
-        div.component_QR_sendinvite_channel:hover & {
+        div.component_Connector_sendinvite_channel:hover & {
             background-position: -82px -171px;
         }
     }
@@ -285,7 +245,7 @@ div.component_QR_sendinvite_channel_icon {
     &.email {
         background-position: -1px -97px;
 
-        div.component_QR_sendinvite_channel:hover & {
+        div.component_Connector_sendinvite_channel:hover & {
             background-position: -1px -243px;
         }
     }
@@ -293,7 +253,7 @@ div.component_QR_sendinvite_channel_icon {
     &.copylink {
         background-position: -82px -97px;
 
-        div.component_QR_sendinvite_channel:hover & {
+        div.component_Connector_sendinvite_channel:hover & {
             background-position: -82px -243px;
         }
     }

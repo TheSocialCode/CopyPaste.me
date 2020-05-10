@@ -294,7 +294,7 @@ module.exports.prototype = {
         if (!device) return false;
 
         // 3. convert
-        this.connectSecondaryDevice(this._unconfirmedSecondaryDeviceSocket, this._sSecondaryDevicePublicKey, device, Token.prototype.TYPE_MANUALCODE);
+        this.connectSecondaryDevice(this._unconfirmedSecondaryDeviceSocket, this._sSecondaryDevicePublicKey, device, ConnectionTypes.prototype.TYPE_MANUALLY);
 
         // 4. cleanup
         delete this._unconfirmedSecondaryDeviceSocket;

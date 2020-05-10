@@ -6,6 +6,8 @@
 
 'use strict';
 
+// import project classes
+const ConnectionTypes = require('./../../client/components/Connector/ConnectionTypes');
 
 // import utils
 const Module_GenerateUniqueID = require('generate-unique-id');
@@ -31,12 +33,6 @@ module.exports.prototype = {
     TOKEN_LIFETIME: 2 * 60 * 1000,
     TOKEN_LIFETIME_INVITE: 5 * 60 * 1000,
 
-    // types
-    TYPE_QR: 'QR',
-    TYPE_MANUALCODE: 'ManualCode',
-    TYPE_INVITE: 'Invite',
-
-
 
     // ----------------------------------------------------------------------------
     // --- Constructor ------------------------------------------------------------
@@ -55,10 +51,10 @@ module.exports.prototype = {
         this._sType = sType;
 
         // 2. init
-        this._sValue = (sType === this.TYPE_QR || sType === this.TYPE_INVITE) ? this._initValueQR() : (sType === this.TYPE_MANUALCODE) ? this._initValueManualCode() : false;
+        this._sValue = (sType === ConnectionTypes.prototype.TYPE_SCAN || sType === ConnectionTypes.prototype.TYPE_INVITE) ? this._initValueQR() : (sType === ConnectionTypes.prototype.TYPE_MANUALLY) ? this._initValueManualCode() : false;
 
         // 3. configure
-        this._nExpires = new Date().getTime() + ((this._sValue !== false) ? ((this._sType === this.TYPE_INVITE) ? this.TOKEN_LIFETIME_INVITE : this.TOKEN_LIFETIME) : 0);
+        this._nExpires = new Date().getTime() + ((this._sValue !== false) ? ((this._sType === ConnectionTypes.prototype.TYPE_INVITE) ? this.TOKEN_LIFETIME_INVITE : this.TOKEN_LIFETIME) : 0);
     },
 
 
@@ -85,7 +81,7 @@ module.exports.prototype = {
     getLifetime: function()
     {
         // 1. send
-        return (this._sType === this.TYPE_INVITE) ? this.TOKEN_LIFETIME_INVITE : this.TOKEN_LIFETIME;
+        return (this._sType === ConnectionTypes.prototype.TYPE_INVITE) ? this.TOKEN_LIFETIME_INVITE : this.TOKEN_LIFETIME;
     },
 
     /**
