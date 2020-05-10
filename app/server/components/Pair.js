@@ -14,6 +14,7 @@ const Token = require('./Token');
 const Utils = require('./../utils/Utils');
 const ConnectorEvents = require('./../../client/components/Connector/ConnectorEvents');
 const ToggleDirectionStates = require('./../../client/components/ToggleDirectionButton/ToggleDirectionStates');
+const ConnectionTypes = require('./../../client/components/Connector/ConnectionTypes');
 
 // import extenders
 const EventDispatcherExtender = require('./../../common/extenders/EventDispatcherExtender');
@@ -52,7 +53,6 @@ module.exports.prototype = {
 
     // config
     _sDirection: '',
-    //_sConnectionType: null,
 
     // action types
     ACTIONTYPE_CREATED: 'CREATED',
