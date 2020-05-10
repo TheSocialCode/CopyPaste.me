@@ -60,7 +60,6 @@ module.exports.prototype = {
     _elConnectionTypeInvite_Options: null,
     _elConnectionTypeInvite_ButtonRefreshToken: null,
     _elConnectionTypeInvite_TimeTillExpiration: null,
-    
     _elConnectionTypeInvite_NotificationCopiedToClipboard: null,
 
     // channel views
@@ -101,22 +100,20 @@ module.exports.prototype = {
         // 1. extend
         new EventDispatcherExtender(this);
 
-
         // ---
 
-
-        // 3. register
+        // 2. register
         this._elRoot = document.querySelector('[data-mimoto-id="component_Connector"]');
         this._elCardFront = this._elRoot.querySelector('[data-mimoto-id="card_front"]');
         this._elCardBack = this._elRoot.querySelector('[data-mimoto-id="card_back"]');
         this._elConnectionTypesContainer = this._elRoot.querySelector('[data-mimoto-id="connectiontypes-container"]');
 
-        // 4. register - connection types
+        // 3. register - connection types
         this._elConnectionTypeScan = this._elConnectionTypesContainer.querySelector('[data-mimoto-id="type_scan"]');
         this._elConnectionTypeManually = this._elConnectionTypesContainer.querySelector('[data-mimoto-id="type_manually"]');
         this._elConnectionTypeInvite = this._elConnectionTypesContainer.querySelector('[data-mimoto-id="type_invite"]');
 
-        // 5. store
+        // 4. store
         this._aConnectionTypes[ConnectionTypes.prototype.TYPE_SCAN] = this._elConnectionTypeScan;
         this._aConnectionTypes[ConnectionTypes.prototype.TYPE_MANUALLY] = this._elConnectionTypeManually;
         this._aConnectionTypes[ConnectionTypes.prototype.TYPE_INVITE] = this._elConnectionTypeInvite;
@@ -124,25 +121,25 @@ module.exports.prototype = {
 
         // --- connection type `scan`
 
-        // 6. register
+        // 5. register
         this._elConnectionTypeScan_QRContainer = this._elConnectionTypeScan.querySelector('[data-mimoto-id="container"]');
 
 
         // --- connection type `manually`
 
-        // 7. register
+        // 6. register
         this._elConnectionTypeManually_Instructions = this._elConnectionTypeManually.querySelector('[data-mimoto-id="instructions"]');
         this._elConnectionTypeManually_Code = this._elConnectionTypeManually.querySelector('[data-mimoto-id="code"]');
         this._elConnectionTypeManually_Countdown = this._elConnectionTypeManually.querySelector('[data-mimoto-id="countdown"]');
         this._elConnectionTypeManually_URL = this._elConnectionTypeManually.querySelector('[data-mimoto-id="connect_url"]');
 
-        // 8. setup
+        // 7. setup
         this._elConnectionTypeManually_URL.innerText = window.location.protocol + '//' + window.location.hostname;
 
 
         // --- connection type `invite`
 
-        // 9. register
+        // 8. register
         this._elConnectionTypeInvite_ButtonRefreshToken = this._elConnectionTypeInvite.querySelector('[data-mimoto-id="button-refreshtoken"]');
         this._elConnectionTypeInvite_TimeTillExpiration = this._elConnectionTypeInvite.querySelector('[data-mimoto-id="timetillexpiration"]');
         this._elConnectionTypeInvite_NotificationCopiedToClipboard = this._elConnectionTypeInvite.querySelector('[data-mimoto-id="notification-copiedtoclipboard"]');
@@ -152,7 +149,7 @@ module.exports.prototype = {
         this._elConnectionTypeInvite_ButtonEmail = this._elConnectionTypeInvite_Options.querySelector('[data-mimoto-id="button-email"]');
         this._elConnectionTypeInvite_ButtonCopyLink = this._elConnectionTypeInvite_Options.querySelector('[data-mimoto-id="button-copylink"]');
 
-        // 10. configure
+        // 9. configure
         this._elConnectionTypeInvite_ButtonCopyLink.addEventListener('click', this._onButtonCopyLinkClick.bind(this));
         this._elConnectionTypeInvite_ButtonRefreshToken.addEventListener('click', this._onButtonRefreshTokenClick.bind(this));
 
@@ -160,22 +157,22 @@ module.exports.prototype = {
         // ---
 
 
-        // 11. store
+        // 10. store
         this._sCurrentConnectionType = ConnectionTypes.prototype.TYPE_SCAN;
 
-        // 12. setup
+        // 11. setup
         this.setToken(sToken, nTokenLifetime);
 
-        // 13. show
+        // 12. show
         this._elCardFront.appendChild(this._aConnectionTypes[this._sCurrentConnectionType]);
 
 
         // ---
 
-        // 14. init
+        // 13. init
         this._menuConnectionType = new MenuConnectionType();
 
-        // 15. configure
+        // 14. configure
         this._menuConnectionType.addEventListener(MenuConnectionType.prototype.REQUEST_TOGGLE_CONNECTIONTYPE, this._onRequestToggleConnectionType.bind(this));
     },
 
@@ -237,13 +234,17 @@ module.exports.prototype = {
         // 2. compose
         this._sTokenURL = window.location.protocol + '//' + window.location.hostname + '/' + sToken;
 
-        // 3. setup
-        var typeNumber = 4;
-        var errorCorrectionLevel = 'L';
-        var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
-        qr.addData(this._sTokenURL);
-        qr.make();
-        this._elConnectionTypeScan_QRContainer.innerHTML = qr.createImgTag(5);
+        // 3. verify
+        if (this._sCurrentConnectionType === ConnectionTypes.prototype.TYPE_SCAN)
+        {
+            // a. instant
+            this._showQR();
+        }
+        else
+        {
+            // b. with a small delay, immediately after the flip anikation to another connection type is finished
+            setTimeout(this._showQR.bind(this), 500);
+        }
 
         // 4. output
         this._elConnectionTypeInvite_ButtonWhatsapp.setAttribute('data-url', this._sTokenURL);
@@ -303,7 +304,10 @@ module.exports.prototype = {
         // 1. verify or exit
         if (sConnectionType === this._sCurrentConnectionType) return;
 
-        // 2. prepare
+        // 2. store new state
+        this._sCurrentConnectionType = sConnectionType;
+
+        // 3. prepare
         switch(sConnectionType)
         {
             case ConnectionTypes.prototype.TYPE_SCAN:
@@ -321,7 +325,7 @@ module.exports.prototype = {
                 break;
         }
 
-        // 3. select
+        // 4. select
         if (this._bIsFrontCardFocused)
         {
             // a. cleanup
@@ -348,10 +352,7 @@ module.exports.prototype = {
         // 5. toggle
         this._bIsFrontCardFocused = !this._bIsFrontCardFocused;
 
-        // 6. store new state
-        this._sCurrentConnectionType = sConnectionType;
-
-        // 7. toggle
+        // 6. toggle
         this._elRoot.classList.toggle('flip');
     },
 
@@ -479,13 +480,13 @@ module.exports.prototype = {
         Module_ClipboardCopy(this._sTokenURL);
 
         // 2. style
-        this._elConnectionTypeInvite_NotificationCopiedToClipboard.classList.add('copiedtoclipboard');
+        this._elConnectionTypeInvite_NotificationCopiedToClipboard.classList.add('show');
 
         // 3. animate
         setTimeout(function ()
         {
             // a. cleanup
-            this._elConnectionTypeInvite_NotificationCopiedToClipboard.classList.remove('copiedtoclipboard');
+            this._elConnectionTypeInvite_NotificationCopiedToClipboard.classList.remove('show');
 
         }.bind(this), 2000);
     },
@@ -498,6 +499,21 @@ module.exports.prototype = {
     {
         // 1. request fresh token
         this._onTimerTokenExpires(true);
+    },
+
+    /**
+     * Show QR
+     * @private
+     */
+    _showQR: function()
+    {
+        // 1. setup
+        var typeNumber = 4;
+        var errorCorrectionLevel = 'L';
+        var qr = QRCodeGenerator(typeNumber, errorCorrectionLevel);
+        qr.addData(this._sTokenURL);
+        qr.make();
+        this._elConnectionTypeScan_QRContainer.innerHTML = qr.createImgTag(5);
     }
 
 };

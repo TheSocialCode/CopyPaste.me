@@ -70,8 +70,8 @@
                             </div>
                         </div>
                     </div>
-                    <div data-mimoto-id="button-toggleconnectionview" class="component_Connector_button_toggleconnectionview">
-                        <div data-mimoto-id="notification-copiedtoclipboard">Copied to clipboard!</div>
+                    <div data-mimoto-id="notification-copiedtoclipboard" class="component_Connector_notification_copiedtoclipboard">
+                        <div>Copied to clipboard!</div>
                     </div>
                 </div>
 

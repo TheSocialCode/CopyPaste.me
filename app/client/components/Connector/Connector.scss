@@ -73,31 +73,21 @@ div.component_Connector_card_sublabel_invite_expirationlabel {
     font-size: 13px;
 }
 
-div.component_Connector_button_toggleconnectionview {
+div.component_Connector_notification_copiedtoclipboard {
 
+    display: none;
+    position: relative;
     text-align: center;
     font-size: smaller;
-    margin-top: -12px;
     color: $color-button-dark;
-    cursor: pointer;
-
-    &:hover {
-        color: #000000;
-    }
 
     & > div {
-        display: none;
-
-        &.show {
-            display: block;
-        }
+        position: absolute;
+        top: -19px;
+        left: 33px;
     }
 
-    &.copiedtoclipboard > div {
-        display: none;
-    }
-
-    &.copiedtoclipboard > div:last-child {
+    &.show {
         display: block;
     }
 }
