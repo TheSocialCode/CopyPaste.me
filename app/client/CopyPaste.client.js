@@ -69,12 +69,12 @@ document.addEventListener('DOMContentLoaded', function () {
     this._toggleFooter();
 
     // 7. configure
-    document.querySelector('[data-mimoto-id="footer-copylink"]').addEventListener('click', function(sURL)
-    {
-        // a. copy
-        Module_ClipboardCopy(sURL);
-
-    }.bind(this, sURL));
+    // document.querySelector('[data-mimoto-id="footer-copylink"]').addEventListener('click', function(sURL)
+    // {
+    //     // a. copy
+    //     Module_ClipboardCopy(sURL);
+    //
+    // }.bind(this, sURL));
 
     // 8. configure
     window.addEventListener('scroll', this._toggleFooter.bind(this));
