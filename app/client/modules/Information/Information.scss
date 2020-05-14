@@ -32,6 +32,17 @@ div.main-interface-information-section {
         color: $color-background-header;
     }
 
+    & a.highlighted {
+        color: $color-background-header;
+        text-decoration: none;
+        font-style: normal;
+        font-weight: normal;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
     & span.highlight {
         font-style: italic;
     }
@@ -55,6 +66,11 @@ div.main-interface-information-section {
 
     &.right {
         text-align: right;
+        float: right;
+    }
+
+    &.right-contentleft {
+        text-align: left;
         float: right;
     }
 

@@ -12,6 +12,10 @@
     // 4. load (ensures use of latest JS build)
     $manifest = json_decode(file_get_contents(dirname(__FILE__).'/static/dist/manifest.json'), true);
     $config = json_decode(file_get_contents(dirname(dirname(__FILE__)).'/CopyPaste.config.json'), true);
+
+    // 5. init
+    $bAutoRun = true;
+
 ?>
 <!doctype html>
 <html>
@@ -84,18 +88,36 @@
             </div>
 
             <?php
-                switch($sSection)
+
+                // 1. verify
+                if (isset($config['stats']) && isset($config['stats']['path']) && strlen($config['stats']['path']) > 0 && $sSection == '/'.$config['stats']['path'])
                 {
-                    case '/faq':
+                    // a. load
+                    include(dirname(dirname(__FILE__)).'/src/pages/stats.php');
 
-                        include(dirname(dirname(__FILE__)).'/src/pages/faq.php');
-                        break;
+                    // b. toggle
+                    $bAutoRun = false;
+                }
+                else
+                {
+                    switch($sSection)
+                    {
+                        case '/faq':
 
-                    case '/connect':
-                    default:
+                            // a. load
+                            include(dirname(dirname(__FILE__)).'/src/pages/faq.php');
 
-                        include(dirname(dirname(__FILE__)).'/src/pages/information.php');
-                        break;
+                            // b. toggle
+                            $bAutoRun = false;
+                            break;
+
+                        case '/connect':
+                        default:
+
+                            // a. load
+                            include(dirname(dirname(__FILE__)).'/src/pages/information.php');
+                            break;
+                    }
                 }
             ?>
         </div>
@@ -109,13 +131,13 @@
                     </div>
                     <div class="footer_table_column center footer_table_center">
                         <div class="footer_table_center_column">
-                            <div class="footer_table_center_column_cell"><a href="#howitworks">How it works</a></div>
-                            <div class="footer_table_center_column_cell"><a href="/">Security</a></div>
+                            <div class="footer_table_center_column_cell"><a href="/#howitworks">How it works</a></div>
+                            <div class="footer_table_center_column_cell"><a href="/faq#security">Security</a></div>
                             <div class="footer_table_center_column_cell"><a href="/faq">FAQ</a></div>
                         </div>
                         <div class="footer_table_center_column">
-                            <div class="footer_table_center_column_cell"><a href="mailto:sebastian@thesocialcode.com">Support</a></div>
-                            <div class="footer_table_center_column_cell"><a href="mailto:sebastian@thesocialcode.com">Contact</a></div>
+                            <div class="footer_table_center_column_cell"><a href="/#support">Support</a></div>
+                            <div class="footer_table_center_column_cell"><a href="/faq#contact">Contact</a></div>
                         </div>
                     </div>
                     <div class="footer_table_column right">
@@ -154,7 +176,8 @@
                 socketio: {
                     port: '<?php echo $config['socketio']['client']['port']; ?>'
                 }
-            }
+            },
+            autoRun: <?php echo ($bAutoRun) ? 'true' : 'false'; ?>
         };
     </script>
     <script src="/static/dist/<?php echo $manifest['main.js']; ?>"></script>

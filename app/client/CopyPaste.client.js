@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }.bind(this));
 
     // 10. verify
-    if (window.location.pathname.toLowerCase() === '/faq') return;
+    if (!document.CopyPaste.autoRun) return;
 
     // 11. startup
     this.client = new Client(sURL + sPort);

@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "Frictionless sharing between devices",
     "repository": "https://github.com/SebastianKersten/CopyPaste.me",
-    "license": "UNLICENSED",
+    "license": "Copyright by The Social Code Repository",
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.13.0",
         "asymmetric-crypto": "^1.0.2",

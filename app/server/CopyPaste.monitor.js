@@ -513,6 +513,59 @@ module.exports = {
         }.bind(this));
 
 
+        // if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').find(
+        //     {
+        //         "logs.action": "DATA",
+        //         "archived": true
+        //     }
+        // ).toArray(function(err, aDocs) {
+        //
+        //     // a. validate
+        //     CoreModule_Assert.equal(err, null);
+        //
+        //
+        //     console.log('Yay!', aDocs);
+        //
+        //     // process.exit(22);
+        //     // return;
+        //
+        //
+        //     var bulkArray = [];
+        //     aDocs.forEach(
+        //         function(d, i)
+        //         {
+        //
+        //             //this._stats.currently_x = 'xxx';
+        //
+        //             bulkArray.push(
+        //                 {
+        //                     updateOne: {
+        //                         filter: { _id: d._id },
+        //                         update: { $set: { marked: 'xxx' }},
+        //                         upsert:true
+        //                     }
+        //                 }
+        //             );
+        //         }
+        //         );
+        //     if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').bulkWrite(bulkArray, {ordered:true, w:1});
+        //
+        // }.bind(this));
+
+
+
+        // --- mark
+
+        // if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').find(
+        //     {
+        //         "logs.action": "DATA",
+        //         "archived": true
+        //     }
+        // ).toArray(function(err, aDocs) {
+
+
+
+
 
         // --- duration ------------------------------------------------
 
