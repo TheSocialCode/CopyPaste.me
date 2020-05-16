@@ -27,6 +27,9 @@
         "file": "path/to/your/file.log"
     },
     "analytics": {
-        "script" : ""
+        "matomo" : {
+            "enabled": false,
+            "siteID": 0
+        }
     }
 }

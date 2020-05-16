@@ -165,10 +165,12 @@
                     port: '<?php echo $config['socketio']['client']['port']; ?>'
                 }
             },
-            autoRun: <?php echo ($bAutoRun) ? 'true' : 'false'; ?>
+            autoRun: <?php echo ($bAutoRun) ? 'true' : 'false'; ?>,
+            analytics: <?php echo json_encode($config['analytics']) ?>
         };
     </script>
     <script src="/static/dist/<?php echo $manifest['main.js']; ?>"></script>
-<?php if (isset($config['analytics']) && isset($config['analytics']['script'])) echo $config['analytics']['script']; ?>
+    <script src="/static/js/matomo.js"></script>
+    <script type="text/javascript" async="1" defer="1" src="//cdn.matomo.cloud/thesocialcode.matomo.cloud/matomo.js"></script>
 </body>
 </html>
