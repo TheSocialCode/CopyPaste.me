@@ -56,24 +56,24 @@ module.exports = {
                 manually: 0,
                 invite: 0
             },
-            averageTimeTillConnection: 0,
+            //averageTimeTillConnection: 0,
             used: 0,
             archived: 0
         },
-        transfers: {
-            started: 0,
-            totalSizeStarted: 0,
-            totalSizeTransferred: 0,
-            finished: 0,
-            totalSizeFinished: 0,
-            unfinished: 0,
-            totalSizeUnfinished: 0,
-            types: {
-                password: 0,
-                text: 0,
-                file: 0
-            }
-        }
+        // transfers: {
+        //     started: 0,
+        //     totalSizeStarted: 0,
+        //     totalSizeTransferred: 0,
+        //     finished: 0,
+        //     totalSizeFinished: 0,
+        //     unfinished: 0,
+        //     totalSizeUnfinished: 0,
+        //     types: {
+        //         password: 0,
+        //         text: 0,
+        //         file: 0
+        //     }
+        // }
     },
 
 
@@ -192,424 +192,48 @@ module.exports = {
     _collectStats: function()
     {
 
+        // 1. add timestamps
+        // 2. cleanup (and analyse) archived pairs older than x
+        // 3. run every x minutes
 
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                // {"$project": {"logs":1}},
-                { "$unwind": "$logs" },
-                //{"$group": {"_id":{"logs":"$logs"}, "count":{"$sum":1}}},
-                {"$match": {"logs.action": "DATA" }},
-                // {"$group": {"_id": "$_id._id", "logs":{"$addToSet":"$_id.logs"}}}
-            ]
-        ).toArray(function(err, aDocs) {
+        // 11. live stats for pairs
+        // 12. show current number of connections
+        // 13. refresh every x minutes
+        // 15. how to handle dropped moments?
 
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.transfers.started = aDocs.length;
-
-            // c. update
-            this._stats.transfers.unfinished = this._stats.transfers.started - this._stats.transfers.finished;
-
-            // d. output
-            this._outputStats();
-
-        }.bind(this));
-
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                // {"$project": {"logs":1}},
-                { "$unwind": "$logs" },
-                //{"$group": {"_id":{"logs":"$logs"}, "count":{"$sum":1}}},
-                {"$match": {"logs.action": "DATA", "logs.finished": true }},
-                // {"$group": {"_id": "$_id._id", "logs":{"$addToSet":"$_id.logs"}}}
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.transfers.finished = aDocs.length;
-
-        }.bind(this));
+        // B. timestamps allows `less than` queries, group ids don't
 
 
 
+        // --- Done
+        // 4. analyzer script
+        // 5. monitor script shows
+
+        // --- Alternative, more obfuscating
+        // A. group creation in second phase, start with timestamps
+        // 6. server creates random unique group id
+        // 7. store all items in group id  (how to keep server and analyzer in sync)
+        // 8. analyse and cleanup group id
+        // 9. close group + add new group
+        // 10. cleanup closed groups
+
+        // --- Later
+        // 14. push to interface
 
 
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                { "$unwind": "$logs" },
-                { "$match": {"logs.action": "DATA" }},
-                {
-                    $project: {
-                        totalSize: { $sum: "$logs.totalSize" },
-                        totalTransferred: { $sum: "$logs.bytesTransferred" }
-                    }
-                }
 
-                // {"$group": {"_id": "$_id._id", "logs":{"$addToSet":"$_id.logs"}}}
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. init
-            let nTotalSize = 0;
-            let nTotalTransferred = 0;
-
-            // c. add up
-            let nItemCount = aDocs.length;
-            for (let nItemIndex = 0; nItemIndex < nItemCount; nItemIndex++)
+        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('stats').find(
             {
-                nTotalSize += aDocs[nItemIndex].totalSize;
-                nTotalTransferred += aDocs[nItemIndex].totalTransferred;
+                //"date": { $gt: , $lt: }
             }
-
-            // d. update
-            this._stats.transfers.totalSizeStarted = nTotalSize;
-            this._stats.transfers.totalSizeTransferred = nTotalTransferred;
-
-            // e. update
-            this._stats.transfers.totalSizeUnfinished = this._stats.transfers.totalSizeStarted - this._stats.transfers.totalSizeTransferred;
-
-
-        }.bind(this));
-
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                { "$unwind": "$logs" },
-                { "$match": {"logs.action": "DATA", "logs.finished": true }},
-
-
-                // db.getCollection('collectionName').aggregate(
-                //     [ {$group : { _id : '$user', count : {$sum : 1}}} ]
-                // )
-
-
-                // {
-                //     "$group":
-                //     {
-                //         _id: { id:"$id", logs:"$logs" },
-                //         //sizes: { $push:  { totalSize: "$logs.totalSize" } }
-                //         totalSize: { $sum: "logs.totalSize" }, //{ $multiply: [ "$price", "$quantity" ] } },
-                //         //count: { $sum: 1 }
-                //     }
-                // },
-                {
-                    $project: {
-                        totalSize: { $sum: "$logs.totalSize" },
-                    }
-                }
-
-                // {"$group": {"_id": "$_id._id", "logs":{"$addToSet":"$_id.logs"}}}
-            ]
         ).toArray(function(err, aDocs) {
 
             // a. validate
             CoreModule_Assert.equal(err, null);
 
-            // b. init
-            let nTotalSize = 0;
-
-            // c. add up
-            let nItemCount = aDocs.length;
-            for (let nItemIndex = 0; nItemIndex < nItemCount; nItemIndex++)
-            {
-                nTotalSize += aDocs[nItemIndex].totalSize;
-            }
-
-            // d. update
-            this._stats.transfers.totalSizeFinished = nTotalSize;
+            console.log('Yay!', aDocs);
 
         }.bind(this));
-
-
-
-
-
-        // ---------------------------------------------------
-
-
-
-
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                {
-                    $unwind: "$logs"
-                },
-                {
-                    $match: {
-                        "logs.action": "DATA"
-                    }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        numberOfTransfers: { $sum: 1 },
-                        totalSize: { $sum: "$logs.totalSize" }
-                    }
-                },
-                {
-                    $project: {
-                        _id: false,
-                        numberOfTransfers : true,
-                        totalSize : true
-                    }
-                }
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.xxx = JSON.stringify(aDocs);
-
-        }.bind(this));
-
-
-
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                {
-                    $unwind: "$logs"
-                },
-                {
-                    $match: {
-                        "logs.action": "DATA"
-                    }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        numberOfTransfers: { $sum: 1 },
-                        totalSize: { $sum: "$logs.totalSize" }
-                    }
-                },
-                {
-                    $project: {
-                        _id: false,
-                        numberOfTransfers : true,
-                        totalSize : true
-                    }
-                }
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. update
-            this._stats.xxx = JSON.stringify(aDocs);
-
-        }.bind(this));
-
-
-
-        // ---------------------------------------------------
-
-
-
-
-
-        // ---------------------------------------------------
-
-
-
-
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                {
-                    "$group": {
-                        "_id": false,
-                        "pairCount": { $sum: 1 },
-                        "activeCount": { $sum: { $cond: [ { $eq: [ "$active", true ] }, 1, 0 ] } },
-                        "connectedCount": { $sum: { $cond: [ { $eq: [ "$connected", true ] }, 1, 0 ] } },
-                        "connectionTypeScan": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_SCAN ] }, 1, 0 ] } },
-                        "connectionTypeManually": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_MANUALLY ] }, 1, 0 ] } },
-                        "connectionTypeInvite": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_INVITE ] }, 1, 0 ] } },
-                        "usedCount": { $sum: { $cond: [ { $eq: [ "$used", true ] }, 1, 0 ] } },
-                        "archivedCount": { $sum: { $cond: [ { $eq: [ "$archived", true ] }, 1, 0 ] } }
-                    }
-                },
-                {
-                    "$project": {
-                        "_id": 0
-                    }
-                }
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. store
-            let result = aDocs[0];
-
-            // c. validate
-            if (!result) return;
-
-            // d. update
-            this._stats.pairs.active = result.activeCount;
-            this._stats.pairs.idle = result.pairCount - result.activeCount - result.archivedCount;
-            this._stats.pairs.connected = result.connectedCount;
-            this._stats.pairs.connectionTypes.scan = result.connectionTypeScan;
-            this._stats.pairs.connectionTypes.manually = result.connectionTypeManually;
-            this._stats.pairs.connectionTypes.invite = result.connectionTypeInvite;
-            this._stats.pairs.used = result.usedCount;
-            this._stats.pairs.archived = result.archivedCount;
-
-        }.bind(this));
-
-
-
-        // --- data ------------------------------------------------
-
-
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                {
-                    $unwind: "$logs"
-                },
-                {
-                    $match: {
-                        "logs.action": "DATA"
-                    }
-                },
-                {
-                    "$group": {
-                        "_id": false,
-                        "typePasswordCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "password" ] }, 1, 0 ] } },
-                        "typeTextCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "text" ] }, 1, 0 ] } },
-                        "typeFileCount": { $sum: { $cond: [ { $eq: [ "$logs.contentType", "file" ] }, 1, 0 ] } },
-                    }
-                },
-                {
-                    "$project": {
-                        "_id": 0
-                    }
-                }
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. store
-            let result = aDocs[0];
-
-            // c. validate
-            if (!result) return;
-
-            // d. update
-            this._stats.transfers.types.password = result.typePasswordCount;
-            this._stats.transfers.types.text = result.typeTextCount;
-            this._stats.transfers.types.file = result.typeFileCount;
-
-        }.bind(this));
-
-
-        // if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').find(
-        //     {
-        //         "logs.action": "DATA",
-        //         "archived": true
-        //     }
-        // ).toArray(function(err, aDocs) {
-        //
-        //     // a. validate
-        //     CoreModule_Assert.equal(err, null);
-        //
-        //
-        //     console.log('Yay!', aDocs);
-        //
-        //     // process.exit(22);
-        //     // return;
-        //
-        //
-        //     var bulkArray = [];
-        //     aDocs.forEach(
-        //         function(d, i)
-        //         {
-        //
-        //             //this._stats.currently_x = 'xxx';
-        //
-        //             bulkArray.push(
-        //                 {
-        //                     updateOne: {
-        //                         filter: { _id: d._id },
-        //                         update: { $set: { marked: 'xxx' }},
-        //                         upsert:true
-        //                     }
-        //                 }
-        //             );
-        //         }
-        //         );
-        //     if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').bulkWrite(bulkArray, {ordered:true, w:1});
-        //
-        // }.bind(this));
-
-
-
-        // --- mark
-
-        // if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').find(
-        //     {
-        //         "logs.action": "DATA",
-        //         "archived": true
-        //     }
-        // ).toArray(function(err, aDocs) {
-
-
-
-
-
-        // --- duration ------------------------------------------------
-
-
-        if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').aggregate(
-            [
-                {
-                    $unwind: "$logs"
-                },
-                {
-                    $match: {
-                        "logs.action": "DEVICES_CONNECTED"
-                    }
-                },
-                {
-                    "$group": {
-                        "_id": false,
-                        "averageTimeTillConnection": { $avg: "$logs.timeSinceStart"}
-                    }
-                },
-                {
-                    "$project": {
-                        "_id": 0,
-                        "averageTimeTillConnection": { $round: "$averageTimeTillConnection" }
-                    }
-                }
-            ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
-            // b. store
-            let result = aDocs[0];
-
-            // c. validate
-            if (!result) return;
-
-            // d. update
-            this._stats.pairs.averageTimeTillConnection = result.averageTimeTillConnection;
-
-        }.bind(this));
-
-
 
 
 

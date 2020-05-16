@@ -30,9 +30,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#63a9e1">
-    <meta name="msapplication-TileColor" content="#2d89ef">
+    <meta name="msapplication-TileColor" content="#63a9e1">
     <meta name="theme-color" content="#63a9e1">
-
 
     <meta name="description" content="Easily and quickly share passwords, texts and files between devices.">
     <meta name="keywords" content="sharing, frictionless, passwords, tool, free">
@@ -55,7 +54,7 @@
                 <div class="main-interface-header-content">
 
                     <div class="logo">
-                        <a class="logo" href="/"><img data-mimoto-id="logo" src="/static/images/copypaste-logo-normal.png" width="200" /></a>
+                        <a class="logo" href="/"><img data-mimoto-id="logo" src="/static/images/copypaste-logo.png" width="190" /></a>
                     </div>
 
                     <h1 class="tagline">Frictionless sharing<br>between devices</h1>
@@ -89,36 +88,25 @@
 
             <?php
 
-                // 1. verify
-                if (isset($config['stats']) && isset($config['stats']['path']) && strlen($config['stats']['path']) > 0 && $sSection == '/'.$config['stats']['path'])
+                switch($sSection)
                 {
-                    // a. load
-                    include(dirname(dirname(__FILE__)).'/src/pages/stats.php');
+                    case '/faq':
 
-                    // b. toggle
-                    $bAutoRun = false;
+                        // a. load
+                        include(dirname(dirname(__FILE__)).'/src/pages/faq.php');
+
+                        // b. toggle
+                        $bAutoRun = false;
+                        break;
+
+                    case '/connect':
+                    default:
+
+                        // a. load
+                        include(dirname(dirname(__FILE__)).'/src/pages/information.php');
+                        break;
                 }
-                else
-                {
-                    switch($sSection)
-                    {
-                        case '/faq':
 
-                            // a. load
-                            include(dirname(dirname(__FILE__)).'/src/pages/faq.php');
-
-                            // b. toggle
-                            $bAutoRun = false;
-                            break;
-
-                        case '/connect':
-                        default:
-
-                            // a. load
-                            include(dirname(dirname(__FILE__)).'/src/pages/information.php');
-                            break;
-                    }
-                }
             ?>
         </div>
 
@@ -181,5 +169,6 @@
         };
     </script>
     <script src="/static/dist/<?php echo $manifest['main.js']; ?>"></script>
+<?php if (isset($config['analytics']) && isset($config['analytics']['script'])) echo $config['analytics']['script']; ?>
 </body>
 </html>

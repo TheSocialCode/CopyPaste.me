@@ -26,7 +26,7 @@
     "logtofile": {
         "file": "path/to/your/file.log"
     },
-    "stats": {
-        "path": ""
+    "analytics": {
+        "script" : ""
     }
 }

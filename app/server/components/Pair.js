@@ -124,6 +124,7 @@ module.exports.prototype = {
         // 4. store
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('pairs').insertOne(
             {
+                created: Utils.prototype.buildDate(),
                 id: this._sPairID,
                 active: this._bIsActive,
                 connected: false,
