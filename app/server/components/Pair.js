@@ -222,7 +222,7 @@ module.exports.prototype = {
             },
             {
                 $set: { "connected" : true, "connectionType": sConnectionType },
-                $push: { logs: { action: this.ACTIONTYPE_DEVICES_CONNECTED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
+                $push: { logs: { created: Utils.prototype.buildDate(), action: this.ACTIONTYPE_DEVICES_CONNECTED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)
             {
@@ -570,6 +570,7 @@ module.exports.prototype = {
                 {
                     $set: { "used": true },
                     $push: { logs: {
+                            created: Utils.prototype.buildDate(),
                             action: this.ACTIONTYPE_DATA,
                             id: encryptedData.id,
                             contentType: encryptedData.sType,
@@ -767,7 +768,7 @@ module.exports.prototype = {
             },
             {
                 $set: { "compromised": true },
-                $push: { logs: { action: this.ACTIONTYPE_SECURITYCOMPROMISED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
+                $push: { logs: { created: Utils.prototype.buildDate(), action: this.ACTIONTYPE_SECURITYCOMPROMISED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)
             {
