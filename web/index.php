@@ -170,7 +170,5 @@
         };
     </script>
     <script src="/static/dist/<?php echo $manifest['main.js']; ?>"></script>
-    <script src="/static/js/matomo.js"></script>
-    <script type="text/javascript" async="1" defer="1" src="//cdn.matomo.cloud/thesocialcode.matomo.cloud/matomo.js"></script>
 </body>
 </html>
