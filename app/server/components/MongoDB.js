@@ -42,6 +42,8 @@ module.exports.prototype = {
     _db: null,
     _aCollections: {
         pairs: null,
+        transfers: null,
+        stats: null,
         exceptions: null
     },
 
@@ -159,6 +161,7 @@ module.exports.prototype = {
 
         // 4. store
         this._aCollections['pairs'] = this._db.collection('pairs');
+        this._aCollections['transfers'] = this._db.collection('transfers');
         this._aCollections['stats'] = this._db.collection('stats');
         this._aCollections['exceptions'] = this._db.collection('exceptions');
 

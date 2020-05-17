@@ -38,6 +38,7 @@ module.exports.prototype = {
     _sPairID: null,
     _nCreated: 0,
     _bIsActive: true,
+    _bIsUsed: false,
 
     // devices
     _primaryDeviceSocket: null,
@@ -221,8 +222,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "connected" : Utils.prototype.buildDate(), "connectionType": sConnectionType },
-                $push: { logs: { created: Utils.prototype.buildDate(), action: this.ACTIONTYPE_DEVICES_CONNECTED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
+                $set: { "connected" : Utils.prototype.buildDate(), "connectionType": sConnectionType }
             },
             function(err, result)
             {
@@ -558,21 +558,56 @@ module.exports.prototype = {
                 bytesTransferred: 0
             };
 
+            // b. verify
+            if (!this._bIsUsed)
+            {
+                // I. toggle
+                this._bIsUsed = true;
+
+                // II. store
+                this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+                    {
+                        "id": this.getID()
+                    },
+                    {
+                        $set: {
+                            "used": Utils.prototype.buildDate()
+                        }
+                    },
+                    function(err, result)
+                    {
+                        CoreModule_Assert.equal(err, null);
+                    }
+                );
+            }
+
+            // II. store
             this.Mimoto.mongoDB.getCollection('pairs').updateOne(
                 {
                     "id": this.getID()
                 },
                 {
-                    $set: { "used": Utils.prototype.buildDate() },
-                    $push: { logs: {
-                            created: Utils.prototype.buildDate(),
-                            action: this.ACTIONTYPE_DATA,
-                            id: encryptedData.id,
-                            contentType: encryptedData.sType,
-                            totalSize: encryptedData.totalSize,
-                            bytesTransferred: encryptedData.packageSize,
-                            direction: this.getDirection(),
-                        } }
+                    $inc: {
+
+                        "transfersStarted": 1
+                    }
+                },
+                function(err, result)
+                {
+                    CoreModule_Assert.equal(err, null);
+                }
+            );
+
+
+            this.Mimoto.mongoDB.getCollection('transfers').insertOne(
+                {
+                    id: encryptedData.id,
+                    created: Utils.prototype.buildDate(),
+                    pairId: this.getID(),
+                    direction: this.getDirection(),
+                    contentType: encryptedData.sType,
+                    totalSize: encryptedData.totalSize,
+                    bytesTransferred: encryptedData.packageSize
                 },
                 function(err, result)
                 {
@@ -592,14 +627,14 @@ module.exports.prototype = {
         this._aTransferTimes[data.id].bytesTransferred += data.packageSize;
 
         // 2. log
-        this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+        this.Mimoto.mongoDB.getCollection('transfers').updateOne(
             {
-                "id": this.getID(), "logs.action": this.ACTIONTYPE_DATA, "logs.id": data.id
+                "id": data.id
             },
             {
                 $set: {
-                    "logs.$.bytesTransferred": this._aTransferTimes[data.id].bytesTransferred,
-                    "logs.$.lastUpdate": Utils.prototype.buildDate(),
+                    "bytesTransferred": this._aTransferTimes[data.id].bytesTransferred,
+                    "lastUpdate": Utils.prototype.buildDate(),
                 }
             },
             function(err, result, data)
@@ -612,19 +647,36 @@ module.exports.prototype = {
         if (data.packageNumber === data.packageCount - 1)
         {
             // a. log
-            this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+            this.Mimoto.mongoDB.getCollection('transfers').updateOne(
                 {
-                    "id": this.getID(), "logs.action": this.ACTIONTYPE_DATA, "logs.id": data.id
+                    "id": data.id
                 },
                 {
                     $set: {
-                        "logs.$.finished": Utils.prototype.buildDate()
+                        "finished": Utils.prototype.buildDate()
                     },
                     $unset: {
-                        "logs.$.lastUpdate": ""
+                        "lastUpdate": ""
                     }
                 },
                 function(err, result, data)
+                {
+                    CoreModule_Assert.equal(err, null);
+                }
+            );
+
+            // II. store
+            this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+                {
+                    "id": this.getID()
+                },
+                {
+                    $inc: {
+
+                        "transfersFinished": 1
+                    }
+                },
+                function(err, result)
                 {
                     CoreModule_Assert.equal(err, null);
                 }
@@ -768,8 +820,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "compromised": Utils.prototype.buildDate() },
-                $push: { logs: { created: Utils.prototype.buildDate(), action: this.ACTIONTYPE_SECURITYCOMPROMISED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
+                $set: { "compromised": Utils.prototype.buildDate() }
             },
             function(err, result)
             {

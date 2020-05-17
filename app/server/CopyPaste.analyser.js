@@ -247,36 +247,29 @@ module.exports = {
             // a. validate
             CoreModule_Assert.equal(err, null);
 
-            // console.log('aDocs', aDocs);
-            // process.exit(22);
-
             // b. store
             let result = aDocs[0];
 
             // c. validate
             if (!result) return;
 
-
-            let stats = {
-                created: Utils.prototype.buildDate(),
-                active: result.activeCount,
-                idle: result.pairCount - result.activeCount - result.archivedCount,
-                connected: result.connectedCount,
-                connectionTypes: {
-                    scan: result.connectionTypeScan,
-                    manually: result.connectionTypeManually,
-                    invite: result.connectionTypeInvite
-                },
-                used: result.usedCount,
-                archived: result.archivedCount
-            };
-
-            // d. update
-
-
-
-            // 4. store
-            if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('stats').insertOne(stats);
+            // d. store
+            if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('stats').insertOne(
+                {
+                    type: 'pairs',
+                    created: Utils.prototype.buildDate(),
+                    active: result.activeCount,
+                    idle: result.pairCount - result.activeCount - result.archivedCount,
+                    connected: result.connectedCount,
+                    connectionTypes: {
+                        scan: result.connectionTypeScan,
+                        manually: result.connectionTypeManually,
+                        invite: result.connectionTypeInvite
+                    },
+                    used: result.usedCount,
+                    archived: result.archivedCount
+                }
+            );
 
         }.bind(this));
 

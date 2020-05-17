@@ -12,7 +12,7 @@ const Client = require('./components/Client');
 
 // import external classes
 const Module_ClipboardCopy = require('clipboard-copy');
-const Module_MatomoTracker = require('matomo-tracker');
+// const Module_MatomoTracker = require('matomo-tracker');
 
 
 // connect
@@ -90,19 +90,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // 12. verify
-    if (document.CopyPaste.analytics && document.CopyPaste.analytics.matomo && document.CopyPaste.analytics.matomo.enabled === true)
-    {
-        let matomo = new Module_MatomoTracker(document.CopyPaste.analytics.matomo.siteID, 'https://thesocialcode.matomo.cloud/matomo.php');
-
-        if (window.location.pathname.substr(0, '/faq'.length) === '/faq')
-        {
-            matomo.track(sURL + '/faq');
-        }
-        else
-        {
-            matomo.track(sURL);
-        }
-    }
+    // if (document.CopyPaste.analytics && document.CopyPaste.analytics.matomo && document.CopyPaste.analytics.matomo.enabled === true)
+    // {
+    //     let matomo = new Module_MatomoTracker(document.CopyPaste.analytics.matomo.siteID, 'https://thesocialcode.matomo.cloud/matomo.php');
+    //
+    //     if (window.location.pathname.substr(0, '/faq'.length) === '/faq')
+    //     {
+    //         matomo.track(sURL + '/faq');
+    //     }
+    //     else
+    //     {
+    //         matomo.track(sURL);
+    //     }
+    // }
 
     // 10. verify
     if (!document.CopyPaste.autoRun) return;
