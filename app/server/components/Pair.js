@@ -221,7 +221,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "connected" : true, "connectionType": sConnectionType },
+                $set: { "connected" : Utils.prototype.buildDate(), "connectionType": sConnectionType },
                 $push: { logs: { created: Utils.prototype.buildDate(), action: this.ACTIONTYPE_DEVICES_CONNECTED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)
@@ -549,26 +549,21 @@ module.exports.prototype = {
         // 3. send
         receiverSocket.emit(ConnectorEvents.prototype.RECEIVE_DATA, encryptedData);
 
-
-        // ---
-
-
-        // 4. log start of data
+        // 4. verify
         if (encryptedData.packageNumber === 0)
         {
-            // a. store
+            // a. init
             this._aTransferTimes[encryptedData.id] = {
-                created: Utils.prototype.since(this._nCreated),
-                bytesTransferred: encryptedData.packageSize
+                created: Utils.prototype.buildDate(),
+                bytesTransferred: 0
             };
 
-            // b. log
             this.Mimoto.mongoDB.getCollection('pairs').updateOne(
                 {
                     "id": this.getID()
                 },
                 {
-                    $set: { "used": true },
+                    $set: { "used": Utils.prototype.buildDate() },
                     $push: { logs: {
                             created: Utils.prototype.buildDate(),
                             action: this.ACTIONTYPE_DATA,
@@ -577,8 +572,6 @@ module.exports.prototype = {
                             totalSize: encryptedData.totalSize,
                             bytesTransferred: encryptedData.packageSize,
                             direction: this.getDirection(),
-                            timeSinceStart: this._aTransferTimes[encryptedData.id].created,
-                            finished: (encryptedData.packageNumber === encryptedData.packageCount - 1)
                         } }
                 },
                 function(err, result)
@@ -587,50 +580,58 @@ module.exports.prototype = {
                 }
             );
         }
-        else
-        {
-            // a. update
-            this._aTransferTimes[encryptedData.id].bytesTransferred += encryptedData.packageSize;
+    },
 
-            // b. log
-            this.Mimoto.mongoDB.getCollection('pairs').updateOne(
-                {
-                    "id": this.getID(), "logs.action": this.ACTIONTYPE_DATA, "logs.id": encryptedData.id
-                },
-                {
-                    $set: {
-                        "logs.$.bytesTransferred": this._aTransferTimes[encryptedData.id].bytesTransferred,
-                        "logs.$.duration": Utils.prototype.since(this._nCreated) - this._aTransferTimes[encryptedData.id].created
-                    }
-                },
-                function(err, result, encryptedData)
-                {
-                    CoreModule_Assert.equal(err, null);
+    /**
+     * Update data received
+     * @param data
+     */
+    updateDataReceived: function(data)
+    {
+        // 1. update
+        this._aTransferTimes[data.id].bytesTransferred += data.packageSize;
+
+        // 2. log
+        this.Mimoto.mongoDB.getCollection('pairs').updateOne(
+            {
+                "id": this.getID(), "logs.action": this.ACTIONTYPE_DATA, "logs.id": data.id
+            },
+            {
+                $set: {
+                    "logs.$.bytesTransferred": this._aTransferTimes[data.id].bytesTransferred,
+                    "logs.$.lastUpdate": Utils.prototype.buildDate(),
                 }
-            );
-        }
+            },
+            function(err, result, data)
+            {
+                CoreModule_Assert.equal(err, null);
+            }
+        );
 
-        // 5. log end of data
-        if (encryptedData.packageCount > 1 && encryptedData.packageNumber === encryptedData.packageCount - 1)
+        // 3. log end of data
+        if (data.packageNumber === data.packageCount - 1)
         {
             // a. log
             this.Mimoto.mongoDB.getCollection('pairs').updateOne(
                 {
-                    "id": this.getID(), "logs.action": this.ACTIONTYPE_DATA, "logs.id": encryptedData.id
+                    "id": this.getID(), "logs.action": this.ACTIONTYPE_DATA, "logs.id": data.id
                 },
                 {
                     $set: {
-                        "logs.$.finished": true
+                        "logs.$.finished": Utils.prototype.buildDate()
+                    },
+                    $unset: {
+                        "logs.$.lastUpdate": ""
                     }
                 },
-                function(err, result, encryptedData)
+                function(err, result, data)
                 {
                     CoreModule_Assert.equal(err, null);
                 }
             );
 
             // b. cleanup
-            delete this._aTransferTimes[encryptedData.id];
+            delete this._aTransferTimes[data.id];
         }
     },
 
@@ -731,7 +732,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "archived": true }
+                $set: { "archived": Utils.prototype.buildDate() }
             },
             function(err, result)
             {
@@ -767,7 +768,7 @@ module.exports.prototype = {
                 "id": this.getID()
             },
             {
-                $set: { "compromised": true },
+                $set: { "compromised": Utils.prototype.buildDate() },
                 $push: { logs: { created: Utils.prototype.buildDate(), action: this.ACTIONTYPE_SECURITYCOMPROMISED, timeSinceStart: Utils.prototype.since(this._nCreated) } }
             },
             function(err, result)

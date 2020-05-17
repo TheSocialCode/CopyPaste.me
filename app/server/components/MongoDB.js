@@ -159,6 +159,7 @@ module.exports.prototype = {
 
         // 4. store
         this._aCollections['pairs'] = this._db.collection('pairs');
+        this._aCollections['stats'] = this._db.collection('stats');
         this._aCollections['exceptions'] = this._db.collection('exceptions');
 
         // 5. toggle

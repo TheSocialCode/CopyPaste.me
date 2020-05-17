@@ -10,6 +10,7 @@
 // import project classes
 const MongoDB = require('./components/MongoDB');
 const ConnectionTypes = require('./../client/components/Connector/ConnectionTypes');
+const Utils = require('./utils/Utils');
 
 // import external classes
 const Module_FS = require('fs');
@@ -185,8 +186,11 @@ module.exports = {
     _onMongoDBReady: function(err, client)
     {
         // 1. run
-        this._timerMonitor = setInterval(this._collectStats.bind(this), 2000);
-        this._timerMonitorOutput = setInterval(this._outputStats.bind(this), 1000);
+        this._timerMonitor = setInterval(this._collectStats.bind(this), 60 * 1000);
+        //this._timerMonitorOutput = setInterval(this._outputStats.bind(this), 1000);
+
+        // 2. auto-run first time
+        this._collectStats();
     },
 
     _collectStats: function()
@@ -224,12 +228,12 @@ module.exports = {
                         "_id": false,
                         "pairCount": { $sum: 1 },
                         "activeCount": { $sum: { $cond: [ { $eq: [ "$active", true ] }, 1, 0 ] } },
-                        "connectedCount": { $sum: { $cond: [ { $eq: [ "$connected", true ] }, 1, 0 ] } },
+                        "connectedCount": { $sum: { $cond: [ { $ne: [ "$connected", false ] }, 1, 0 ] } },
                         "connectionTypeScan": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_SCAN ] }, 1, 0 ] } },
                         "connectionTypeManually": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_MANUALLY ] }, 1, 0 ] } },
                         "connectionTypeInvite": { $sum: { $cond: [ { $eq: [ "$connectionType", ConnectionTypes.prototype.TYPE_INVITE ] }, 1, 0 ] } },
-                        "usedCount": { $sum: { $cond: [ { $eq: [ "$used", true ] }, 1, 0 ] } },
-                        "archivedCount": { $sum: { $cond: [ { $eq: [ "$archived", true ] }, 1, 0 ] } }
+                        "usedCount": { $sum: { $cond: [ { $ne: [ "$used", false ] }, 1, 0 ] } },
+                        "archivedCount": { $sum: { $cond: [ { $ne: [ "$archived", false ] }, 1, 0 ] } }
                     }
                 },
                 {
@@ -243,8 +247,8 @@ module.exports = {
             // a. validate
             CoreModule_Assert.equal(err, null);
 
-            console.log('aDocs', aDocs);
-            process.exit(22);
+            // console.log('aDocs', aDocs);
+            // process.exit(22);
 
             // b. store
             let result = aDocs[0];
@@ -252,15 +256,27 @@ module.exports = {
             // c. validate
             if (!result) return;
 
+
+            let stats = {
+                created: Utils.prototype.buildDate(),
+                active: result.activeCount,
+                idle: result.pairCount - result.activeCount - result.archivedCount,
+                connected: result.connectedCount,
+                connectionTypes: {
+                    scan: result.connectionTypeScan,
+                    manually: result.connectionTypeManually,
+                    invite: result.connectionTypeInvite
+                },
+                used: result.usedCount,
+                archived: result.archivedCount
+            };
+
             // d. update
-            this._stats.pairs.active = result.activeCount;
-            this._stats.pairs.idle = result.pairCount - result.activeCount - result.archivedCount;
-            this._stats.pairs.connected = result.connectedCount;
-            this._stats.pairs.connectionTypes.scan = result.connectionTypeScan;
-            this._stats.pairs.connectionTypes.manually = result.connectionTypeManually;
-            this._stats.pairs.connectionTypes.invite = result.connectionTypeInvite;
-            this._stats.pairs.used = result.usedCount;
-            this._stats.pairs.archived = result.archivedCount;
+
+
+
+            // 4. store
+            if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('stats').insertOne(stats);
 
         }.bind(this));
 
@@ -648,18 +664,18 @@ module.exports = {
 
 
 
-        this._outputStats();
+        //this._outputStats();
     },
 
-    _outputStats: function()
-    {
-        //return;
-        // 1. cleanup
-        console.clear();
-        console.log(this._sIntro + '\n\n' + new Date().toString() +'\n\n');
-
-        console.log(this._stats);
-    }
+    // _outputStats: function()
+    // {
+    //     //return;
+    //     // 1. cleanup
+    //     console.clear();
+    //     console.log(this._sIntro + '\n\n' + new Date().toString() +'\n\n');
+    //
+    //     console.log(this._stats);
+    // }
 
 };
 

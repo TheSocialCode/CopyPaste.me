@@ -682,6 +682,8 @@ module.exports = {
         // 3. forward
         if (pair.hasOtherDevice(socket)) pair.getOtherDevice(socket).emit(ConnectorEvents.prototype.DATA_RECEIVED, data);
 
+        // 4. store
+        pair.updateDataReceived(data);
     },
 
 
