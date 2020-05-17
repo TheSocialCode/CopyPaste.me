@@ -253,22 +253,28 @@ module.exports = {
             // c. validate
             if (!result) return;
 
+            let stats = {
+                type: 'pairs',
+                created: Utils.prototype.buildDate(),
+                active: result.activeCount,
+                idle: result.pairCount - result.activeCount - result.archivedCount,
+                connected: result.connectedCount,
+                connectionTypes: {
+                    scan: result.connectionTypeScan,
+                    manually: result.connectionTypeManually,
+                    invite: result.connectionTypeInvite
+                },
+                used: result.usedCount,
+                archived: result.archivedCount
+            };
+
+            console.clear();
+            console.log(this._sIntro + '\n\n' + new Date().toString() +'\n\n');
+            console.log(stats);
+
             // d. store
             if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('stats').insertOne(
-                {
-                    type: 'pairs',
-                    created: Utils.prototype.buildDate(),
-                    active: result.activeCount,
-                    idle: result.pairCount - result.activeCount - result.archivedCount,
-                    connected: result.connectedCount,
-                    connectionTypes: {
-                        scan: result.connectionTypeScan,
-                        manually: result.connectionTypeManually,
-                        invite: result.connectionTypeInvite
-                    },
-                    used: result.usedCount,
-                    archived: result.archivedCount
-                }
+                stats
             );
 
         }.bind(this));
