@@ -35,7 +35,7 @@
 
     <meta name="description" content="Easily and quickly share passwords, texts and files between devices.">
     <meta name="keywords" content="sharing, frictionless, passwords, tool, free">
-    <meta property="og:title" content="Frictionless sharing" />
+    <meta property="og:title" content="Frictionless sharing between devices" />
     <meta property="og:url" content="<?php echo $sURL ?>" />
     <meta property="og:description" content="Easily and quickly share passwords, texts and files between devices.">
     <meta property="og:image" content="<?php echo $sURL ?>/static/images/copypaste-preview.png">
