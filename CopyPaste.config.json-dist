@@ -25,11 +25,5 @@
     },
     "logtofile": {
         "file": "path/to/your/file.log"
-    },
-    "analytics": {
-        "matomo" : {
-            "enabled": false,
-            "siteID": 0
-        }
     }
 }

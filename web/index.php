@@ -165,8 +165,7 @@
                     port: '<?php echo $config['socketio']['client']['port']; ?>'
                 }
             },
-            autoRun: <?php echo ($bAutoRun) ? 'true' : 'false'; ?> //,
-            //analytics: < ?php //echo json_encode($config['analytics']) ? >
+            autoRun: <?php echo ($bAutoRun) ? 'true' : 'false'; ?>
         };
     </script>
     <script src="/static/dist/<?php echo $manifest['main.js']; ?>"></script>
