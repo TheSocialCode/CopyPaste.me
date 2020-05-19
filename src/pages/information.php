@@ -11,7 +11,7 @@
         <div class="main-interface-information-section right">
             <h2 class="main-interface-information-section-title">How does it work?</h2>
             <div class="main-interface-information-section-body">
-                <p>The QR code above is generated specifically for you. Scan it by pointing your phone’s camera at it (most of them have a QR scanner built in) to setup the connection and start sharing! If you don’t have a camera at hand, for instance whan you want to connect your laptop to another computer, simply use the <span class="highlight">'connect manually'</span> option.</p>
+                <p>The QR code above is generated specifically for you. Scan it by pointing your phone’s camera at it (most of them have a QR scanner built in) to setup the connection and start sharing! If you don’t have a camera at hand, for instance when you want to connect your laptop to another computer, simply use the <span class="highlight">'connect manually'</span> option. Or use the <span class="highlight">'invite'</span> option if you like to setup a secure connection with someone else.</p>
             </div>
         </div>
     </div>
