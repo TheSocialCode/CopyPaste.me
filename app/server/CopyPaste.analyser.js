@@ -165,7 +165,7 @@ module.exports = {
     _startupMongoDB: function()
     {
         // 1. init
-        this.Mimoto.mongoDB = new MongoDB(this._configFile, this._config);
+        this.Mimoto.mongoDB = new MongoDB(this._configFile, this._config, ['pairs', 'transfers', 'stats', 'exceptions']);
 
         // 2. verify and exit
         if (!this._config.mongo) return false;

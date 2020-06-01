@@ -153,3 +153,52 @@ div.feature_description {
     margin: 0 auto 0 auto;
     padding: 20px;
 }
+
+// --- Banner ---
+
+div.component_Banner {
+
+    display: none;
+    background-color: #f3f3f3;
+    color: #333333;
+    border-top: 1px dashed #cccccc;
+    border-bottom: 1px dashed #cccccc;
+    padding: 15px;
+
+    &.show {
+        display: block;
+    }
+}
+
+div.component_Banner_inner_container {
+    display: inline-block;
+}
+
+div.component_Banner_inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    & > div.component_Banner_inner_logo {
+        flex: fit-content;
+    }
+
+    & > div.component_Banner_inner_text {
+        flex: fit-content;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    & > div.component_Banner_inner_menu {
+        flex: fit-content;
+    }
+}
+
+a.component_Banner_button {
+    font-weight: normal;
+    text-decoration: none;
+
+    &:hover {
+        background-color: #DA562E
+    }
+}

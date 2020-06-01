@@ -7,9 +7,6 @@
 'use strict';
 
 
-// import
-const Token = require('./Token');
-
 // import extenders
 const EventDispatcherExtender = require('./../../common/extenders/EventDispatcherExtender');
 
@@ -21,10 +18,10 @@ const Module_MongoDB = require("mongodb");
 
 
 
-module.exports = function(configFile, config)
+module.exports = function(configFile, config, aCollections)
 {
     // start
-    this.__construct(configFile, config);
+    this.__construct(configFile, config, aCollections);
 };
 
 module.exports.prototype = {
@@ -40,12 +37,7 @@ module.exports.prototype = {
 
     // database
     _db: null,
-    _aCollections: {
-        pairs: null,
-        transfers: null,
-        stats: null,
-        exceptions: null
-    },
+    _aCollections: {},
 
 
 
@@ -57,7 +49,7 @@ module.exports.prototype = {
     /**
      * Constructor
      */
-    __construct: function (configFile, config)
+    __construct: function (configFile, config, aCollections)
     {
         // 1. extend
         new EventDispatcherExtender(this);
@@ -66,16 +58,25 @@ module.exports.prototype = {
         // ---
 
 
-        // 2. verify
+        // 2. store
+        if (aCollections && Array.isArray(aCollections) && aCollections.length > 0)
+        {
+            for (let nIndex = 0; nIndex < aCollections.length; nIndex++)
+            {
+                this._aCollections[aCollections[nIndex]] = null;
+            }
+        }
+
+        // 3. verify
         if (!config.mongo) return;
 
-        // 3. init
+        // 4. init
         this._mongoClient = Module_MongoDB.MongoClient;
 
-        // 4. init
+        // 5. init
         let sMongoURL = 'mongodb://';
 
-        // 5. compose
+        // 6. compose
         if (config.mongoauthenticate)
         {
             // a. convert and register
@@ -86,26 +87,15 @@ module.exports.prototype = {
             sMongoURL += sUsername + ':' + sPassword + '@';
         }
 
-        // 6. compose
+        // 7. compose
         sMongoURL += configFile.mongodb.host.toString() + ':' + configFile.mongodb.port.toString();
         if (config.mongoauthenticate) sMongoURL += '?authMechanism=SCRAM-SHA-1&authSource=' + configFile.mongodb.dbname;
 
-        // 7. connect
+        // 8. connect
         this._mongoClient.connect(sMongoURL, {
             useUnifiedTopology: true,
             useNewUrlParser: true,
         }, this._onMongoDBConnected.bind(this, configFile));
-
-
-        // mongoose
-        //     .connect(process.env.MONGO_URI, {
-        //         useUnifiedTopology: true,
-        //         useNewUrlParser: true,
-        //     })
-        //     .then(() => console.log('DB Connected!'))
-        //     .catch(err => {
-        //         console.log(DB Connection Error: ${err.message});
-        //     });
     },
 
 
@@ -160,10 +150,10 @@ module.exports.prototype = {
         this._db = client.db(sMongoDBName);
 
         // 4. store
-        this._aCollections['pairs'] = this._db.collection('pairs');
-        this._aCollections['transfers'] = this._db.collection('transfers');
-        this._aCollections['stats'] = this._db.collection('stats');
-        this._aCollections['exceptions'] = this._db.collection('exceptions');
+        for (let sKey in this._aCollections)
+        {
+            this._aCollections[sKey] = this._db.collection(sKey);
+        }
 
         // 5. toggle
         this._bIsRunning = true;

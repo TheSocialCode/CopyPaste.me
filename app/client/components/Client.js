@@ -990,6 +990,10 @@ module.exports.prototype = {
                     //console.log('NOT both devices online');
                 }
 
+                // d. #BANNER
+                let elBanner = document.querySelector('[data-mimoto-id="component_Banner"]');
+                if (elBanner) elBanner.classList.add('show');
+
                 break;
         }
     }
