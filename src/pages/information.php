@@ -1,9 +1,12 @@
-<div data-mimoto-id="component_Banner" class="component_Banner">
+<div data-mimoto-id="component_Banner" class="component_Banner show">
     <div class="component_Banner_inner_container">
         <div class="component_Banner_inner">
             <div class="component_Banner_inner_logo"><img src="/static/images/product-hunt-logo-orange-240.png" width="30" height="30"></div>
             <div class="component_Banner_inner_text">Support this project by giving it an upvote on Product Hunt</div>
             <div class="component_Banner_inner_menu"><a href="https://www.producthunt.com/posts/copypaste-me" target="_blank" class="button component_Banner_button">Upvote now</a></div>
+<!--	        <div class="component_Banner_inner_logo"><img src="/static/images/LovieLogo.png" width="84" height="63"></div>-->
+<!--	        <div class="component_Banner_inner_text"><b>VOTE NOW</b> to help me win a <i>People's Lovie Award</i></div>-->
+<!--	        <div class="component_Banner_inner_menu"><a href="https://vote.lovieawards.com/PublicVoting#/2021/websites/website-single/services" target="_blank" class="button component_Banner_button">Vote now!</a></div>-->
         </div>
     </div>
 </div>
