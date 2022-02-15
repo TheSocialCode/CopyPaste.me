@@ -56,7 +56,7 @@ In your root directory, start the server script using it's default config:
 node app/server/CopyPaste.server.js 
 ```
 
-Of for instance, if you are on a local environment withou SSL and without MongoDB authentication, run: 
+Or for instance, if you are on a local environment withou SSL and without MongoDB authentication, run: 
 
 ```
 node app/server/CopyPaste.server.js https=false mongoauthenticate=false 
