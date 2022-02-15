@@ -3,7 +3,7 @@
 	    <div class="component_Banner_inner">
 		    <div class="component_Banner_inner_logo"><img src="/static/images/DonateLove.png" width="60" height="60"></div>
 		    <div class="component_Banner_inner_text">This project runs on donations. <i>Pitch in to keep it free for everyone!</i></div>
-		    <div class="component_Banner_inner_menu"><a href="https://paypal.me/thesocialcode" target="_blank" class="button component_Banner_button">Donate now!$
+		    <div class="component_Banner_inner_menu"><a href="https://paypal.me/thesocialcode" target="_blank" class="button component_Banner_button">Donate now!</a></div>
 		</div>
     </div>
 </div>
