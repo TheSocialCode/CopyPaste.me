@@ -1,4 +1,4 @@
-<div data-mimoto-id="component_Banner" class="component_Banner">
+<div data-mimoto-id="component_Banner" class="component_Banner show">
     <div class="component_Banner_inner_container">
 	    <div class="component_Banner_inner">
 		    <div class="component_Banner_inner_logo"><img src="/static/images/DonateLove.png" width="60" height="60"></div>
