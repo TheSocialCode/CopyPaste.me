@@ -9,6 +9,7 @@
         "@thesocialcode/mimoto": "^1.0.2",
         "asymmetric-crypto": "^1.0.2",
         "clipboard-copy": "^4.0.1",
+        "cors": "^2.8.5",
         "express": "^4.17.2",
         "file-saver": "^2.0.5",
         "fs": "0.0.1-security",

@@ -144,7 +144,12 @@ module.exports = {
         }
 
         // 2. setup
-        this._socketIO = Module_SocketIO(this._server);
+        this._socketIO = Module_SocketIO(this._server, {
+            cors: {
+                origin: this._configFile.socketio.cors,
+                methods: ["GET", "POST"]
+            }
+        });
 
         // 3. configure
         this._socketIO.on('connection', this._onSocketConnect.bind(this));
