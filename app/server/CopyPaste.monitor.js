@@ -18,6 +18,7 @@ const Module_MongoDB = require("mongodb");
 // import core module
 const CoreModule_Assert = require('assert');
 const CoreModule_Util = require('util');
+const Utils = require("./utils/Utils");
 
 
 module.exports = {
@@ -116,6 +117,9 @@ module.exports = {
             'Please help keeping this service free by donating: https://paypal.me/thesocialcode',
             ' ',
             'MongoDB connected on ' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString(),
+            ' ',
+            ' ',
+            '*** MONITOR (MINIMAL STATS) ***',
             ''
         ];
 
@@ -148,6 +152,7 @@ module.exports = {
 
         // 6. output extra line
         this._sIntro += '\n';
+        //console.log(this._sIntro);
 
         
         // --- Mongo DB
@@ -184,9 +189,16 @@ module.exports = {
      */
     _onMongoDBReady: function(err, client)
     {
-        // 1. run
-        this._timerMonitor = setInterval(this._collectStats.bind(this), 2000);
-        this._timerMonitorOutput = setInterval(this._outputStats.bind(this), 1000);
+        // 1. cleanup
+        console.clear();
+        console.log(this._sIntro + '\n\n' + new Date().toString() +'\n\n');
+
+        // 2. run
+        // this._timerMonitor = setInterval(this._collectStats.bind(this), 5 * 1000);
+        // this._timerMonitorOutput = setInterval(this._outputStats.bind(this), 2 * 1000);
+
+
+        this._collectStats();
     },
 
     _collectStats: function()
@@ -223,32 +235,139 @@ module.exports = {
 
 
         if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('stats').find(
-            {
-                //"date": { $gt: , $lt: }
-            }
+            // {
+            //     //"date": { $gt: , $lt: }
+            // }
+            // {created: {$regex: '^2022.08.06 00:06'}}
         ).toArray(function(err, aDocs) {
 
             // a. validate
             CoreModule_Assert.equal(err, null);
 
-            console.log('Yay!', aDocs);
+
+            // 1. cleanup
+            console.clear();
+            console.log(this._sIntro + '\n\n' + new Date().toString() +'\n\n');
+
+            // console.log(this._stats);
+
+
+
+            // let stats = {
+            //     type: 'pairs',
+            //     created: Utils.prototype.buildDate(),
+            //     active: result.activeCount,
+            //     idle: result.pairCount - result.activeCount - result.archivedCount,
+            //     connected: result.connectedCount,
+            //     connectionTypes: {
+            //         scan: result.connectionTypeScan,
+            //         manually: result.connectionTypeManually,
+            //         invite: result.connectionTypeInvite
+            //     },
+            //     used: result.usedCount,
+            //     archived: result.archivedCount
+            // };
+            //
+            // console.clear();
+            // console.log(this._sIntro + '\n\n' + new Date().toString() +'\n\n');
+            // console.log(stats);
+            //
+            // // d. store
+            // if (this.Mimoto.mongoDB.isRunning()) this.Mimoto.mongoDB.getCollection('stats').insertOne(
+            //     stats
+            // );
+
+
+            // console.log('Yay!', aDocs);
+
+
+
+            // get first in collection
+            // for (let s in aDocs) { console.log('created =', aDocs[s].created); return; }
+
+
+            let nTotal = 0;
+
+            let nStartValue = 0;
+            let nEndValue = 0;
+            let nLastValue = 0;
+            let sCurrentPeriod = null;
+
+
+            // let addZeros = function(sValue, nLength = null)
+            // {
+            //     // convert
+            //     sValue = '' + sValue;
+            //     if (nLength === null) nLength = sValue.length;
+            //
+            //     // complete
+            //     while (sValue.length < nLength) sValue += '0' + sValue;
+            // }
+
+
+            for (let sKey in aDocs)
+            {
+                let sYear = aDocs[sKey].created.substring(0, 4);
+                let sMonth = aDocs[sKey].created.substring(5, 7);
+                let sDaily = aDocs[sKey].created.substring(8, 10);
+
+                // console.log('aDocs[sKey].created =', aDocs[sKey].created, 'sYear =', sYear, 'sMonth =', sMonth);
+
+
+
+                nEndValue = aDocs[sKey].used - nStartValue;
+
+
+                if (sCurrentPeriod !== aDocs[sKey].created.substring(0, 7)) // monthly
+                // if (sCurrentPeriod !== aDocs[sKey].created.substring(0, 10)) // daily
+                {
+                    nTotal += nEndValue;
+
+                    // console.log(sCurrentPeriod);
+                    // console.log(nEndValue);
+                    console.log(sCurrentPeriod, '=', nEndValue);
+
+                    sCurrentPeriod = sYear + '.' + sMonth; // monthly
+                    // sCurrentPeriod = sYear + '.' + sMonth + '.' + sDaily; // daily
+
+
+                    nStartValue = aDocs[sKey].used;
+                }
+
+                nLastValue = aDocs[sKey].used;
+            }
+
+
+            nTotal += nEndValue;
+            console.log(sCurrentPeriod, '=', nEndValue);
+
+            console.log('');
+            console.log('Total =', nTotal);
+
+
+
+
+
+
 
         }.bind(this));
 
 
 
-        this._outputStats();
+
+
+        //this._outputStats();
     },
 
-    _outputStats: function()
-    {
-        //return;
-        // 1. cleanup
-        console.clear();
-        console.log(this._sIntro + '\n\n' + new Date().toString() +'\n\n');
-
-        console.log(this._stats);
-    }
+    // _outputStats: function()
+    // {
+    //     //return;
+    //     // 1. cleanup
+    //     console.clear();
+    //     console.log(this._sIntro + '\n\n' + new Date().toString() +'\n\n');
+    //
+    //     console.log(this._stats);
+    // }
 
 };
 

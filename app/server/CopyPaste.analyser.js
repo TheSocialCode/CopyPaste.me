@@ -95,7 +95,6 @@ module.exports = {
         if (config.mongo === true || config.mongo === false) this._config.mongo = config.mongo;
         if (config.mongoauthenticate === true || config.mongoauthenticate === false) this._config.mongoauthenticate = config.mongoauthenticate;
 
-
         // 1. load
         let jsonConfigFile = Module_FS.readFileSync('CopyPaste.config.json');
 
@@ -117,6 +116,9 @@ module.exports = {
             'Please help keeping this service free by donating: https://paypal.me/thesocialcode',
             ' ',
             'MongoDB connected on ' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString(),
+            ' ',
+            ' ',
+            '*** ANALYZER ***',
             ''
         ];
 
@@ -150,12 +152,13 @@ module.exports = {
         // 6. output extra line
         this._sIntro += '\n';
 
-        
+
         // --- Mongo DB
-        
+
         
         // 7. boot up
-        if (!this._startupMongoDB()) this._startupSocketIO();
+        // if (!this._startupMongoDB()) this._startupSocketIO();
+        this._startupMongoDB();
     },
 
     /**

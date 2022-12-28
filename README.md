@@ -74,3 +74,22 @@ For example:
 pm2 start app/server/CopyPaste.server.js -- mode=dev https=false
 ```
 (don't forget to `pm2 save` your current pm2 config)
+
+
+### Analyzer
+```
+Local
+node app/server/CopyPaste.analyzer.js https=false mongoauthenticate=false
+
+Production
+node app/server/CopyPaste.analyzer.js
+```
+
+### Monitor (minimal stats)
+```
+Local
+node app/server/CopyPaste.monitor.js https=false mongoauthenticate=false
+
+Production
+node app/server/CopyPaste.monitor.js
+```
