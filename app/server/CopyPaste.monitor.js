@@ -95,6 +95,8 @@ module.exports = {
         if (config.mongo === true || config.mongo === false) this._config.mongo = config.mongo;
         if (config.mongoauthenticate === true || config.mongoauthenticate === false) this._config.mongoauthenticate = config.mongoauthenticate;
 
+        // 2. store settings
+        this._config.period = (config.period === 'daily') ? 'daily' : 'monthly';
 
         // 1. load
         let jsonConfigFile = Module_FS.readFileSync('CopyPaste.config.json');
@@ -196,7 +198,6 @@ module.exports = {
         // 2. run
         // this._timerMonitor = setInterval(this._collectStats.bind(this), 5 * 1000);
         // this._timerMonitorOutput = setInterval(this._outputStats.bind(this), 2 * 1000);
-
 
         this._collectStats();
     },
@@ -305,6 +306,7 @@ module.exports = {
             // }
 
 
+
             for (let sKey in aDocs)
             {
                 let sYear = aDocs[sKey].created.substring(0, 4);
@@ -318,8 +320,12 @@ module.exports = {
                 nEndValue = aDocs[sKey].used - nStartValue;
 
 
-                if (sCurrentPeriod !== aDocs[sKey].created.substring(0, 7)) // monthly
+                let sPeriod = (this._config.period === 'daily') ? aDocs[sKey].created.substring(0, 10) : aDocs[sKey].created.substring(0, 7);
+
+
+                // if (sCurrentPeriod !== aDocs[sKey].created.substring(0, 7)) // monthly
                 // if (sCurrentPeriod !== aDocs[sKey].created.substring(0, 10)) // daily
+                if (sCurrentPeriod !== sPeriod) // use settings
                 {
                     nTotal += nEndValue;
 
@@ -327,8 +333,9 @@ module.exports = {
                     // console.log(nEndValue);
                     console.log(sCurrentPeriod, '=', nEndValue);
 
-                    sCurrentPeriod = sYear + '.' + sMonth; // monthly
+                    // sCurrentPeriod = sYear + '.' + sMonth; // monthly
                     // sCurrentPeriod = sYear + '.' + sMonth + '.' + sDaily; // daily
+                    sCurrentPeriod = (this._config.period === 'daily') ? sYear + '.' + sMonth + '.' + sDaily : sYear + '.' + sMonth;
 
 
                     nStartValue = aDocs[sKey].used;
@@ -377,9 +384,14 @@ this.Mimoto.config = {};
 
 // read
 process.argv.forEach((value, index) => {
-    if (value.substr(0, 18) === 'mongoauthenticate=')
+    if (value.substring(0, 18) === 'mongoauthenticate=')
     {
-        this.Mimoto.config.mongoauthenticate = (value.substr(18) === 'false') ? false : true;
+        this.Mimoto.config.mongoauthenticate = (value.substring(18) === 'false') ? false : true;
+    }
+    if (value.substring(0, 7) === 'period=')
+    {
+
+        this.Mimoto.config.period = value.substring(7);
     }
 });
 
