@@ -318,8 +318,8 @@ module.exports = {
                 nEndValue = aDocs[sKey].used - nStartValue;
 
 
-                if (sCurrentPeriod !== aDocs[sKey].created.substring(0, 7)) // monthly
-                // if (sCurrentPeriod !== aDocs[sKey].created.substring(0, 10)) // daily
+                if (sCurrentPeriod !== aDocs[sKey].created.substring(0, 7))     // TOGGLE - Monthly 1/2
+                // if (sCurrentPeriod !== aDocs[sKey].created.substring(0, 10)) // TOGGLE - Daily 1/2
                 {
                     nTotal += nEndValue;
 
@@ -327,8 +327,8 @@ module.exports = {
                     // console.log(nEndValue);
                     console.log(sCurrentPeriod, '=', nEndValue);
 
-                    sCurrentPeriod = sYear + '.' + sMonth; // monthly
-                    // sCurrentPeriod = sYear + '.' + sMonth + '.' + sDaily; // daily
+                    sCurrentPeriod = sYear + '.' + sMonth;                      // TOGGLE - Monthly 2/2
+                    // sCurrentPeriod = sYear + '.' + sMonth + '.' + sDaily;    // TOGGLE - daily 2/2
 
 
                     nStartValue = aDocs[sKey].used;

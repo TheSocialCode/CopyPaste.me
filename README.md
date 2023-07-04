@@ -85,7 +85,7 @@ Production
 node app/server/CopyPaste.analyzer.js
 ```
 
-### Monitor (minimal stats)
+### Monitor (monthly and daily stats)
 ```
 Local
 node app/server/CopyPaste.monitor.js https=false mongoauthenticate=false
@@ -93,3 +93,5 @@ node app/server/CopyPaste.monitor.js https=false mongoauthenticate=false
 Production
 node app/server/CopyPaste.monitor.js
 ```
+
+*NOTE* - First run the server, then the monitor. In case of issues, try npm update to fix all dependencies
