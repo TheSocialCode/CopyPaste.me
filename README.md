@@ -88,7 +88,8 @@ node app/server/CopyPaste.analyzer.js
 ### Monitor (monthly and daily stats)
 ```
 Local
-node app/server/CopyPaste.monitor.js https=false mongoauthenticate=false
+node app/server/CopyPaste.monitor.js period=montlhy https=false mongoauthenticate=false
+node app/server/CopyPaste.monitor.js period=daily https=false mongoauthenticate=false
 
 Production
 node app/server/CopyPaste.monitor.js
