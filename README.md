@@ -50,13 +50,13 @@ Make a duplicate of `CopyPaste.config.json.dist`, name it `CopyPaste.config.json
 
 #### Step 2 - Start the server
 
-In your root directory, start the server script using it's default config:
+In your root directory, start the server script using its default config:
 
 ```
 node app/server/CopyPaste.server.js 
 ```
 
-Or for instance, if you are on a local environment withou SSL and without MongoDB authentication, run: 
+Or for instance, if you are on a local environment without SSL and without MongoDB authentication, run: 
 
 ```
 node app/server/CopyPaste.server.js https=false mongoauthenticate=false 
