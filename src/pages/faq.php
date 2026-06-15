@@ -261,7 +261,7 @@
                     <b>The Decryption:</b> The receiving device catches the scrambled data and uses its matching local key to instantly decrypt it back into your original text, password, or file.
                 </p>
                 <p class="main-interface-information-section-body">
-                    Because we believe privacy shouldn't rely on blind trust, the entire process is open-source. Developers and privacy enthusiasts can view the <a href="https://github.com/TheSocialCode/CopyPaste.me" target="_blank" class="highlighted">source code</a> directly to verify exactly how the encryption and transfer mechanics are implemented.
+                    Because privacy shouldn't rely on blind trust, the entire process is open-source. Developers and privacy enthusiasts can view the <a href="https://github.com/TheSocialCode/CopyPaste.me" target="_blank" class="highlighted">source code</a> directly to verify exactly how the encryption and transfer mechanics are implemented.
                 </p>
             </div>
 
