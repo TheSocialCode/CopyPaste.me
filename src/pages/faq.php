@@ -44,6 +44,10 @@
                 </p>
             </div>
 
+            <div class="main-interface-information-section left">
+                <h2 class="main-interface-information-section-title">How does it actually work technically?</h2>
+            </div>
+
             <figure class="howitworks-blueprint" aria-labelledby="howitworks-blueprint-caption">
                 <svg class="howitworks-blueprint-svg" viewBox="0 0 960 650" role="img" xmlns="http://www.w3.org/2000/svg" aria-label="Schematic of how CopyPaste.me connects two devices over a secure end-to-end encrypted relay: the devices exchange public keys, then share passwords, text and files that can only be opened with their private keys">
                     <defs>
@@ -241,6 +245,27 @@
             </figure>
 
             <div class="main-interface-information-section left">
+                <p class="main-interface-information-section-body">
+                    At its core, <a href="/" class="highlighted">CopyPaste.me</a> acts as a secure, temporary bridge between your two devices. Here is what happens behind the scenes when you share something:
+                </p>
+                <p class="main-interface-information-section-body">
+                    <b>The Handshake:</b> When you scan the QR code or enter a manual code, our server temporarily introduces your two devices to each other (think of it like a digital handshake). The tokens used for this handshake have a very short lifespan and expire quickly.
+                </p>
+                <p class="main-interface-information-section-body">
+                    <b>End-to-End Encryption (E2EE):</b> Before your password, text, or file ever leaves your first device, it is encrypted locally right inside your web browser. This means the data is scrambled into an unreadable format using a cryptographic key that only your two connected devices possess.
+                </p>
+                <p class="main-interface-information-section-body">
+                    <b>The Transfer:</b> Once encrypted, the data is pushed to the receiving device. Because we don't use databases to store your payload, the encrypted data is simply relayed in real-time. Even if we wanted to read it as it passed through (which we don't!), we couldn't, because the server doesn't hold the decryption keys.
+                </p>
+                <p class="main-interface-information-section-body">
+                    <b>The Decryption:</b> The receiving device catches the scrambled data and uses its matching local key to instantly decrypt it back into your original text, password, or file.
+                </p>
+                <p class="main-interface-information-section-body">
+                    Because we believe privacy shouldn't rely on blind trust, the entire process is open-source. Developers and privacy enthusiasts can view the <a href="https://github.com/TheSocialCode/CopyPaste.me" target="_blank" class="highlighted">source code</a> directly to verify exactly how the encryption and transfer mechanics are implemented.
+                </p>
+            </div>
+
+            <div class="main-interface-information-section right">
                 <h2 class="main-interface-information-section-title">Why, instead of sending a secure invite via WhatApp, Telegram or email and then sharing the data via that connection, not just send the data via those channels directly?</h2>
                 <p class="main-interface-information-section-body">
                     First of all: after you connect two devices, the data your send one to another is secured through end-to-end encryption. Not all services you commonly use offer this because their business models centre about knowing you by analysing the data your share (so they, for instance, can serve you ads that are tailored to your personal preferences)
@@ -250,7 +275,7 @@
                 </p>
             </div>
 
-            <div id="security" class="main-interface-information-section right">
+            <div id="security" class="main-interface-information-section left">
                 <h2 class="main-interface-information-section-title">Can I trust my data to be handled in a safe way?</h2>
                 <p class="main-interface-information-section-body">
                     <a href="/" class="highlighted">CopyPaste.me</a> has been designed and built with security and your privacy in mind. The tokens (QR-code, the code to connect manually or the secure invite link) you see when setting up a connection all have a short expiry date. The tokens are meant to quickly setup a connection, not to have them wandering around on the internet. Once you connected the two devices and start sharing, the data is transferred using end-to-end encryption so the data can only be accessed on the two devices, not on the server. And to top that, when you send your data, it's immediately forwarded to the receiving device without storing it on the server. Therefore there will be no traces or logs of what you share.
@@ -263,7 +288,7 @@
                 </p>
             </div>
 
-            <div class="main-interface-information-section left">
+            <div class="main-interface-information-section right">
                 <h2 class="main-interface-information-section-title">So you really seem to care about our privacy, that's awesome. How about analytics. Do you use them?</h2>
                 <p class="main-interface-information-section-body">
                     Yes, I've written some very basis stats specifically for this tool, just enough to monitor 'how' <a href="/" class="highlighted">CopyPaste.me</a> is used – not who uses it, when, where or for what. When implementing any form of analytics I try always to aim for the highest level of privacy and stay away from the common practice of services like Google Analytics that scrape the hell out of every user  and providing me with way more information than I'll ever need (don't get me wrong, I love stats, I just think they don't belong here in order to safeguard your privacy).
@@ -276,7 +301,7 @@
                 </p>
             </div>
 
-            <div class="main-interface-information-section right">
+            <div class="main-interface-information-section left">
                 <h2 class="main-interface-information-section-title">Why is it free? Are you secretly selling my data?</h2>
                 <p class="main-interface-information-section-body">
                     No, your data is yours and yours alone. Furthermore, because your data is end-to-end encrypted, there is no way to even know what your data is, because only your device has the key that allows access to it. So even when I would want to sell any data, I couldn't, because I don't have it.
@@ -289,21 +314,21 @@
                 </p>
             </div>
 
-            <div class="main-interface-information-section left">
+            <div class="main-interface-information-section right">
                 <h2 class="main-interface-information-section-title">So just to be clear, my data is never stored?</h2>
                 <p class="main-interface-information-section-body">
                     Exactly! Your data is yours and yours alone and this tool is designed to work without the need to store your data. Which is good, because your data shouldn't be stored all over the internet just because you're using online tools.
                 </p>
             </div>
 
-            <div id="contact" class="main-interface-information-section right">
+            <div id="contact" class="main-interface-information-section left">
                 <h2 class="main-interface-information-section-title">I have a suggestion for an improvement or found a bug. How can I contact you about this?</h2>
                 <p class="main-interface-information-section-body">
                     For features requests, suggestions for improvement or things you noticed are not working as you imagine they should, please contact me at <a href="mailto:sebastian@thesocialcode.com" class="highlighted">sebastian@thesocialcode.com</a>
                 </p>
             </div>
 
-            <div class="main-interface-information-section left">
+            <div class="main-interface-information-section right">
                 <h2 class="main-interface-information-section-title">For now ...</h2>
                 <p class="main-interface-information-section-body">
                     I hope you enjoy using <a href="/" class="highlighted">CopyPaste.me</a><br>
