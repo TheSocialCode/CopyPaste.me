@@ -1,6 +1,6 @@
-// imports
-@import 'SharedData/SharedData';
-@import 'ClearClipboard/ClearClipboard';
+@use '../../tokens' as *;
+@use 'SharedData/SharedData';
+@use 'ClearClipboard/ClearClipboard';
 
 
 div.component_DataOutput {

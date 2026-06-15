@@ -291,7 +291,7 @@ module.exports.prototype = {
                 for (let nCharIndex = 0; nCharIndex < nCharCount; nCharIndex++)
                 {
                     // I. register
-                    let sCurrentChar = sCurrentValue.substr(nCharIndex, 1);
+                    let sCurrentChar = sCurrentValue.charAt(nCharIndex);
 
                     // II. verify and build
                     if (this._sAllowedCharacters.indexOf(sCurrentChar) !== -1) sNewValue += sCurrentValue;
@@ -331,7 +331,7 @@ module.exports.prototype = {
                     let elInput = this._aInputs[nIndex];
 
                     // II. output
-                    elInput.value = sNewValue.substr(nCharIndex, 1);
+                    elInput.value = sNewValue.charAt(nCharIndex);
 
                     // III. update
                     nCharIndex++;

@@ -245,10 +245,7 @@ module.exports = {
                     }
                 }
             ]
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
+        ).toArray().then(function(aDocs) {
 
             // b. store
             let result = aDocs[0];
@@ -280,7 +277,9 @@ module.exports = {
                 stats
             );
 
-        }.bind(this));
+        }.bind(this)).catch(function(err) {
+            CoreModule_Assert.equal(err, null);
+        });
 
 
 
@@ -687,9 +686,9 @@ this.Mimoto.config = {};
 
 // read
 process.argv.forEach((value, index) => {
-    if (value.substr(0, 18) === 'mongoauthenticate=')
+    if (value.startsWith('mongoauthenticate='))
     {
-        this.Mimoto.config.mongoauthenticate = (value.substr(18) === 'false') ? false : true;
+        this.Mimoto.config.mongoauthenticate = (value.slice('mongoauthenticate='.length) === 'false') ? false : true;
     }
 });
 

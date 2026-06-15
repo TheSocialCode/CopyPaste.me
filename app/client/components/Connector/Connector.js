@@ -270,7 +270,7 @@ module.exports.prototype = {
         this._manualCode = {};
 
         // 2. output
-        this._elConnectionTypeManually_Code.innerText = sToken.substr(0, 3) + '-' + sToken.substr(3);
+        this._elConnectionTypeManually_Code.innerText = sToken.slice(0, 3) + '-' + sToken.slice(3);
 
         // 3. setup
         this._manualCode.localCreated = new Date().getTime();

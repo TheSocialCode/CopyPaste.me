@@ -1,16 +1,15 @@
-// imports
-@import 'Connector/Connector';
-@import 'Waiting/Waiting';
-@import 'DataInput/DataInput';
-@import 'DataOutput/DataOutput';
-@import 'ToggleDirectionButton/ToggleDirectionButton';
-@import 'MenuConnectionType/MenuConnectionType';
-@import 'ManualConnectHandshake/ManualConnectHandshake';
-@import 'ManualConnectInput/ManualConnectInput';
-@import 'AlertMessage/AlertMessage';
-@import 'SecurityWarning/SecurityWarning';
-@import 'Templates/Templates';
-@import 'FAQ/FAQ';
+@use 'Connector/Connector';
+@use 'Waiting/Waiting';
+@use 'DataInput/DataInput';
+@use 'DataOutput/DataOutput';
+@use 'ToggleDirectionButton/ToggleDirectionButton';
+@use 'MenuConnectionType/MenuConnectionType';
+@use 'ManualConnectHandshake/ManualConnectHandshake';
+@use 'ManualConnectInput/ManualConnectInput';
+@use 'AlertMessage/AlertMessage';
+@use 'SecurityWarning/SecurityWarning';
+@use 'Templates/Templates';
+@use 'FAQ/FAQ';
 
 
 div.component_Client {
