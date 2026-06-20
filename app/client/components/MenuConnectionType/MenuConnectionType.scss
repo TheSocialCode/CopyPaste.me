@@ -53,6 +53,26 @@ div.component_MenuConnectionType_buttons {
     }
 }
 
+div.component_MenuConnectionType_terms {
+    width: 215px;
+    margin: 12px auto 0 auto;
+
+    font-size: 11px;
+    line-height: 15px;
+    color: $color-text-lessdark;
+    opacity: 0.7;
+
+    & > a {
+        color: $color-button-dark;
+        text-decoration: underline;
+        cursor: pointer;
+
+        &:hover {
+            color: #000000;
+        }
+    }
+}
+
 div.component_MenuConnectionType_button {
     flex: auto;
     background-color: #f5f5f5;
