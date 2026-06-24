@@ -86,7 +86,7 @@ module.exports.prototype = {
     EXPIRED: 'EXPIRED',
 
     // logs
-    _aTransferTimes: [],
+    _aTransferTimes: null,
 
 
 
@@ -112,6 +112,9 @@ module.exports.prototype = {
         this._sPairID = Module_GenerateUniqueID({ length: 32 });
         this._nCreated = new Date().getTime();
         this._sDirection = ToggleDirectionStates.prototype.DEFAULT;
+
+        // per-instance transfer state (prevents sharing one map across all pairs)
+        this._aTransferTimes = {};
 
         // 3. store
         this._primaryDeviceSocket = socket;
