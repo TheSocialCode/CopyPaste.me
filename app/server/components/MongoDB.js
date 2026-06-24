@@ -92,10 +92,14 @@ module.exports.prototype = {
         if (config.mongoauthenticate) sMongoURL += '?authMechanism=SCRAM-SHA-1&authSource=' + configFile.mongodb.dbname;
 
         // 8. connect
-        this._mongoClient.connect(sMongoURL, {
-            useUnifiedTopology: true,
-            useNewUrlParser: true,
-        }, this._onMongoDBConnected.bind(this, configFile));
+        this._mongoClient
+            .connect(sMongoURL)
+            .then((client) => {
+                this._onMongoDBConnected(configFile, null, client);
+            })
+            .catch((err) => {
+                this._onMongoDBConnected(configFile, err, null);
+            });
     },
 
 

@@ -91,6 +91,7 @@
                 <div data-mimoto-id="button-manually" class="component_MenuConnectionType_button">Manually</div>
                 <div data-mimoto-id="button-invite" class="component_MenuConnectionType_button">Invite</div>
             </div>
+            <div class="component_MenuConnectionType_terms">By using this service you accept the <a href="/terms-and-conditions">terms of usage</a></div>
         </div>
     </div>
 

@@ -72,7 +72,7 @@ module.exports.prototype = {
             let elCharacter = this._elRoot.querySelector('[data-mimoto-id="char' + (nIndex + 1) + '"]');
 
             // b. output
-            elCharacter.innerText = sCode.substr(nIndex, 1);
+            elCharacter.innerText = sCode.charAt(nIndex);
         }
 
         // 2. toggle

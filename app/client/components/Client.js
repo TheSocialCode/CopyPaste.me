@@ -107,7 +107,7 @@ module.exports.prototype = {
 
         // 6. verify
         let sConnectPath = 'connect';
-        if (window.location.pathname.substr(1, sConnectPath.length).toLowerCase() === sConnectPath)
+        if (window.location.pathname.slice(1, 1 + sConnectPath.length).toLowerCase() === sConnectPath)
         {
             // a. configure
             this._bIsManualConnect = true;
@@ -118,7 +118,7 @@ module.exports.prototype = {
         else
         {
             // a. register
-            this._sToken = window.location.pathname.substr(1);
+            this._sToken = window.location.pathname.slice(1);
 
             // b. init
             if (!this._sToken || this._sToken.length === 0)
@@ -449,14 +449,18 @@ module.exports.prototype = {
     /**
      * Handle secondary device
      * @param sOtherDevicePublicKey
+     * @param sDirection optional; when set (server), keeps primary UI in sync with pair direction (e.g. manual connect)
      * @private
      */
-    _onUpdateOtherDeviceConnected: function(sOtherDevicePublicKey)
+    _onUpdateOtherDeviceConnected: function(sOtherDevicePublicKey, sDirection)
     {
         // 1. store
         this._dataManager.setTheirPublicKey(sOtherDevicePublicKey);
 
-        // 2. update interface
+        // 2. direction (QR / manual — server is source of truth when provided)
+        if (typeof sDirection === 'string') this._sDirection = sDirection;
+
+        // 3. update interface
         this._setState(this.STATE_SECONDARYDEVICECONNECTED, true);
     },
 

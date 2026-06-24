@@ -86,7 +86,7 @@ module.exports.prototype = {
     EXPIRED: 'EXPIRED',
 
     // logs
-    _aTransferTimes: [],
+    _aTransferTimes: null,
 
 
 
@@ -112,6 +112,9 @@ module.exports.prototype = {
         this._sPairID = Module_GenerateUniqueID({ length: 32 });
         this._nCreated = new Date().getTime();
         this._sDirection = ToggleDirectionStates.prototype.DEFAULT;
+
+        // per-instance transfer state (prevents sharing one map across all pairs)
+        this._aTransferTimes = {};
 
         // 3. store
         this._primaryDeviceSocket = socket;
@@ -543,13 +546,10 @@ module.exports.prototype = {
         {
             let sValue = dataCloneForLogging.value.data;
 
-            dataCloneForLogging.value.data = sValue.substr(0, 10) + ' ... ' + sValue.substr(sValue.length - 10);
+            dataCloneForLogging.value.data = sValue.slice(0, 10) + ' ... ' + sValue.slice(-10);
         }
 
-        // 3. send
-        receiverSocket.emit(ConnectorEvents.prototype.RECEIVE_DATA, encryptedData);
-
-        // 4. verify
+        // 3. first package: register transfer before emit so DATA_RECEIVED cannot arrive first
         if (encryptedData.packageNumber === 0)
         {
             // a. init
@@ -615,6 +615,9 @@ module.exports.prototype = {
                 }
             );
         }
+
+        // 4. send
+        receiverSocket.emit(ConnectorEvents.prototype.RECEIVE_DATA, encryptedData);
     },
 
     /**
@@ -623,6 +626,15 @@ module.exports.prototype = {
      */
     updateDataReceived: function(data)
     {
+        // 0. ensure slot (e.g. stale ack, or multi-instance without shared pair state)
+        if (!this._aTransferTimes[data.id])
+        {
+            this._aTransferTimes[data.id] = {
+                created: Utils.prototype.buildDate(),
+                bytesTransferred: 0
+            };
+        }
+
         // 1. update
         this._aTransferTimes[data.id].bytesTransferred += data.packageSize;
 

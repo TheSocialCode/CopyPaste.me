@@ -99,6 +99,15 @@
                         $bAutoRun = false;
                         break;
 
+                    case '/terms-and-conditions':
+
+                        // a. load
+                        include(dirname(dirname(__FILE__)).'/src/pages/terms.php');
+
+                        // b. toggle
+                        $bAutoRun = false;
+                        break;
+
                     case '/connect':
                     default:
 
@@ -126,6 +135,7 @@
                         <div class="footer_table_center_column">
                             <div class="footer_table_center_column_cell"><a href="/#support">Support</a></div>
                             <div class="footer_table_center_column_cell"><a href="/faq#contact">Contact</a></div>
+                            <div class="footer_table_center_column_cell"><a href="/terms-and-conditions">Terms &amp; Conditions</a></div>
                         </div>
                     </div>
                     <div class="footer_table_column right">

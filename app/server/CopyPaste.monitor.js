@@ -240,11 +240,7 @@ module.exports = {
             //     //"date": { $gt: , $lt: }
             // }
             // {created: {$regex: '^2022.08.06 00:06'}}
-        ).toArray(function(err, aDocs) {
-
-            // a. validate
-            CoreModule_Assert.equal(err, null);
-
+        ).toArray().then(function(aDocs) {
 
             // 1. cleanup
             console.clear();
@@ -357,7 +353,9 @@ module.exports = {
 
 
 
-        }.bind(this));
+        }.bind(this)).catch(function(err) {
+            CoreModule_Assert.equal(err, null);
+        });
 
 
 

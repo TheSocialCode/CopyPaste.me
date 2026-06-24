@@ -152,7 +152,10 @@ module.exports.prototype = {
             packageToTransfer.packageNumber = nPackageIndex;
 
             // b. split
-            let sValueToEncrypt = sJSONValueToTransfer.substr(nPackageIndex * this._nSizePerPackage, this._nSizePerPackage);
+            let sValueToEncrypt = sJSONValueToTransfer.slice(
+                nPackageIndex * this._nSizePerPackage,
+                nPackageIndex * this._nSizePerPackage + this._nSizePerPackage
+            );
 
             // c. store
             packageToTransfer.packageSize = sValueToEncrypt.length;

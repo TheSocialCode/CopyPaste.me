@@ -476,7 +476,7 @@ module.exports = {
         socket.emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_QR, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
 
         // 7. send
-        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey());
+        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey(), pair.getDirection());
 
         // 8. output
         this._logUsers('Secondary device with socket.id = ' + socket.id, 'Requests connection to token = ' + token.getValue());
@@ -603,17 +603,20 @@ module.exports = {
             return;
         }
 
-        // 4. send
-        if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_MANUALCODE, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
+        // 4. manual pairing: first device (primary) shares input; second device receives (opposite of QR default)
+        pair.setDirection(ToggleDirectionStates.prototype.SWAPPED);
 
         // 5. send
-        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey());
+        if (pair.hasSecondaryDevice()) pair.getSecondaryDevice().emit(ConnectorEvents.prototype.UPDATE_SECONDARYDEVICE_CONNECTED_BY_MANUALCODE, pair.getSecondaryDeviceID(), pair.getPrimaryDevicePublicKey(), pair.getDirection());
+
+        // 6. send
+        if (pair.hasPrimaryDevice()) pair.getPrimaryDevice().emit(ConnectorEvents.prototype.UPDATE_OTHERDEVICE_CONNECTED, pair.getSecondaryDevicePublicKey(), pair.getDirection());
 
 
         // --- log ---
 
 
-        // 6. output
+        // 7. output
         this._logUsers('Secondary device connected by manual code (socket.id = ' + pair.getSecondaryDevice().id + ')');
     },
 
@@ -777,17 +780,17 @@ this.Mimoto.config = {};
 
 // read
 process.argv.forEach((value, index) => {
-    if (value.substr(0, 5) === 'mode=')
+    if (value.startsWith('mode='))
     {
-        this.Mimoto.config.mode = (value.substr(5) === 'dev') ? 'dev' : 'prod';
+        this.Mimoto.config.mode = (value.slice('mode='.length) === 'dev') ? 'dev' : 'prod';
     }
-    if (value.substr(0, 6) === 'https=')
+    if (value.startsWith('https='))
     {
-        this.Mimoto.config.https = (value.substr(6) === 'false') ? false : true;
+        this.Mimoto.config.https = (value.slice('https='.length) === 'false') ? false : true;
     }
-    if (value.substr(0, 18) === 'mongoauthenticate=')
+    if (value.startsWith('mongoauthenticate='))
     {
-        this.Mimoto.config.mongoauthenticate = (value.substr(18) === 'false') ? false : true;
+        this.Mimoto.config.mongoauthenticate = (value.slice('mongoauthenticate='.length) === 'false') ? false : true;
     }
 });
 

@@ -1,3 +1,4 @@
+@use '../../tokens' as *;
 
 html, body {
     width: 100%;
@@ -37,7 +38,7 @@ div.main-interface-header-background {
     background-color: $color-background-header;
 
     .app & {
-        bottom: 150px;
+        bottom: 192px;
     }
 }
 

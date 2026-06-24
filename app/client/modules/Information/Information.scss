@@ -1,3 +1,5 @@
+@use '../../tokens' as *;
+
 div.main-information {
     margin-bottom: 30px;
 }
@@ -95,6 +97,40 @@ div.main-interface-information-section {
 
     div.main-interface-information-section-body.bottom {
         padding-bottom: 40px;
+    }
+}
+
+
+figure.howitworks-blueprint {
+    clear: both;
+    display: block;
+    width: 100%;
+    margin: 10px 0 0 0;
+    padding: 0;
+}
+
+svg.howitworks-blueprint-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid #e2e6ea;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(43, 47, 51, 0.12);
+}
+
+figcaption.howitworks-blueprint-caption {
+    font-family: Montserrat, sans-serif;
+    font-size: 13px;
+    line-height: 20px;
+    color: $color-text-lessdark;
+    text-align: center;
+    max-width: 700px;
+    margin: 14px auto 32px auto;
+
+    & span.highlight {
+        font-style: normal;
+        font-weight: 700;
+        color: $color-background-header;
     }
 }
 
