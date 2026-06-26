@@ -46,6 +46,8 @@
 <body>
     <div data-mimoto-id="interface" class="main-interface">
 
+        <a href="https://thesocialcode.com/copypaste.me#support" target="_blank" class="donate_button">Donate</a>
+
         <div data-mimoto-id="interface-content">
             <div class="main-interface-container">
 

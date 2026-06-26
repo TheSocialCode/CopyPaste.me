@@ -1,0 +1,36 @@
+@use '../../tokens' as *;
+
+a.donate_button {
+    display: none;
+
+    position: fixed;
+    top: 20px;
+    // cap horizontal position so the button stops at the edge of a centered band on wide screens
+    right: max(20px, calc(50vw - 700px));
+    z-index: 3000;
+
+    color: #ffffff;
+    background-color: #000000;
+
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+
+    padding: 10px 24px;
+    border-radius: 999px;
+
+    transition: opacity 0.15s ease-in-out;
+
+    &:hover {
+        opacity: 0.85;
+        text-decoration: none;
+    }
+
+    // show on non-mobile only
+    @media screen and (min-width: 601px) {
+        display: inline-block;
+    }
+}
