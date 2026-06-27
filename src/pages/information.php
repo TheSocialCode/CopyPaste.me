@@ -3,7 +3,7 @@
 	    <div class="component_Banner_inner">
 		    <div class="component_Banner_inner_logo"><img src="/static/images/DonateLove.png" width="60" height="60"></div>
 		    <div class="component_Banner_inner_text">This project runs on donations. <i>Pitch in to keep it free for everyone!</i></div>
-		    <div class="component_Banner_inner_menu"><a href="https://paypal.me/thesocialcode" target="_blank" class="button component_Banner_button">Donate now!</a></div>
+		    <div class="component_Banner_inner_menu"><a href="https://thesocialcode.com/copypaste.me#support" target="_blank" class="button component_Banner_button">Donate now!</a></div>
 		</div>
     </div>
 </div>
@@ -77,7 +77,7 @@
             <div class="main-interface-information-section-body bottom">
                 <p><a href="https://thesocialcodefoundation.org" target="_blank">The Social Code Foundation</a> wants to offer this privacy-friendly sharing service free to all, but to cover the operational costs it relies on donations by enthusiastic users. For privacy reasons, and because the advertisement business model is broken to the core, the project can’t be funded with ad revenue. For long term sustainability reasons the project doesn’t want to rely on investors: profit and economic growth shouldn't be at the core of every initiative.</p>
                 <div class="supportoptions">
-                    <a href="https://paypal.me/thesocialcode" target="_blank" class="buttonSupport paypal">Make a donation</a><a href="https://www.patreon.com/thesocialcode" target="_blank" class="buttonSupport patreon">Become a patron</a>
+                    <a href="https://thesocialcode.com/copypaste.me#support" target="_blank" class="buttonSupport paypal">Make a donation</a><a href="https://www.patreon.com/thesocialcode" target="_blank" class="buttonSupport patreon">Become a patron</a>
                 </div>
                 <p>So if you like this service, please consider supporting the project by chipping in. Thank you very much for making this possible!</p>
             </div>

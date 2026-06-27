@@ -11,6 +11,7 @@
 const SharedData = require('./SharedData/SharedData');
 const ClearClipboard = require('./ClearClipboard/ClearClipboard');
 const Waiting = require('./../Waiting/Waiting');
+const Donate = require('./../Donate/Donate');
 const Module_Crypto = require('asymmetric-crypto');
 
 
@@ -30,6 +31,7 @@ module.exports.prototype = {
     // components
     _waiting: null,
     _clearClipboard: null,
+    _donate: null,
 
     // data
     _aSharedData: [],
@@ -57,6 +59,7 @@ module.exports.prototype = {
         // 2. init
         this._waiting = new Waiting();
         this._clearClipboard = new ClearClipboard();
+        this._donate = new Donate(this._elRoot.querySelector('[data-mimoto-id="component_DataOutput_donate"]'));
     },
 
 
@@ -109,7 +112,10 @@ module.exports.prototype = {
         // 1. toggle
         this._waiting.hide();
 
-        // 2. verify
+        // 2. show donate call-to-action (delayed)
+        this._donate.show();
+
+        // 3. verify
         if (!this._aSharedData[data.id])
         {
             // a. create
@@ -149,7 +155,11 @@ module.exports.prototype = {
     _onSharedDataCleared: function(sharedData)
     {
         // a. verify and show
-        if (this._elContainer.children.length === 0 && !this._bIsMuted) this._waiting.show();
+        if (this._elContainer.children.length === 0)
+        {
+            // I. keep donate call-to-action visible, verify and show waiting state
+            if (!this._bIsMuted) this._waiting.show();
+        }
 
         // b. find
         for (let nIndex = 0; nIndex < this._aSharedData.length; nIndex++)

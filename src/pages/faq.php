@@ -89,7 +89,7 @@
                     It's as simple as that.
                 </p>
                 <p class="main-interface-information-section-body">
-                    Another reason why <a href="/" class="highlighted">CopyPaste.me</a> is free is because I hope to prove another business model than exponential growth backed by venture capital or selling attention to support an ad model is viable as well. By asking you, the users of this tool, to contribute in the form of a one time <a href="https://paypal.me/thesocialcode" target="_blank" class="highlighted">donation</a> or by becoming a <a href="https://www.patreon.com/thesocialcode" target="_blank" class="highlighted">patron</a>, I hope we can build a technology world that doesn't revolve solely on making money, but simply one that benefits all equally funded by the collective (a good example of this model for instance is WikiPedia)
+                    Another reason why <a href="/" class="highlighted">CopyPaste.me</a> is free is because I hope to prove another business model than exponential growth backed by venture capital or selling attention to support an ad model is viable as well. By asking you, the users of this tool, to contribute in the form of a one time <a href="https://thesocialcode.com/copypaste.me#support" target="_blank" class="highlighted">donation</a> or by becoming a <a href="https://www.patreon.com/thesocialcode" target="_blank" class="highlighted">patron</a>, I hope we can build a technology world that doesn't revolve solely on making money, but simply one that benefits all equally funded by the collective (a good example of this model for instance is WikiPedia)
                 </p>
             </div>
 

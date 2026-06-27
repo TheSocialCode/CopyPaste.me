@@ -9,7 +9,7 @@ div.component_ManualConnectHandshake {
     }
 
     background-color: $background-light;
-    border-radius: 5px;
+    border-radius: 12px;
     padding: 15px 10px 10px 10px;
     box-shadow: 1px 3px 10px $support-color-dark;
 }
@@ -27,7 +27,7 @@ div.component_ManualConnectHandshake_sublabel {
 
 div.component_ManualConnectHandshake_characters {
 
-    border-radius: 3px;
+    border-radius: 8px;
     background-color: $background-lightestgray;
     border: $background-lightgray 1px solid;
     cursor: default;
@@ -40,7 +40,7 @@ div.component_ManualConnectHandshake_characters {
         padding: 7px 9px 7px 9px;
         background-color: $background-light;
         border: 1px solid $background-lightgray;
-        border-radius: 3px;
+        border-radius: 8px;
         width: 27px;
         text-align: center;
     }
@@ -49,6 +49,7 @@ div.component_ManualConnectHandshake_characters {
 div.component_ManualConnectHandshake_button {
     display: none;
     margin-top: 10px;
+    border-radius: 8px;
 
     &.show {
         display: inline-block;

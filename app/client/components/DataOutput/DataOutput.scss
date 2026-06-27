@@ -24,7 +24,7 @@ div.receiver_data_placeholder_container {
 
 div.receiver_data_placeholder {
     position: relative;
-    border-radius: 5px;
+    border-radius: 12px;
     height: 0;
     margin-top: 0;
     width: 100%;
@@ -34,7 +34,7 @@ div.receiver_data_placeholder {
 div.receiver_data_content_container {
     position: relative;
     background-color: $background-light;
-    border-radius: 5px;
+    border-radius: 12px;
     margin-bottom: 10px;
 
     opacity: 0;
@@ -43,6 +43,157 @@ div.receiver_data_content_container {
 
 div.receiver_data_content_container.show {
     opacity: 1;
+}
+
+div.component_DataOutput_donate {
+
+    // collapsed + hidden by default; revealed with a smooth, eased animation
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transform: translateY(24px);
+
+    // smooth, hand-animated feel: height eases open, content fades, and the
+    // whole element slides up and gently settles into place
+    transition:
+        grid-template-rows 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.45s ease-out,
+        transform 0.7s cubic-bezier(0.34, 1.4, 0.5, 1);
+
+    &.show {
+        grid-template-rows: 1fr;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: opacity 0.2s ease-out;
+        transform: none;
+    }
+}
+
+// inner collapser: clips the content so the grid-rows animation reads as a smooth height reveal
+div.component_DataOutput_donate_inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+div.component_DataOutput_donate_content {
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    max-width: 600px;
+    padding: 20px;
+    text-align: left;
+    background-color: #ffffff;
+    border-radius: 12px;
+}
+
+div.component_DataOutput_donate_titlerow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 8px;
+}
+
+div.component_DataOutput_donate_eyebrow {
+    color: $color-background-header;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+div.component_DataOutput_donate_title {
+    color: $color-text-dark;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-wrap: balance;
+}
+
+div.component_DataOutput_donate_message {
+    color: $support-color-dark;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+div.component_DataOutput_donate_action {
+    flex: 0 0 auto;
+}
+
+a.component_DataOutput_donate_button {
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+
+// --- funding status bar
+
+div.component_DataOutput_donate_funding {
+    margin-top: 18px;
+    padding: 16px 18px;
+    background-color: #eaf2fb;
+    border-radius: 10px;
+}
+
+div.component_DataOutput_donate_funding_cost {
+    color: $color-button-dark;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+div.component_DataOutput_donate_funding_bar {
+    position: relative;
+    height: 8px;
+    background-color: #d5e5f5;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+div.component_DataOutput_donate_funding_bar_fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background-color: $color-background-header;
+    border-radius: 999px;
+    transition: width 0.6s ease-out;
+}
+
+div.component_DataOutput_donate_funding_stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 10px;
+    color: $color-button-dark;
+    font-size: 13px;
+}
+
+span.component_DataOutput_donate_funding_percentage {
+    font-weight: 700;
+}
+
+@media only screen and (max-width: 400px) {
+
+    div.component_DataOutput_donate_titlerow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    div.component_DataOutput_donate_action {
+        margin-top: 12px;
+    }
+
+    a.component_DataOutput_donate_button {
+        display: block;
+        text-align: center;
+    }
 }
 
 div.component_DataOutput_progress {

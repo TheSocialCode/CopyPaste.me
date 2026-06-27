@@ -149,8 +149,8 @@
                             <div class="sender_data_label_cover_label"><img class="sender_data_label_cover_label_indicator" src="static/images/waiting.svg">&nbsp;<span data-mimoto-id="progress">Encrypting data ...</span></div>
                         </div>
                         <div class="sender_data_label_data_input">
-                            <input data-mimoto-id="data_input_password" class="data_input selected" type="password" placeholder="Enter password"/>
-                            <textarea data-mimoto-id="data_input_text" class="data_input" placeholder="Enter text"></textarea>
+                            <input data-mimoto-id="data_input_password" class="data_input selected" type="password" placeholder="Enter password" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other"/>
+                            <textarea data-mimoto-id="data_input_text" class="data_input" placeholder="Enter text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other"></textarea>
                             <div data-mimoto-id="data_input_file" class="data_input">
                                 <div class="data_input_file">
                                     <div class="data_input_file_menu">
@@ -170,19 +170,32 @@
                 </div>
             </div>
         </div>
-    </div>
 
-
-    <!-- Data output -->
-
-    <div data-mimoto-id="component_DataOutput" class="component_DataOutput">
-        <div data-mimoto-id="component_DataOutput_container"></div>
-        <div data-mimoto-id="component_ClearClipboard" class="component_ClearClipboard">
-            <div class="component_ClearClipboard_content">
-                <div class="component_ClearClipboard_content_message"><b>STAY SAFE</b> - This is a not-so-subtle reminder to clear your clipboard after you copied sensitive data to it.</div>
-                <div class="component_ClearClipboard_content_input">
-                    <div data-mimoto-id="button_clear" class="button">Clear clipboard now!</div>
+        <!-- Donate call-to-action (shown below the input after the first item is sent) -->
+        <div data-mimoto-id="component_DataInput_donate" class="component_DataOutput_donate">
+            <div class="component_DataOutput_donate_inner">
+            <div class="component_DataOutput_donate_content">
+                <div class="component_DataOutput_donate_header">
+                    <div class="component_DataOutput_donate_eyebrow">Support CopyPaste.me</div>
+                    <div class="component_DataOutput_donate_titlerow">
+                        <div class="component_DataOutput_donate_title">Help keep CopyPaste.me available for everybody</div>
+                        <div class="component_DataOutput_donate_action">
+                            <a href="https://thesocialcode.com/copypaste.me#support" target="_blank" class="button component_DataOutput_donate_button">Donate</a>
+                        </div>
+                    </div>
+                    <div class="component_DataOutput_donate_message">CopyPaste.me is free, open and ad-free. Your donation keeps it online and independent.</div>
                 </div>
+                <div class="component_DataOutput_donate_funding">
+                    <div data-mimoto-id="donate_funding_cost" class="component_DataOutput_donate_funding_cost">CopyPaste.me costs around &euro; 135 per month to run</div>
+                    <div class="component_DataOutput_donate_funding_bar">
+                        <div data-mimoto-id="donate_funding_bar" class="component_DataOutput_donate_funding_bar_fill"></div>
+                    </div>
+                    <div class="component_DataOutput_donate_funding_stats">
+                        <span data-mimoto-id="donate_funding_raised" class="component_DataOutput_donate_funding_raised">&euro; 25 of &euro; 135 raised this month</span>
+                        <span data-mimoto-id="donate_funding_percentage" class="component_DataOutput_donate_funding_percentage">19%</span>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -193,6 +206,47 @@
     <div data-mimoto-id="component_Waiting" class="component_Waiting">
         <div class="component_Waiting_label">Sender device connected<br>Waiting for data!</div>
         <img src="static/images/waiting.svg">
+    </div>
+
+
+    <!-- Data output -->
+
+    <div data-mimoto-id="component_DataOutput" class="component_DataOutput">
+        <div data-mimoto-id="component_DataOutput_container"></div>
+        <div data-mimoto-id="component_DataOutput_donate" class="component_DataOutput_donate">
+            <div class="component_DataOutput_donate_inner">
+            <div class="component_DataOutput_donate_content">
+                <div class="component_DataOutput_donate_header">
+                    <div class="component_DataOutput_donate_eyebrow">Support CopyPaste.me</div>
+                    <div class="component_DataOutput_donate_titlerow">
+                        <div class="component_DataOutput_donate_title">Help keep CopyPaste.me available for everybody</div>
+                        <div class="component_DataOutput_donate_action">
+                            <a href="https://thesocialcode.com/copypaste.me#support" target="_blank" class="button component_DataOutput_donate_button">Donate</a>
+                        </div>
+                    </div>
+                    <div class="component_DataOutput_donate_message">CopyPaste.me is free, open and ad-free. Your donation keeps it online and independent.</div>
+                </div>
+                <div class="component_DataOutput_donate_funding">
+                    <div data-mimoto-id="donate_funding_cost" class="component_DataOutput_donate_funding_cost">CopyPaste.me costs around &euro; 135 per month to run</div>
+                    <div class="component_DataOutput_donate_funding_bar">
+                        <div data-mimoto-id="donate_funding_bar" class="component_DataOutput_donate_funding_bar_fill"></div>
+                    </div>
+                    <div class="component_DataOutput_donate_funding_stats">
+                        <span data-mimoto-id="donate_funding_raised" class="component_DataOutput_donate_funding_raised">&euro; 25 of &euro; 135 raised this month</span>
+                        <span data-mimoto-id="donate_funding_percentage" class="component_DataOutput_donate_funding_percentage">19%</span>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div data-mimoto-id="component_ClearClipboard" class="component_ClearClipboard">
+            <div class="component_ClearClipboard_content">
+                <div class="component_ClearClipboard_content_message"><b>STAY SAFE</b> - This is a not-so-subtle reminder to clear your clipboard after you copied sensitive data to it.</div>
+                <div class="component_ClearClipboard_content_input">
+                    <div data-mimoto-id="button_clear" class="button">Clear clipboard now!</div>
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -235,11 +289,7 @@
                 <div data-mimoto-id="optionsmenu" class="component_SharedData_optionsmenu">
                     Clears in <span data-mimoto-id="receiver_data_lifetime" class="component_SharedData_expires">2 mins 0 secs</span> -
                     <a data-mimoto-id="receiver_data_option_extend" class="receiver_data_option">extend</a> -
-                    <a data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">clear now</a> -
-                    Please <a href="#support" target="_blank" class="component_SharedData_donate">donate</a> <span class="module_SharedData_donate_heart">♥</span>
-                </div>
-                <div data-mimoto-id="donate" class="component_SharedData_donate">
-                    Help keeping this project free for all. Please <a href="#support" target="_blank" class="component_SharedData_donate">donate</a> <span class="module_SharedData_donate_heart">♥</span>
+                    <a data-mimoto-id="receiver_data_option_clearnow" class="receiver_data_option">clear now</a>
                 </div>
             </div>
         </div>

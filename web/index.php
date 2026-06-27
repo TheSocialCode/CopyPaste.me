@@ -137,16 +137,14 @@
                         <div class="footer_table_center_column">
                             <div class="footer_table_center_column_cell"><a href="/#support">Support</a></div>
                             <div class="footer_table_center_column_cell"><a href="/faq#contact">Contact</a></div>
-                            <div class="footer_table_center_column_cell"><a href="/terms-and-conditions">Terms &amp; Conditions</a></div>
+                            <div class="footer_table_center_column_cell"><a href="/terms-and-conditions">Terms and conditions</a></div>
                         </div>
                     </div>
                     <div class="footer_table_column right">
                         <div class="footer_socialicons_title">Follow this project</div>
                         <div class="footer_socialicons">
-                            <a href="https://www.facebook.com/frictionless.sharing/" target="_blank"><div class="footer_socialicon facebook"></div></a>
-<!--                            <a href="https://www.instagram.com/the.social.code" target="_blank"><div class="footer_socialicon instagram"></div></a>-->
+                            <a href="https://instagram.com/the.social.code" target="_blank"><div class="footer_socialicon instagram"></div></a>
                             <a href="https://www.linkedin.com/company/thesocialcode" target="_blank"><div class="footer_socialicon linkedin"></div></a>
-                            <a href="https://www.getrevue.co/profile/TheSocialCode" target="_blank"><div class="footer_socialicon email"></div></a>
                             <a href="https://patreon.com/thesocialcode" target="_blank"><div class="footer_socialicon patreon"></div></a>
                         </div>
 <!--                        <div class="footer_socialicons_title">Share this project</div>-->
@@ -165,7 +163,7 @@
             </div>
             <div data-mimoto-id="footer-collapsed" class="main-interface-footer-collapsed show">
                 <div data-mimoto-id="footer-collapsed-background" class="main-interface-footer-collapsed-background"></div>
-                <div class="main-interface-footer-collapsed-content">Offered by <a href="https://thesocialcodefoundation.org" target="_blank">The Social Code</a> - <a href="/faq">FAQ</a> - <a href="https://paypal.me/thesocialcode" target="_blank">Donate now</a></div>
+                <div class="main-interface-footer-collapsed-content">Offered by <a href="https://thesocialcodefoundation.org" target="_blank">The Social Code</a> - <a href="/faq">FAQ</a> - <a href="/terms-and-conditions">Terms</a> - <a href="https://thesocialcode.com/copypaste.me#support" target="_blank">Donate now</a></div>
             </div>
         </div>
     </div>

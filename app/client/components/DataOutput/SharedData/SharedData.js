@@ -30,7 +30,6 @@ module.exports.prototype = {
     _elDataLabel: null,
     _elButton: null,
     _elOptionsMenu: null,
-    _elDonate: null,
     _elCoverLabel: null,
     _elCoverIndicator: null,
 
@@ -79,10 +78,9 @@ module.exports.prototype = {
         this._elOptionsMenu = this._elRoot.querySelector('[data-mimoto-id="optionsmenu"]');
         this._elCoverLabel = this._elRoot.querySelector('[data-mimoto-id="coverlabel"]');
         this._elCoverIndicator = this._elRoot.querySelector('[data-mimoto-id="indicator"]');
-        this._elDonate = this._elRoot.querySelector('[data-mimoto-id="donate"]');
 
         // 5. show
-        this._elRootContainer.insertBefore(this._elRoot, this._elRootContainer.firstChild);
+        this._elRootContainer.appendChild(this._elRoot);
     },
 
 
@@ -171,7 +169,6 @@ module.exports.prototype = {
 
             // b. prepare
             this._elRoot.classList.add('showProgress');
-            this._elDonate.classList.add('show');
         }
     },
 
@@ -228,7 +225,6 @@ module.exports.prototype = {
             // b. continue animation
             this._elRoot.classList.remove('showProgress');
             this._elRoot.classList.add('hideProgress');
-            this._elDonate.classList.remove('show');
 
             // c. time clearing of animation
             let timerCover = setTimeout(function ()

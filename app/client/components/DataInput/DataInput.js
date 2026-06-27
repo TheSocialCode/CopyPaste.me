@@ -10,6 +10,7 @@
 // import
 const SocketIO = require('socket.io-client');
 const Module_Crypto = require('asymmetric-crypto');
+const Donate = require('./../Donate/Donate');
 
 // import extenders
 const EventDispatcherExtender = require('./../../../common/extenders/EventDispatcherExtender');
@@ -36,6 +37,12 @@ module.exports.prototype = {
     // utils
     _aEvents: [],
     _aTabs: [],
+
+    // components
+    _donate: null,
+
+    // state
+    _bHasSentData: false,
 
     // events
     REQUEST_DATABROADCAST: 'onRequestDataBroadcast',
@@ -85,6 +92,9 @@ module.exports.prototype = {
 
         // 5. init
         this._data.sType = this.DATATYPE_PASSWORD;
+
+        // 6. init donate call-to-action
+        this._donate = new Donate(document.querySelector('[data-mimoto-id="component_DataInput_donate"]'));
     },
 
 
@@ -104,6 +114,9 @@ module.exports.prototype = {
 
         // 2. refocus
         this._focusDataInput(this._data.sType);
+
+        // 3. verify and re-show donate call-to-action when data was sent before
+        if (this._bHasSentData) this._donate.show();
     },
 
     /**
@@ -113,6 +126,9 @@ module.exports.prototype = {
     {
         // 1. toggle
         this._elRoot.classList.remove('show');
+
+        // 2. hide donate call-to-action
+        this._donate.hide();
     },
 
     /**
@@ -368,6 +384,10 @@ module.exports.prototype = {
 
             // c. cleanup
             this._discardAllInput(this._data.sType);
+
+            // d. show donate call-to-action below the input after the first item is sent
+            this._bHasSentData = true;
+            this._donate.show();
 
         }.bind(this), 600);
     },

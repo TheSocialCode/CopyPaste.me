@@ -692,8 +692,8 @@ module.exports.prototype = {
         // 2. store
         this._dataManager.setTheirPublicKey(sOtherDevicePublicKey);
 
-        // 3. update
-        if (window && window.history && window.history.pushState) window.history.pushState(null, document.getElementsByTagName("title")[0].innerHTML, '/');
+        // 3. update - keep manual connect devices on `/connect`, otherwise clean up the URL
+        if (!this._bIsManualConnect && window && window.history && window.history.pushState) window.history.pushState(null, document.getElementsByTagName("title")[0].innerHTML, '/');
 
         // 4. update interface
         this._setState(this.STATE_SECONDARYDEVICECONNECTED, true);
@@ -994,9 +994,9 @@ module.exports.prototype = {
                     //console.log('NOT both devices online');
                 }
 
-                // d. #BANNER
-                let elBanner = document.querySelector('[data-mimoto-id="component_Banner"]');
-                if (elBanner) elBanner.classList.add('show');
+                // d. #BANNER - donation banner hidden for now (kept for future re-enable)
+                // let elBanner = document.querySelector('[data-mimoto-id="component_Banner"]');
+                // if (elBanner) elBanner.classList.add('show');
 
                 break;
         }

@@ -10,12 +10,18 @@ div.receiver_data_content {
 
 div.receiver_data_menu {
     position: relative;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     flex: auto;
     padding: 9px 9px 9px 9px;
     text-align: right;
     background-color: $background-lightergray;
-    border-radius: 5px;
+    border-radius: 12px;
+}
+
+div.receiver_data_menu .button {
+    border-radius: 8px;
 }
 
 div.receiver_data_label {
@@ -23,7 +29,7 @@ div.receiver_data_label {
     text-align: left;
     padding: 8px 0 8px 8px;
     background-color: $background-lightergray;
-    border-radius: 5px;
+    border-radius: 12px;
     width: 100%;
 
     flex: auto;
@@ -33,7 +39,7 @@ div.receiver_data_label {
 div.receiver_data_label_data {
     position: relative;
     background-color: $background-light;
-    border-radius: 3px;
+    border-radius: 8px;
     border: $background-lightgray 1px solid;
     padding: 12px 20px 12px 15px;
     width: 100%;
@@ -55,7 +61,7 @@ div.component_SharedData_data_label {
 
 div.receiver_data_options {
     padding: 0 20px 9px 15px;
-    border-radius: 5px;
+    border-radius: 12px;
     font-size: smaller;
     background-color: $background-lightergray;
     color: #999999;
@@ -86,27 +92,6 @@ a.receiver_data_option:hover {
     text-decoration: underline;
     cursor: pointer;
     color: $support-color-dark;
-}
-
-div.component_SharedData_donate {
-
-    display: none;
-
-    &.show {
-        display: block;
-    }
-}
-
-a.component_SharedData_donate {
-    color: #999999;
-}
-
-a.component_SharedData_donate:hover {
-    color: #000000;
-}
-
-span.module_SharedData_donate_heart {
-    color:#C25B56;
 }
 
 span.component_SharedData_expires {

@@ -19,6 +19,9 @@ div.sender_input {
     margin-right: auto;
     max-width: 600px;
     text-align: center;
+
+    // gap between the input and the donate call-to-action below it (matches receiver side)
+    margin-bottom: 10px;
 }
 
 div.sender_menu {
@@ -64,8 +67,8 @@ div.sender_menu_tab {
 }
 
 div.sender_data {
-    background-color: $background-light;
-    border-radius: 5px;
+    background-color: $background-lightergray;
+    border-radius: 12px;
     display:flex;
 }
 
@@ -74,16 +77,17 @@ div.sender_data_label {
     text-align: left;
     padding: 8px 0 8px 8px;
     background-color: $background-lightergray;
-    border-radius: 5px;
+    border-radius: 12px;
     display: flex;
     width: 100%;
 }
 div.sender_data_label_data {
     background-color: $background-light;
-    border-radius: 3px;
+    border-radius: 8px;
     border: $background-lightgray 1px solid;
     flex: auto;
     position: relative;
+    overflow: hidden;
 }
 
 div.sender_data_label_data_cover {
@@ -95,7 +99,7 @@ div.sender_data_label_data_cover {
     bottom: 0;
     overflow: hidden;
     z-index: 1000;
-    border-radius: 3px;
+    border-radius: 8px;
     visibility: hidden;
 }
 
@@ -242,12 +246,18 @@ div.sender_data_label_cover_label {
 
 div.sender_data_menu {
     position: relative;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     flex: auto;
     padding: 9px 9px 9px 9px;
     text-align: right;
     background-color: $background-lightergray;
-    border-radius: 5px;
+    border-radius: 12px;
+}
+
+div.sender_data_menu .button {
+    border-radius: 8px;
 }
 
 
@@ -260,11 +270,19 @@ input.data_input {
     outline: none;
     box-sizing : border-box;
     display: none;
+
+    // Montserrat renders the password-mask glyph (*) high in the line box,
+    // which makes it look top-aligned. Use a font whose mask glyph is vertically
+    // centered so the dots/asterisks sit in the middle of the field.
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 input.data_input::placeholder {
     font-style: italic;
     color: #858585;
+
+    // keep the placeholder text in the site font
+    font-family: Montserrat, sans-serif;
 }
 
 textarea.data_input {
@@ -311,6 +329,10 @@ div.data_input_file
 
 div.data_input_file_menu {
 
+}
+
+div.data_input_file_menu .button {
+    border-radius: 8px;
 }
 
 input.data_input_file_inputfield {

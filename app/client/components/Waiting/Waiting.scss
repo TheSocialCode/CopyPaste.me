@@ -8,6 +8,13 @@ div.component_Waiting {
         display: block;
     }
 
+    // when waiting for new data while the donate call-to-action is shown (no
+    // data presented), add space below the spinner to match the space above
+    // the "Share from here" button
+    &.show:has(~ div.component_DataOutput div.component_DataOutput_donate.show) {
+        margin-bottom: 34px;
+    }
+
     & div.component_Waiting_label {
         color: $support-color-dark;
         line-height: 24px;
