@@ -213,6 +213,14 @@
 
     <div data-mimoto-id="component_DataOutput" class="component_DataOutput">
         <div data-mimoto-id="component_DataOutput_container"></div>
+        <div data-mimoto-id="component_ClearClipboard" class="component_ClearClipboard">
+            <div class="component_ClearClipboard_content">
+                <div class="component_ClearClipboard_content_message"><b>STAY SAFE</b> - This is a not-so-subtle reminder to clear your clipboard after you copied sensitive data to it.</div>
+                <div class="component_ClearClipboard_content_input">
+                    <div data-mimoto-id="button_clear" class="button">Clear clipboard now!</div>
+                </div>
+            </div>
+        </div>
         <div data-mimoto-id="component_DataOutput_donate" class="component_DataOutput_donate">
             <div class="component_DataOutput_donate_inner">
             <div class="component_DataOutput_donate_content">
@@ -237,14 +245,6 @@
                     </div>
                 </div>
             </div>
-            </div>
-        </div>
-        <div data-mimoto-id="component_ClearClipboard" class="component_ClearClipboard">
-            <div class="component_ClearClipboard_content">
-                <div class="component_ClearClipboard_content_message"><b>STAY SAFE</b> - This is a not-so-subtle reminder to clear your clipboard after you copied sensitive data to it.</div>
-                <div class="component_ClearClipboard_content_input">
-                    <div data-mimoto-id="button_clear" class="button">Clear clipboard now!</div>
-                </div>
             </div>
         </div>
     </div>
