@@ -18,8 +18,9 @@ function _loadFunding()
     // 1. verify and reuse
     if (_fundingPromise) return _fundingPromise;
 
-    // 2. request once
-    _fundingPromise = fetch(FUNDING_URL).then(function(response) { return response.json(); });
+    // 2. request once (bypass cache so the donated amount is always current)
+    let sUrl = FUNDING_URL + '&_=' + Date.now();
+    _fundingPromise = fetch(sUrl, { cache: 'no-store' }).then(function(response) { return response.json(); });
 
     // 3. send
     return _fundingPromise;
