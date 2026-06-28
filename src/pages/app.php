@@ -186,13 +186,13 @@
                     <div class="component_DataOutput_donate_message">CopyPaste.me is free, open and ad-free. Your donation keeps it online and independent.</div>
                 </div>
                 <div class="component_DataOutput_donate_funding">
-                    <div data-mimoto-id="donate_funding_cost" class="component_DataOutput_donate_funding_cost">CopyPaste.me costs around &euro; 135 per month to run</div>
+                    <div data-mimoto-id="donate_funding_cost" class="component_DataOutput_donate_funding_cost"></div>
                     <div class="component_DataOutput_donate_funding_bar">
                         <div data-mimoto-id="donate_funding_bar" class="component_DataOutput_donate_funding_bar_fill"></div>
                     </div>
                     <div class="component_DataOutput_donate_funding_stats">
-                        <span data-mimoto-id="donate_funding_raised" class="component_DataOutput_donate_funding_raised">&euro; 25 of &euro; 135 raised this month</span>
-                        <span data-mimoto-id="donate_funding_percentage" class="component_DataOutput_donate_funding_percentage">19%</span>
+                        <span data-mimoto-id="donate_funding_raised" class="component_DataOutput_donate_funding_raised"></span>
+                        <span data-mimoto-id="donate_funding_percentage" class="component_DataOutput_donate_funding_percentage"></span>
                     </div>
                 </div>
             </div>
@@ -235,13 +235,13 @@
                     <div class="component_DataOutput_donate_message">CopyPaste.me is free, open and ad-free. Your donation keeps it online and independent.</div>
                 </div>
                 <div class="component_DataOutput_donate_funding">
-                    <div data-mimoto-id="donate_funding_cost" class="component_DataOutput_donate_funding_cost">CopyPaste.me costs around &euro; 135 per month to run</div>
+                    <div data-mimoto-id="donate_funding_cost" class="component_DataOutput_donate_funding_cost"></div>
                     <div class="component_DataOutput_donate_funding_bar">
                         <div data-mimoto-id="donate_funding_bar" class="component_DataOutput_donate_funding_bar_fill"></div>
                     </div>
                     <div class="component_DataOutput_donate_funding_stats">
-                        <span data-mimoto-id="donate_funding_raised" class="component_DataOutput_donate_funding_raised">&euro; 25 of &euro; 135 raised this month</span>
-                        <span data-mimoto-id="donate_funding_percentage" class="component_DataOutput_donate_funding_percentage">19%</span>
+                        <span data-mimoto-id="donate_funding_raised" class="component_DataOutput_donate_funding_raised"></span>
+                        <span data-mimoto-id="donate_funding_percentage" class="component_DataOutput_donate_funding_percentage"></span>
                     </div>
                 </div>
             </div>
