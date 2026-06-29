@@ -187,9 +187,7 @@
                 </div>
                 <div class="component_DataOutput_donate_funding">
                     <div data-mimoto-id="donate_funding_cost" class="component_DataOutput_donate_funding_cost"></div>
-                    <div class="component_DataOutput_donate_funding_bar">
-                        <div data-mimoto-id="donate_funding_bar" class="component_DataOutput_donate_funding_bar_fill"></div>
-                    </div>
+                    <div data-mimoto-id="donate_funding_bar" class="component_DataOutput_donate_funding_bar"></div>
                     <div class="component_DataOutput_donate_funding_stats">
                         <span data-mimoto-id="donate_funding_raised" class="component_DataOutput_donate_funding_raised"></span>
                         <span data-mimoto-id="donate_funding_percentage" class="component_DataOutput_donate_funding_percentage"></span>
@@ -236,9 +234,7 @@
                 </div>
                 <div class="component_DataOutput_donate_funding">
                     <div data-mimoto-id="donate_funding_cost" class="component_DataOutput_donate_funding_cost"></div>
-                    <div class="component_DataOutput_donate_funding_bar">
-                        <div data-mimoto-id="donate_funding_bar" class="component_DataOutput_donate_funding_bar_fill"></div>
-                    </div>
+                    <div data-mimoto-id="donate_funding_bar" class="component_DataOutput_donate_funding_bar"></div>
                     <div class="component_DataOutput_donate_funding_stats">
                         <span data-mimoto-id="donate_funding_raised" class="component_DataOutput_donate_funding_raised"></span>
                         <span data-mimoto-id="donate_funding_percentage" class="component_DataOutput_donate_funding_percentage"></span>

@@ -147,22 +147,63 @@ div.component_DataOutput_donate_funding_cost {
 }
 
 div.component_DataOutput_donate_funding_bar {
-    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
     height: 8px;
     background-color: #d5e5f5;
     border-radius: 999px;
-    overflow: hidden;
 }
 
-div.component_DataOutput_donate_funding_bar_fill {
-    position: absolute;
-    top: 0;
-    left: 0;
+div.component_DataOutput_donate_funding_bar_segment {
+    position: relative;
     height: 100%;
     width: 0;
-    background-color: $color-background-header;
     border-radius: 999px;
+    background-color: $color-background-header;
+    cursor: pointer;
     transition: width 0.6s ease-out;
+
+    &[data-channel-index="1"] { background-color: $color-button-dark; }
+    &[data-channel-index="2"] { background-color: #8fc3ea; }
+    &[data-channel-index="3"] { background-color: #2f5170; }
+
+    // reveal tooltip on hover
+    &:hover .component_DataOutput_donate_funding_bar_segment_tooltip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+div.component_DataOutput_donate_funding_bar_segment_tooltip {
+    position: absolute;
+    bottom: calc(100% + 9px);
+    left: 50%;
+    z-index: 2;
+    transform: translateX(-50%) translateY(4px);
+    padding: 7px 11px;
+    background-color: #1f2329;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(31, 35, 41, 0.28);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+
+    // downward pointing arrow
+    &::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: #1f2329;
+    }
 }
 
 div.component_DataOutput_donate_funding_stats {
