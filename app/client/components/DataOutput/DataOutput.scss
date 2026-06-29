@@ -159,10 +159,20 @@ div.component_DataOutput_donate_funding_bar_segment {
     position: relative;
     height: 100%;
     width: 0;
-    border-radius: 999px;
     background-color: $color-background-header;
     cursor: pointer;
     transition: width 0.6s ease-out;
+
+    // round only the outer ends so the segments read as one continuous bar
+    &:first-child {
+        border-top-left-radius: 999px;
+        border-bottom-left-radius: 999px;
+    }
+
+    &:last-child {
+        border-top-right-radius: 999px;
+        border-bottom-right-radius: 999px;
+    }
 
     &[data-channel-index="1"] { background-color: $color-button-dark; }
     &[data-channel-index="2"] { background-color: #8fc3ea; }
