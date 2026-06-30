@@ -80,6 +80,9 @@ module.exports.prototype = {
         // 2. store
         this._aDevicesBySocketID[socket.id] = device;
         this._aDevicesByDeviceID[device.getID()] = device;
+
+        // 3. log
+        this._logCounts('Device registered online', device.getID());
     },
 
     /**
@@ -245,7 +248,10 @@ module.exports.prototype = {
             // c. cleanup
             delete this._aOfflineDevices[sKey];
 
-            // d. broadcast
+            // d. log
+            this._logCounts('Offline device expired', offlineDeviceData.device.getID());
+
+            // e. broadcast
             this.dispatchEvent(this.DEVICE_REMOVED, offlineDeviceData.device);
         }
     },

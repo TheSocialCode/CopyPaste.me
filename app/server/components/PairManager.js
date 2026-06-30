@@ -110,7 +110,10 @@ module.exports.prototype = {
         device.setPairID(pair.getID());
         device.setType(Device.prototype.PRIMARYDEVICE);
 
-        // 7. send
+        // 7. log
+        this._logCounts('Pair created', pair.getID());
+
+        // 8. send
         return pair;
     },
 
@@ -283,6 +286,9 @@ module.exports.prototype = {
 
         // 5. cleanup
         delete this._aPairs['' + sPairID];
+
+        // 6. log
+        this._logCounts('Pair destroyed', sPairID);
     },
 
     /**
@@ -311,6 +317,38 @@ module.exports.prototype = {
 
 
     // ----------------------------------------------------------------------------
+    // --- Helpers for logging purposes -------------------------------------------
+    // ----------------------------------------------------------------------------
+
+
+    /**
+     * Log pair map counts to console
+     * @param sEvent
+     * @param sPairID
+     * @private
+     */
+    _logCounts: function(sEvent, sPairID)
+    {
+        let sOutput = '✨ - ' + sEvent;
+
+        if (this.Mimoto && this.Mimoto.deviceManager)
+        {
+            sOutput += ' — online: ' + this.Mimoto.deviceManager.getNumberOfDevices() + ', offline: ' + this.Mimoto.deviceManager.getNumberOfOfflineDevices();
+        }
+
+        sOutput += ', pairs: ' + this.getNumberOfActivePairs() + ' (idle: ' + this.getNumberOfIdlePairs() + ')';
+
+        if (sPairID)
+        {
+            sOutput += ', pairId: ' + sPairID;
+        }
+
+        console.log(sOutput);
+    },
+
+
+
+    // ----------------------------------------------------------------------------
     // --- Private functions ------------------------------------------------------
     // ----------------------------------------------------------------------------
 
@@ -324,6 +362,9 @@ module.exports.prototype = {
     {
         // 1. cleanup
         if (this._aIdlePairs[pair.getID()]) delete this._aIdlePairs[pair.getID()];
+
+        // 2. log
+        this._logCounts('Pair active', pair.getID());
     },
 
     /**
@@ -335,6 +376,9 @@ module.exports.prototype = {
     {
         // 1. store
         if (!this._aIdlePairs[pair.getID()]) this._aIdlePairs[pair.getID()] = pair;
+
+        // 2. log
+        this._logCounts('Pair idle', pair.getID());
     },
 
     /**
