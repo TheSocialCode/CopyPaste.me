@@ -111,7 +111,7 @@ module.exports.prototype = {
         device.setType(Device.prototype.PRIMARYDEVICE);
 
         // 7. log
-        this._logCounts('Pair created', pair.getID());
+        // this._logCounts('Pair created', pair.getID());
 
         // 8. send
         return pair;
@@ -288,7 +288,7 @@ module.exports.prototype = {
         delete this._aPairs['' + sPairID];
 
         // 6. log
-        this._logCounts('Pair destroyed', sPairID);
+        // this._logCounts('Pair destroyed', sPairID);
     },
 
     /**
@@ -343,7 +343,7 @@ module.exports.prototype = {
             sOutput += ', pairId: ' + sPairID;
         }
 
-        console.log(sOutput);
+        // console.log(sOutput);
     },
 
 
@@ -364,7 +364,7 @@ module.exports.prototype = {
         if (this._aIdlePairs[pair.getID()]) delete this._aIdlePairs[pair.getID()];
 
         // 2. log
-        this._logCounts('Pair active', pair.getID());
+        // this._logCounts('Pair active', pair.getID());
     },
 
     /**
@@ -378,7 +378,7 @@ module.exports.prototype = {
         if (!this._aIdlePairs[pair.getID()]) this._aIdlePairs[pair.getID()] = pair;
 
         // 2. log
-        this._logCounts('Pair idle', pair.getID());
+        // this._logCounts('Pair idle', pair.getID());
     },
 
     /**

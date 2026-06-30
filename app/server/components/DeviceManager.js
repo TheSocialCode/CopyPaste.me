@@ -82,7 +82,7 @@ module.exports.prototype = {
         this._aDevicesByDeviceID[device.getID()] = device;
 
         // 3. log
-        this._logCounts('Device registered online', device.getID());
+        // this._logCounts('Device registered online', device.getID());
     },
 
     /**
@@ -115,7 +115,7 @@ module.exports.prototype = {
         delete this._aDevicesByDeviceID[device.getID()];
 
         // 5. log
-        this._logCounts('Device moved offline', device.getID());
+        // this._logCounts('Device moved offline', device.getID());
 
         // 6. broadcast
         this.dispatchEvent(this.DEVICE_OFFLINE, device);
@@ -144,7 +144,7 @@ module.exports.prototype = {
         this._aDevicesByDeviceID[originalDevice.getID()] = originalDevice;
 
         // 5. log
-        this._logCounts('Device restored online', originalDevice.getID());
+        // this._logCounts('Device restored online', originalDevice.getID());
 
         // 6. send
         return originalDevice;
@@ -217,7 +217,7 @@ module.exports.prototype = {
         delete this._aDevicesByDeviceID[sDeviceID];
 
         // 6. log
-        this._logCounts('Device destroyed', sDeviceID);
+        // this._logCounts('Device destroyed', sDeviceID);
     },
 
 
@@ -249,7 +249,7 @@ module.exports.prototype = {
             delete this._aOfflineDevices[sKey];
 
             // d. log
-            this._logCounts('Offline device expired', offlineDeviceData.device.getID());
+            // this._logCounts('Offline device expired', offlineDeviceData.device.getID());
 
             // e. broadcast
             this.dispatchEvent(this.DEVICE_REMOVED, offlineDeviceData.device);
@@ -283,7 +283,7 @@ module.exports.prototype = {
             sOutput += ', deviceId: ' + sDeviceID;
         }
 
-        console.log(sOutput);
+        // console.log(sOutput);
     },
 
 
