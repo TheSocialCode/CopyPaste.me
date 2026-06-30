@@ -111,7 +111,10 @@ module.exports.prototype = {
         delete this._aDevicesBySocketID[socket.id];
         delete this._aDevicesByDeviceID[device.getID()];
 
-        // 5. broadcast
+        // 5. log
+        this._logCounts('Device moved offline', device.getID());
+
+        // 6. broadcast
         this.dispatchEvent(this.DEVICE_OFFLINE, device);
     },
 
@@ -137,7 +140,10 @@ module.exports.prototype = {
         this._aDevicesBySocketID[originalDevice.getSocketID()] = originalDevice;
         this._aDevicesByDeviceID[originalDevice.getID()] = originalDevice;
 
-        // 5. send
+        // 5. log
+        this._logCounts('Device restored online', originalDevice.getID());
+
+        // 6. send
         return originalDevice;
     },
 
@@ -206,6 +212,9 @@ module.exports.prototype = {
         // 5. cleanup
         delete this._aOfflineDevices[sDeviceID];
         delete this._aDevicesByDeviceID[sDeviceID];
+
+        // 6. log
+        this._logCounts('Device destroyed', sDeviceID);
     },
 
 
@@ -246,6 +255,30 @@ module.exports.prototype = {
     // ----------------------------------------------------------------------------
     // --- Helpers for logging purposes -------------------------------------------
     // ----------------------------------------------------------------------------
+
+
+    /**
+     * Log device map counts to console
+     * @param sEvent
+     * @param sDeviceID
+     * @private
+     */
+    _logCounts: function(sEvent, sDeviceID)
+    {
+        let sOutput = '✨ - ' + sEvent + ' — online: ' + this.getNumberOfDevices() + ', offline: ' + this.getNumberOfOfflineDevices();
+
+        if (this.Mimoto && this.Mimoto.pairManager)
+        {
+            sOutput += ', pairs: ' + this.Mimoto.pairManager.getNumberOfActivePairs() + ' (idle: ' + this.Mimoto.pairManager.getNumberOfIdlePairs() + ')';
+        }
+
+        if (sDeviceID)
+        {
+            sOutput += ', deviceId: ' + sDeviceID;
+        }
+
+        console.log(sOutput);
+    },
 
 
     /**
