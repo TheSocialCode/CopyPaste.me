@@ -237,7 +237,13 @@ module.exports.prototype = {
         // ---
 
 
-        // 8. success
+        // 8. log
+        if (this.Mimoto && this.Mimoto.pairManager)
+        {
+            this.Mimoto.pairManager._logCounts('Pair connected', this.getID());
+        }
+
+        // 9. success
         return true;
     },
 
