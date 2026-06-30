@@ -180,8 +180,13 @@ module.exports.prototype = {
      */
     destroy: function(sDeviceID)
     {
-        // 1. load
+        // 1. load (active device, or offline after disconnect)
         let device = this.getDeviceByDeviceID(sDeviceID);
+
+        if (!device && this._aOfflineDevices[sDeviceID])
+        {
+            device = this._aOfflineDevices[sDeviceID].device;
+        }
 
         // 2. validate
         if (!device) return;
