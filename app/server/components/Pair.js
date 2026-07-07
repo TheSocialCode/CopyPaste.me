@@ -545,16 +545,6 @@ module.exports.prototype = {
         // 2. register
         let receiverSocket = (this.getDirection() === ToggleDirectionStates.prototype.SWAPPED) ? this.getSecondaryDevice() : this.getPrimaryDevice();
 
-
-        let dataCloneForLogging = JSON.parse(JSON.stringify(encryptedData));
-
-        if (dataCloneForLogging.value.data.length > 20)
-        {
-            let sValue = dataCloneForLogging.value.data;
-
-            dataCloneForLogging.value.data = sValue.slice(0, 10) + ' ... ' + sValue.slice(-10);
-        }
-
         // 3. first package: register transfer before emit so DATA_RECEIVED cannot arrive first
         if (encryptedData.packageNumber === 0)
         {
