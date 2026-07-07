@@ -112,23 +112,23 @@ module.exports.prototype = {
         // 1. toggle
         this._waiting.hide();
 
-        // 2. show donate call-to-action (delayed)
-        this._donate.show();
-
-        // 3. verify
+        // 2. verify
         if (!this._aSharedData[data.id])
         {
-            // a. create
+            // a. show donate call-to-action once per received item (delayed)
+            this._donate.show();
+
+            // b. create
             let sharedData = new SharedData(this._elContainer);
 
-            // b. configure
+            // c. configure
             sharedData.addEventListener(SharedData.prototype.CLEARED, this._onSharedDataCleared.bind(this, sharedData));
             sharedData.addEventListener(SharedData.prototype.USED_CLIPBOARD, this._onSharedDataUsedClipboard.bind(this, sharedData));
 
-            // c. store
+            // d. store
             this._aSharedData[data.id] = sharedData;
 
-            // d. init
+            // e. init
             this._aSharedData[data.id].initData(data);
         }
         else

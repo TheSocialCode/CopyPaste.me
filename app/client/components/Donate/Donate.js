@@ -80,11 +80,11 @@ module.exports.prototype = {
      */
     show: function()
     {
-        // 1. load funding data
-        this._requestFunding();
-
-        // 2. verify - already shown or scheduled
+        // 1. verify - already shown or scheduled
         if (this._timer || this._elRoot.classList.contains('show')) return;
+
+        // 2. load funding data (only when first revealing)
+        this._requestFunding();
 
         // 3. show after a short delay
         this._timer = setTimeout(function() {
@@ -177,10 +177,13 @@ module.exports.prototype = {
             ? data.channels
             : [{ channel: data.label || 'Donations', total: data.total }];
 
-        // 3. reset
+        // 3. verify - already rendered (avoid resetting the animation)
+        if (this._elFundingBar.children.length > 0) return;
+
+        // 4. reset
         this._elFundingBar.innerHTML = '';
 
-        // 4. build a segment per channel
+        // 5. build a segment per channel
         let aSegments = [];
         for (let i = 0; i < aChannels.length; i++)
         {
@@ -207,7 +210,7 @@ module.exports.prototype = {
             aSegments.push({ el: elSegment, width: nWidth });
         }
 
-        // 5. animate segments to their target width on the next frame
+        // 6. animate segments to their target width on the next frame
         let fnAnimate = function() {
             for (let i = 0; i < aSegments.length; i++) aSegments[i].el.style.width = aSegments[i].width + '%';
         };
