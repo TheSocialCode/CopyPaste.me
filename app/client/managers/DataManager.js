@@ -115,6 +115,15 @@ module.exports.prototype = {
         this._transferPackages();
     },
 
+    /**
+     * Check if an outgoing transfer still has packages in flight or queued
+     * @returns {boolean}
+     */
+    isTransferInProgress: function()
+    {
+        return (this._aPackagesReadyForTransfer.length > 0 || this._packageCurrentlyInTransfer !== null);
+    },
+
 
 
     // ----------------------------------------------------------------------------
