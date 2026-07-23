@@ -351,7 +351,11 @@ module.exports.prototype = {
         this._dataManager.pause();
 
         // 2. intentional idle disconnect stays silent (tab hidden / post-transfer idle)
-        if (this._bIntentionalIdleDisconnect) return;
+        if (this._bIntentionalIdleDisconnect)
+        {
+            this._logConnectionIdle('disconnected (intentional idle)');
+            return;
+        }
 
         // 3. notify
         if (this._alertMessage) this._alertMessage.show('You seem to have gone offline .. reconnecting ..');
@@ -540,6 +544,9 @@ module.exports.prototype = {
 
         // 7. resume post-transfer idle countdown if that session already finished a transfer
         if (this._bArmPostTransferIdle) this._schedulePostTransferIdle();
+
+        // 8. log
+        this._logConnectionIdle('reconnected (device handshake ok, otherDeviceConnected=' + bOtherDeviceConnected + ')');
     },
 
     /**
@@ -1039,12 +1046,14 @@ module.exports.prototype = {
             this._clearVisibilityGrace();
             if (this._bIntentionalIdleDisconnect || (this._socket && !this._socket.connected))
             {
+                this._logConnectionIdle('tab visible → reconnecting');
                 this._ensureConnected();
             }
             return;
         }
 
         // 2. tab hidden → disconnect after grace (unless transferring)
+        this._logConnectionIdle('tab hidden → grace ' + (this.VISIBILITY_DISCONNECT_GRACE_MS / 1000) + 's');
         this._scheduleVisibilityGrace();
     },
 
@@ -1057,6 +1066,7 @@ module.exports.prototype = {
         // 1. wake connection after intentional idle disconnect
         if (this._bIntentionalIdleDisconnect || (this._socket && !this._socket.connected))
         {
+            this._logConnectionIdle('user activity → reconnecting');
             this._ensureConnected();
         }
 
@@ -1077,13 +1087,17 @@ module.exports.prototype = {
         this._clearVisibilityGrace();
 
         // 2. skip while transferring
-        if (this._isTransferInProgress()) return;
+        if (this._isTransferInProgress())
+        {
+            this._logConnectionIdle('tab hidden but transfer in progress → skip disconnect');
+            return;
+        }
 
         // 3. wait, then drop
         this._timerVisibilityGrace = setTimeout(function()
         {
             this._timerVisibilityGrace = null;
-            if (document.visibilityState !== 'visible') this._disconnectForIdle();
+            if (document.visibilityState !== 'visible') this._disconnectForIdle('visibility');
         }.bind(this), this.VISIBILITY_DISCONNECT_GRACE_MS);
     },
 
@@ -1112,11 +1126,13 @@ module.exports.prototype = {
         // 2. schedule (or disconnect immediately if tab already hidden)
         if (document.visibilityState !== 'visible')
         {
+            this._logConnectionIdle('transfer finished while tab hidden → visibility grace');
             this._scheduleVisibilityGrace();
             return;
         }
 
         // 3. start idle countdown while tab stays open
+        this._logConnectionIdle('transfer finished → idle ' + (this.POST_TRANSFER_IDLE_MS / 1000) + 's');
         this._schedulePostTransferIdle();
     },
 
@@ -1136,7 +1152,7 @@ module.exports.prototype = {
         this._timerPostTransferIdle = setTimeout(function()
         {
             this._timerPostTransferIdle = null;
-            this._disconnectForIdle();
+            this._disconnectForIdle('post-transfer');
         }.bind(this), this.POST_TRANSFER_IDLE_MS);
     },
 
@@ -1165,19 +1181,27 @@ module.exports.prototype = {
 
     /**
      * Intentionally disconnect to free server handles
+     * @param sReason
      * @private
      */
-    _disconnectForIdle: function()
+    _disconnectForIdle: function(sReason)
     {
         // 1. validate
         if (!this._socket || !this._socket.connected) return;
-        if (this._isTransferInProgress()) return;
+        if (this._isTransferInProgress())
+        {
+            this._logConnectionIdle('skip disconnect (' + (sReason || 'idle') + ') → transfer in progress');
+            return;
+        }
 
         // 2. mark silent disconnect (socket.disconnect() will not auto-reconnect)
         this._bIntentionalIdleDisconnect = true;
         this._bReconnectInProgress = false;
 
-        // 3. drop
+        // 3. log
+        this._logConnectionIdle('disconnecting (' + (sReason || 'idle') + ')');
+
+        // 4. drop
         this._socket.disconnect();
     },
 
@@ -1205,6 +1229,7 @@ module.exports.prototype = {
         if (!this._socket.connected)
         {
             this._bReconnectInProgress = true;
+            this._logConnectionIdle('connecting…');
             this._socket.connect();
         }
     },
@@ -1220,11 +1245,24 @@ module.exports.prototype = {
         this._aPendingAfterReconnect = [];
         this._bReconnectInProgress = false;
 
-        // 2. run
+        // 2. log
+        if (aPending.length > 0) this._logConnectionIdle('flushing ' + aPending.length + ' pending action(s) after reconnect');
+
+        // 3. run
         for (let nIndex = 0; nIndex < aPending.length; nIndex++)
         {
             aPending[nIndex]();
         }
+    },
+
+    /**
+     * Log idle connection lifecycle to the browser console
+     * @param sMessage
+     * @private
+     */
+    _logConnectionIdle: function(sMessage)
+    {
+        if (console && console.log) console.log('[CopyPaste.me][idle-connection] ' + sMessage);
     },
 
     /**
