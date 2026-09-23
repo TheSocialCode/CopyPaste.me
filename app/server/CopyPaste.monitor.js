@@ -116,7 +116,7 @@ module.exports = {
             ' ',
             '@author  Sebastian Kersten',
             ' ',
-            'Please help keeping this service free by donating: https://paypal.me/thesocialcode',
+            'Please help keeping this service free by donating: https://thesocialcode.com/copypaste.me',
             ' ',
             'MongoDB connected on ' + this._configFile.mongodb.host.toString() + ':' + this._configFile.mongodb.port.toString(),
             ' ',

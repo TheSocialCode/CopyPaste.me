@@ -42,7 +42,7 @@ module.exports.prototype = {
             ' ',
             '@author  Sebastian Kersten',
             ' ',
-            'Please help keeping this service free by donating: https://paypal.me/thesocialcode',
+            'Please help keeping this service free by donating: https://thesocialcode.com/copypaste.me',
             ' ',
             'listening on *:' + configFile.socketio.server.port + ' ' + JSON.stringify(config),
         ];

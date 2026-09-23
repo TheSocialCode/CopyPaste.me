@@ -8,7 +8,7 @@ Try it yourself: [CopyPaste.me](https://copypaste.me)
 ---
 
 Please help keeping this service free:
-- Donate: https://paypal.me/thesocialcode
+- Donate: https://thesocialcode.com/copypaste.me
 - Become a patron: https://www.patreon.com/thesocialcode
 
 You can also show your support by giving it an upvote on Product Hunt:
@@ -36,7 +36,7 @@ You should be able to share your data from one of your devices to another or sha
 ## How you can help to keep it free
 [The Social Code Foundation](https://thesocialcodefoundation.org) wants to offer this privacy-friendly sharing service free to all, but to cover the operational costs it relies on donations by enthusiastic users. For privacy reasons, and because the advertisement business model is broken to the core, the project can’t be funded with ad revenue. For long term sustainability reasons the project doesn’t want to rely on investors: profit and economic growth shouldn't be at the core of every initiative.
 
-- Donate: https://paypal.me/thesocialcode
+- Donate: https://thesocialcode.com/copypaste.me
 - Become a patron: https://www.patreon.com/thesocialcode
 
 So if you like this service, please consider supporting the project by chipping in. Thank you very much for making this possible!

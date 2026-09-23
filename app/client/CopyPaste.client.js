@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (console)
     {
         console.log('CopyPaste.me - Frictionless sharing between devices - Created by The Social Code');
-        console.log('Please help keeping this service free by donating: https://paypal.me/thesocialcode');
+        console.log('Please help keeping this service free by donating: https://thesocialcode.com/copypaste.me');
         console.log('');
     }
 
